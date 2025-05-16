@@ -16,50 +16,46 @@ interface ModelProps {
   mousePosition: { x: number; y: number };
 }
 
+// Preload the model to avoid loading delays
 function Model({ url, mousePosition }: ModelProps) {
-  // Add a default URL as fallback if the provided URL is undefined or empty
-  const modelUrl = url || '/virtual_coach.glb';
-  
-  // Use try-catch with useGLTF to handle loading errors
-  let gltf;
-  try {
-    gltf = useGLTF(modelUrl);
-  } catch (error) {
-    console.error("Error loading model:", error);
-    // Return a simple fallback
-    return (
-      <mesh>
-        <sphereGeometry args={[1, 16, 16]} />
-        <meshStandardMaterial color="#4080ff" />
-      </mesh>
-    );
-  }
-  
-  const { scene } = gltf;
+  const { scene } = useGLTF(url, true); // true enables preloading
   const modelRef = useRef<Group>(null);
   const { viewport } = useThree();
   
-  // Respond to mouse movements and add breathing animation
+  // Performance optimization: use a lower frequency for animation updates
+  const frameSkip = useRef(0);
+  const lastRotationY = useRef(0);
+  const lastRotationX = useRef(0);
+  
+  // Respond to mouse movements and add breathing animation with reduced frequency
   useFrame(({ clock }) => {
+    // Skip frames for better performance (especially on mobile)
+    frameSkip.current = (frameSkip.current + 1) % 2;
+    if (frameSkip.current !== 0) return;
+    
     if (modelRef.current) {
-      // Breathing animation
+      // Breathing animation - lower frequency
       const t = clock.getElapsedTime();
-      const breathingIntensity = 0.05;
+      const breathingIntensity = 0.03; // Reduced intensity
       
-      // Convert mouse position to model rotation
-      // Map mousePosition from [0,1] to rotation range
-      const targetRotationY = (mousePosition.x - 0.5) * 0.5; // -0.25 to 0.25 radians
-      const targetRotationX = (mousePosition.y - 0.5) * 0.3; // -0.15 to 0.15 radians
+      // Convert mouse position to model rotation with damping
+      const targetRotationY = (mousePosition.x - 0.5) * 0.3; // Reduced range
+      const targetRotationX = (mousePosition.y - 0.5) * 0.2; // Reduced range
       
-      // Smoothly interpolate current rotation to target rotation
-      modelRef.current.rotation.y += (targetRotationY - modelRef.current.rotation.y) * 0.05;
-      modelRef.current.rotation.x += (targetRotationX - modelRef.current.rotation.x) * 0.05;
+      // Smoothly interpolate with stronger damping for stability
+      lastRotationY.current = lastRotationY.current + (targetRotationY - lastRotationY.current) * 0.03;
+      lastRotationX.current = lastRotationX.current + (targetRotationX - lastRotationX.current) * 0.03;
       
-      // Add breathing animation
-      modelRef.current.position.y = Math.sin(t * 0.5) * breathingIntensity;
-      // Subtle scale change for breathing effect
-      const breathScale = 1 + Math.sin(t * 0.5) * 0.01;
-      modelRef.current.scale.set(breathScale, breathScale, breathScale);
+      modelRef.current.rotation.y = lastRotationY.current;
+      modelRef.current.rotation.x = lastRotationX.current;
+      
+      // Add breathing animation with reduced calculations
+      modelRef.current.position.y = Math.sin(t * 0.3) * breathingIntensity;
+      // Skip scale changes on mobile for better performance
+      if (window.innerWidth > 768) {
+        const breathScale = 1 + Math.sin(t * 0.3) * 0.01;
+        modelRef.current.scale.set(breathScale, breathScale, breathScale);
+      }
     }
   });
 
@@ -234,7 +230,7 @@ export default function VirtualCoach({ modelUrl, className = '', sessionResults 
       )}
       
       <Canvas
-        className="rounded-xl overflow-hidden bg-gray-900/50 backdrop-blur-sm"
+        className="rounded-xl overflow-hidden bg-transparent"
         camera={{ position: [0, 0, 2.5], fov: 50 }}
         shadows
         gl={{ antialias: true, alpha: true }}
