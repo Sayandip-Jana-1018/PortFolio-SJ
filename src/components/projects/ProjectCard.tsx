@@ -44,10 +44,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, accentColor, theme, 
               zIndex: 5
             }}
             initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.7, delay: index * 0.1 }}
-            viewport={{ once: true, margin: "-50px" }}
+            viewport={{ once: false, margin: "-50px" }}
             whileHover={{ 
               boxShadow: `0 20px 40px rgba(0, 0, 0, 0.2), 0 0 20px ${accentColor}40`,
               scale: 1.05,

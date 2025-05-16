@@ -121,7 +121,8 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
         WebkitBackdropFilter: 'blur(10px)'
       }}
     >
-
+            {/* Dynamic background elements */}
+            <BackgroundElements accentColor={accentColor} theme={theme} />   
       <div className="container mx-auto px-4 relative z-10">
         {/* Title Section with Typing Effect */}
         <motion.div

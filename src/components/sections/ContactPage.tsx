@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 import { FiMail, FiGithub, FiLinkedin, FiTwitter, FiSend, FiUser, FiMessageSquare } from 'react-icons/fi';
+import BackgroundElements from '../about/BackgroundElements';
 
 interface ContactPageProps {
   sectionRef: React.RefObject<HTMLDivElement>;
@@ -52,9 +53,14 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
       ref={sectionRef}
       className="min-h-screen flex items-center justify-center relative section-container py-20"
       style={{ 
-        background: theme === 'dark' ? 'linear-gradient(to bottom, #1a1a2e, #000000)' : 'linear-gradient(to bottom, #e6e6f0, #ffffff)'
+        background: theme === 'dark' 
+          ? `linear-gradient(135deg, #000000, #0a0a18, ${accentColor}40)` 
+          : `linear-gradient(135deg, #ffffff, #f0f0f5, ${accentColor}20)`,
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)'
       }}
     >
+      <BackgroundElements accentColor={accentColor} theme={theme} />
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div 

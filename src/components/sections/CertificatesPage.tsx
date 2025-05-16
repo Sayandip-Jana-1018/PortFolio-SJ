@@ -1,222 +1,187 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
-import { FiAward, FiCalendar, FiExternalLink } from 'react-icons/fi';
-import Image from 'next/image';
+import { certificates } from '../../data/certificatesData';
+import BackgroundElements from '../about/BackgroundElements';
+import TitleSection from '../about/TitleSection';
+import CertificateFilter from '../certificates/CertificateFilter';
+import CertificateCard from '../certificates/CertificateCard';
+import CertificateModal from '../certificates/CertificateModal';
+import CertificatePagination from '../certificates/CertificatePagination';
+import { Certificate } from '../../data/certificatesData';
 
-interface CertificatesPageProps {
-  sectionRef: React.RefObject<HTMLDivElement>;
-}
-
-const CertificatesPage: React.FC<CertificatesPageProps> = ({ sectionRef }) => {
+const CertificatesPage: React.FC = () => {
   const { theme, accentColor } = useTheme();
+  const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [visibleCertificates, setVisibleCertificates] = useState<Certificate[]>(certificates);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const certificatesPerPage = 6;
+  const containerRef = useRef<HTMLDivElement>(null);
   
-  const certificates = [
-    {
-      title: "Advanced React and Redux",
-      issuer: "Udemy",
-      date: "September 2023",
-      image: "/certificates/certificate1.jpeg",
-      link: "https://udemy.com/certificate/123",
-      description: "Comprehensive course covering advanced React patterns, Redux state management, middleware, and modern application architecture."
-    },
-    {
-      title: "AWS Certified Solutions Architect",
-      issuer: "Amazon Web Services",
-      date: "July 2023",
-      image: "/certificates/certificate2.jpeg",
-      link: "https://aws.amazon.com/certification/123",
-      description: "Professional certification validating expertise in designing distributed systems on AWS, including security, reliability, and cost optimization."
-    },
-    {
-      title: "TensorFlow Developer Certificate",
-      issuer: "Google",
-      date: "March 2023",
-      image: "/certificates/certificate3.jpeg",
-      link: "https://tensorflow.org/certificate/123",
-      description: "Certification demonstrating proficiency in building and training neural networks using TensorFlow for various machine learning applications."
-    },
-    {
-      title: "UI/UX Design Fundamentals",
-      issuer: "Interaction Design Foundation",
-      date: "January 2023",
-      image: "/certificates/certificate4.jpeg",
-      link: "https://interaction-design.org/certificate/123",
-      description: "Course covering user-centered design principles, wireframing, prototyping, and usability testing methodologies."
-    }
-  ];
+  // Mouse parallax effect values
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  
+  // Handle mouse move for parallax effect
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!containerRef.current) return;
+    const { left, top, width, height } = containerRef.current.getBoundingClientRect();
+    const x = (e.clientX - left) / width - 0.5;
+    const y = (e.clientY - top) / height - 0.5;
+    
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+  
+  // Category filters
+  const categories = ['All', ...Array.from(new Set(certificates.map(cert => cert.category)))];
+  
+  // Filter certificates by category
+  useEffect(() => {
+    setIsLoading(true);
+    setTimeout(() => {
+      if (activeCategory === 'All') {
+        setVisibleCertificates(certificates);
+      } else {
+        setVisibleCertificates(certificates.filter(cert => cert.category === activeCategory));
+      }
+      setCurrentPage(0);
+      setIsLoading(false);
+    }, 500);
+  }, [activeCategory]);
+  
+  // Calculate pagination
+  const totalPages = Math.ceil(visibleCertificates.length / certificatesPerPage);
+  const currentCertificates = visibleCertificates.slice(
+    currentPage * certificatesPerPage,
+    (currentPage + 1) * certificatesPerPage
+  );
+  
+  // Handle certificate selection
+  const handleCertificateSelect = (certificate: Certificate) => {
+    setSelectedCertificate(certificate);
+    setIsModalOpen(true);
+  };
+  
+  // Handle modal close
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedCertificate(null), 300); // Delay to allow exit animation
+  };
+  
+  // Function to handle certificate download
+  const handleDownloadCertificate = (imageUrl: string, title: string) => {
+    // Create an anchor element
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.download = `${title.replace(/\s+/g, '-').toLowerCase()}-certificate.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
-    <div 
-      id="certificates" 
-      ref={sectionRef}
-      className="min-h-screen flex items-center justify-center relative section-container py-20"
+    <section 
+      className="min-h-screen flex items-center justify-center relative section-container py-10 overflow-hidden"
       style={{ 
-        background: theme === 'dark' ? 'linear-gradient(to bottom, #2d1a3e, #1a1a2e)' : 'linear-gradient(to bottom, #f5e6f0, #e6e6f0)'
+        background: theme === 'dark' 
+          ? `linear-gradient(135deg, #000000, #0a0a18, ${accentColor}40)` 
+          : `linear-gradient(135deg, #ffffff, #f0f0f5, ${accentColor}20)`,
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)'
       }}
     >
-      {/* Background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div 
-          className="absolute bottom-1/4 left-1/4 w-96 h-96 opacity-10"
-          style={{ 
-            borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
-            background: `radial-gradient(circle, ${accentColor}80, transparent)`,
-            filter: 'blur(60px)'
-          }}
-          animate={{ 
-            rotate: -360,
-            scale: [1, 1.2, 1]
-          }}
-          transition={{ 
-            rotate: { duration: 25, repeat: Infinity, ease: "linear" },
-            scale: { duration: 12, repeat: Infinity, ease: "easeInOut" }
-          }}
-        />
-      </div>
+      {/* Background Elements */}
+      <BackgroundElements accentColor={accentColor} theme={theme} />
       
-      {/* Content */}
-      <motion.div 
-        className="w-full max-w-6xl mx-auto px-4 z-20 content-block"
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true, margin: "-100px" }}
-      >
-        <motion.h2 
-          className="text-4xl md:text-5xl font-bold mb-4 text-center"
-          style={{ 
-            backgroundImage: `linear-gradient(135deg, #fff 0%, ${accentColor} 50%, #fff 100%)`,
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            textShadow: `0 0 5px rgba(255, 255, 255, 0.1), 0 0 10px ${accentColor}40`
-          }}
-        >
-          Certificates
-        </motion.h2>
+      <div className="w-full max-w-7xl mx-auto px-4 z-20 content-block flex flex-col items-center">
+        {/* Title Section */}
+        <TitleSection 
+          accentColor={accentColor} 
+          theme={theme}
+          title="My Certificates"
+          subtitlePrefix="Showcasing my"
+          subtitles={[
+            'Professional Achievements',
+            'Technical Expertise',
+            'Learning Journey',
+            'Skills & Qualifications'
+          ]}
+        />
         
-        <motion.p 
-          className="text-center max-w-2xl mx-auto mb-16 opacity-80"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          viewport={{ once: true }}
-        >
-          Professional certifications and courses I've completed to enhance my skills
-        </motion.p>
-        
-        {/* Certificates Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {certificates.map((certificate, index) => (
-            <motion.div 
-              key={certificate.title}
-              className="glassmorphic-card rounded-xl overflow-hidden hover-3d"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 + (index * 0.1) }}
-              viewport={{ once: true }}
-              whileHover={{ 
-                y: -10, 
-                boxShadow: `0 15px 30px rgba(0, 0, 0, 0.1), 0 0 15px ${accentColor}30` 
-              }}
-            >
-              <div className="relative h-48 overflow-hidden">
-                <div 
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ 
-                    backgroundImage: `url(${certificate.image})`,
-                    filter: 'blur(2px)',
-                    transform: 'scale(1.05)'
-                  }}
-                />
-                <div className="absolute inset-0" style={{ backgroundColor: `${theme === 'dark' ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)'}` }} />
-                
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div 
-                    className="w-24 h-24 rounded-full flex items-center justify-center"
-                    style={{ 
-                      backgroundColor: `${accentColor}20`,
-                      border: `2px solid ${accentColor}80`
-                    }}
-                  >
-                    <FiAward size={40} style={{ color: accentColor }} />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2">{certificate.title}</h3>
-                <div className="flex justify-between items-center mb-4">
-                  <span className="opacity-80">{certificate.issuer}</span>
-                  <div className="flex items-center gap-1 text-sm opacity-70">
-                    <FiCalendar size={14} />
-                    <span>{certificate.date}</span>
-                  </div>
-                </div>
-                
-                <p className="opacity-80 mb-4 text-sm">{certificate.description}</p>
-                
-                <a 
-                  href={certificate.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-sm mt-4"
-                  style={{ color: accentColor }}
-                >
-                  <FiExternalLink /> View Certificate
-                </a>
-              </div>
-            </motion.div>
-          ))}
+        {/* Category Filters */}
+        <div className="w-full max-w-3xl mx-auto">
+          <CertificateFilter 
+            categories={categories}
+            activeCategory={activeCategory}
+            onCategoryChange={setActiveCategory}
+            accentColor={accentColor}
+            theme={theme}
+          />
         </div>
         
-        {/* Additional Qualifications */}
-        <motion.div 
-          className="mt-16 glassmorphic-card rounded-xl p-6"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          viewport={{ once: true }}
+        {/* Certificates Grid */}
+        <div 
+          ref={containerRef} 
+          className="relative w-full" 
+          onMouseMove={handleMouseMove}
         >
-          <h3 className="text-xl font-semibold mb-6 text-center">Additional Qualifications</h3>
+          {isLoading ? (
+            <motion.div 
+              className="flex justify-center items-center py-32"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="relative w-16 h-16">
+                <motion.div 
+                  className="absolute inset-0 rounded-full"
+                  style={{ borderWidth: 3, borderColor: `${accentColor} transparent ${accentColor} transparent` }}
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                />
+              </div>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {currentCertificates.map((certificate, index) => (
+                <CertificateCard
+                  key={certificate.id}
+                  certificate={certificate}
+                  index={index}
+                  accentColor={accentColor}
+                  theme={theme}
+                  onSelect={handleCertificateSelect}
+                />
+              ))}
+            </div>
+          )}
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {[
-              { title: "Python Data Structures", issuer: "University of Michigan", date: "2022" },
-              { title: "Web Accessibility", issuer: "W3C", date: "2022" },
-              { title: "Agile Project Management", issuer: "PMI", date: "2021" },
-              { title: "Responsive Web Design", issuer: "freeCodeCamp", date: "2021" },
-              { title: "JavaScript Algorithms", issuer: "freeCodeCamp", date: "2021" },
-              { title: "Git & GitHub Fundamentals", issuer: "GitHub", date: "2020" }
-            ].map((qual, index) => (
-              <motion.div 
-                key={qual.title}
-                className="p-4 rounded-lg"
-                style={{ 
-                  backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
-                  border: `1px solid ${accentColor}20`
-                }}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, delay: 0.6 + (index * 0.05) }}
-                viewport={{ once: true }}
-                whileHover={{ 
-                  backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-                  borderColor: `${accentColor}40`
-                }}
-              >
-                <h4 className="font-medium mb-1">{qual.title}</h4>
-                <div className="flex justify-between text-sm opacity-70">
-                  <span>{qual.issuer}</span>
-                  <span>{qual.date}</span>
-                </div>
-              </motion.div>
-            ))}
+          {/* Pagination */}
+          <div className="mt-12 flex justify-center">
+            <CertificatePagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              accentColor={accentColor}
+              theme={theme}
+            />
           </div>
-        </motion.div>
-      </motion.div>
-    </div>
+        </div>
+      </div>
+      
+      {/* Certificate Modal with working download button */}
+      <CertificateModal 
+        certificate={selectedCertificate}
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        accentColor={accentColor}
+        onDownload={handleDownloadCertificate}
+      />
+    </section>
   );
 };
 

@@ -15,6 +15,7 @@ import ProjectFilter from '../projects/ProjectFilter';
 // BackgroundElements import removed as it's not used
 import TitleSection from '../about/TitleSection';
 import { allProjects, getCategories, filterProjectsByCategory } from '@/data/allProjectsData';
+import BackgroundElements from '../about/BackgroundElements';
 
 interface ProjectsPageProps {
   // sectionRef removed as it's not used
@@ -81,7 +82,8 @@ const ProjectsPage: React.FC<ProjectsPageProps> = () => {
         color: theme === 'dark' ? '#ffffff' : '#000000'
       }}
     >
-
+      {/* Dynamic background elements */}
+      <BackgroundElements accentColor={accentColor} theme={theme} />   
       <div className="container mx-auto relative z-10">
         {/* Section Title with Typing Effect */}
         <div className="mb-12">

@@ -23,7 +23,7 @@ const StatItem: React.FC<StatItemProps> = ({
   const { accentColor } = useTheme();
   const controls = useAnimation();
   const [ref, inView] = useInView({ 
-    triggerOnce: true,
+    triggerOnce: false,
     threshold: 0.2
   });
   
@@ -96,7 +96,7 @@ const SkillStats: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        viewport={{ once: true }}
+        viewport={{ once: false }}
       >
         Experience Overview
       </motion.h3>

@@ -56,14 +56,14 @@ const SkillProficiency: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        viewport={{ once: true }}
+        viewport={{ once: false }}
       >
         <motion.h3
           className="text-3xl font-bold mb-4"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
+          viewport={{ once: false }}
         >
           Skill Proficiency
         </motion.h3>
@@ -87,7 +87,7 @@ const SkillProficiency: React.FC = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: groupIndex * 0.2 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: false, margin: "-100px" }}
             whileHover={{ 
               boxShadow: `0 20px 40px rgba(0,0,0,0.2), 0 0 15px ${accentColor}30`,
               transform: 'translateY(-5px)'
