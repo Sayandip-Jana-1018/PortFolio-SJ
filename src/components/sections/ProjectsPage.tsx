@@ -1,23 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-// Create a simple SectionTitle component since it's missing
-interface SectionTitleProps {
-  title: string;
-  subtitle?: string;
-  align?: 'left' | 'center' | 'right';
-}
-
-const SectionTitle: React.FC<SectionTitleProps> = ({ title, subtitle, align = 'left' }) => {
-  const textAlign = align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left';
-  
-  return (
-    <div className={`mb-12 ${textAlign}`}>
-      <h2 className="text-3xl md:text-4xl font-bold mb-4">{title}</h2>
-      {subtitle && <p className="text-black/70 dark:text-white/70 text-lg">{subtitle}</p>}
-    </div>
-  );
-};
+// SectionTitle component removed as it's no longer used
 
 // Import the actual ThemeContext instead of creating a placeholder
 import { useTheme as useActualTheme } from '../../context/ThemeContext';
@@ -28,15 +12,15 @@ const useTheme = useActualTheme;
 import ProjectCard from '../projects/ProjectCard';
 import FeaturedProject from '../projects/FeaturedProject';
 import ProjectFilter from '../projects/ProjectFilter';
-import BackgroundElements from '../about/BackgroundElements';
+// BackgroundElements import removed as it's not used
 import TitleSection from '../about/TitleSection';
 import { allProjects, getCategories, filterProjectsByCategory } from '@/data/allProjectsData';
 
 interface ProjectsPageProps {
-  sectionRef?: React.RefObject<HTMLDivElement>;
+  // sectionRef removed as it's not used
 }
 
-const ProjectsPage: React.FC<ProjectsPageProps> = ({ sectionRef }) => {
+const ProjectsPage: React.FC<ProjectsPageProps> = () => {
   const { theme, accentColor } = useTheme();
   const [activeCategory, setActiveCategory] = useState('All');
   const [filteredProjects, setFilteredProjects] = useState(allProjects);
@@ -46,7 +30,7 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ sectionRef }) => {
   useEffect(() => {
     setCategories(getCategories());
     setFilteredProjects(filterProjectsByCategory(activeCategory));
-  }, []);
+  }, [activeCategory]);
 
   // Update filtered projects when category changes
   useEffect(() => {
