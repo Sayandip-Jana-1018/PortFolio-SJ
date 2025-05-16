@@ -1,0 +1,139 @@
+/* Responsive styles for PortfolioX */
+
+/* Base responsive adjustments */
+@media (max-width: 640px) {
+  /* Small devices (mobile) */
+  html, body {
+    overflow-x: hidden;
+  }
+  
+  /* Adjust spacing for mobile */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    text-align: center;
+  }
+  
+  /* Center align content in mobile */
+  .center-mobile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  /* Apply center-mobile class to main containers */
+  .main-content > div,
+  .section-container,
+  .content-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  /* Ensure text is readable and centered on mobile */
+  p, h1, h2, h3, h4, h5, h6, span, a {
+    text-align: center;
+  }
+  
+  .text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+  }
+  
+  /* Preserve layout for specific components */
+  .flex-row {
+    flex-direction: row;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  /* Medium devices (tablets) */
+  html, body {
+    overflow-x: hidden;
+  }
+}
+
+/* Responsive adjustments for GlassmorphicProfile */
+@media (max-width: 640px) {
+  /* Adjust profile photo size on mobile */
+  .profile-photo-container {
+    max-width: 280px;
+    max-height: 280px;
+  }
+  
+  /* Ensure button is properly sized on mobile */
+  .btn-glassmorphic {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  /* Adjust profile photo size on tablet */
+  .profile-photo-container {
+    max-width: 350px;
+    max-height: 350px;
+  }
+}
+
+/* Responsive adjustments for AnimatedText */
+@media (max-width: 640px) {
+  /* Ensure text is properly sized on mobile */
+  .title-container {
+    gap: 0.5rem;
+  }
+  
+  /* Adjust decorative elements for mobile */
+  .decorative-element {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+}
+
+/* Responsive adjustments for navigation cards */
+@media (max-width: 640px) {
+  /* Make cards more compact on mobile */
+  .glassmorphic-card {
+    padding: 1rem;
+  }
+  
+  /* Adjust icon sizes for mobile */
+  .card-icon {
+    transform: scale(0.9);
+  }
+}
+
+/* Ensure glassmorphic elements work well on all devices */
+.glassmorphic {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Ensure proper text color in light/dark mode across all devices */
+@media (prefers-color-scheme: light) {
+  .glassmorphic {
+    background-color: rgba(255, 255, 255, 0.7);
+    color: #000000;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .glassmorphic {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #ffffff;
+  }
+}
+
+/* Ensure proper touch interactions on mobile */
+@media (max-width: 768px) {
+  button, a {
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+}
