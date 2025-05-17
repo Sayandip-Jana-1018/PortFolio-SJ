@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 interface BackgroundElementsProps {
@@ -7,6 +7,28 @@ interface BackgroundElementsProps {
 }
 
 const BackgroundElements: React.FC<BackgroundElementsProps> = ({ accentColor, theme }) => {
+  // State to track if we're on mobile
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Check if we're on mobile on mount and when window resizes
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px is typical md breakpoint
+    };
+    
+    // Check immediately
+    checkIfMobile();
+    
+    // Add event listener for window resize
+    window.addEventListener('resize', checkIfMobile);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+  
+  // Don't render anything on mobile to improve performance
+  if (isMobile) return null;
+  
   return (
     <div className="absolute inset-0 overflow-hidden">
       {/* Animated gradient borders */}

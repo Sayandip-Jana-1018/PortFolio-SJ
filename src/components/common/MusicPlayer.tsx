@@ -50,17 +50,24 @@ const MusicPlayer: React.FC = () => {
   return (
     <motion.button
       onClick={togglePlay}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      className="p-2 rounded-full flex items-center justify-center"
-      style={{ backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className="flex items-center justify-center"
+      style={{ 
+        width: '36px',
+        height: '36px',
+        borderRadius: '50%',
+        backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+        border: `1px solid ${accentColor}30`,
+        boxShadow: isPlaying ? `0 0 8px ${accentColor}40` : 'none'
+      }}
       aria-label={isPlaying ? "Pause music" : "Play music"}
       title={isPlaying ? "Pause music" : "Play music"}
     >
       {isPlaying ? (
-        <MdMusicNote style={{ color: accentColor }} size={20} />
+        <MdMusicNote style={{ color: accentColor }} size={18} />
       ) : (
-        <MdMusicOff style={{ color: accentColor }} size={20} />
+        <MdMusicOff style={{ color: accentColor }} size={18} />
       )}
     </motion.button>
   );
