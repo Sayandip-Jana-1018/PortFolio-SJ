@@ -169,16 +169,6 @@ const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
           >
             <QuoteSection accentColor={accentColor} theme={theme} />
           </motion.div>
-          
-          {/* Experience Timeline */}
-          <motion.div
-            ref={timelineRef}
-            initial="hidden"
-            animate={timelineInView ? "visible" : "hidden"}
-            variants={fadeInUpVariant}
-          >
-            <ExperienceTimeline accentColor={accentColor} theme={theme} />
-          </motion.div>
         </div>
       </motion.div>
     </div>

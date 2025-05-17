@@ -236,9 +236,49 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
           </div>
         </div>
         
+        {/* Back to top button */}
+        <motion.div
+          className="flex flex-col items-center justify-center mt-12 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+        >
+          <button 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="flex flex-col items-center justify-center p-3 transition-all duration-300 hover:opacity-80"
+            aria-label="Scroll to top"
+          >
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+              className="w-10 h-10 flex items-center justify-center rounded-full border-2"
+              style={{ 
+                borderColor: accentColor,
+                backgroundColor: `${accentColor}20`,
+              }}
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className="h-5 w-5" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke={accentColor}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+              </svg>
+            </motion.div>
+            <span 
+              className="text-sm mt-2"
+              style={{ color: accentColor }}
+            >
+              Back to Top
+            </span>
+          </button>
+        </motion.div>
+        
         {/* Footer */}
         <motion.div 
-          className="mt-16 text-center"
+          className="mt-6 text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2 }}

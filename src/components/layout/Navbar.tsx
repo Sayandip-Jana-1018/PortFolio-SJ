@@ -4,16 +4,38 @@ import { useParticles } from '../../context/ParticlesContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { HexColorPicker } from 'react-colorful';
-import { FiHome, FiUser, FiCode, FiAward, FiFileText, FiMail, FiMenu, FiX, FiSun, FiMoon, FiSettings } from 'react-icons/fi';
+import { FiHome, FiUser, FiCode, FiAward, FiFileText, FiMail, FiMenu, FiX, FiSun, FiMoon, FiSettings, FiBookOpen, FiMic } from 'react-icons/fi';
 import MusicPlayer from '../common/MusicPlayer';
+import dynamic from 'next/dynamic';
 import { FaMedal } from 'react-icons/fa';
 import { FaRocket } from 'react-icons/fa';
+
+// Import the VoiceNavigator component directly
+import VoiceNavigator from '../common/VoiceNavigator';
+
+// Create a functional VoiceNavigatorButton component
+const VoiceNavigatorButton = () => {
+  // Handle navigation to sections
+  const handleNavigate = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  
+  return (
+    <div className="relative">
+      <VoiceNavigator onNavigate={handleNavigate} />
+    </div>
+  );
+};
 
 const navItems = [
   { name: 'Home', href: '/#', icon: <FiHome /> },
   { name: 'About', href: '/#about', icon: <FiUser /> },
   { name: 'Projects', href: '/#projects', icon: <FiCode /> },
   { name: 'Skills', href: '/#skills', icon: <FiAward /> },
+  { name: 'Education', href: '/#education', icon: <FiBookOpen /> },
   { name: 'Hackathons', href: '/#hackathons', icon: <FaMedal /> },
   { name: 'Certificates', href: '/#certificates', icon: <FiFileText /> },
   { name: 'Contact', href: '/#contact', icon: <FiMail /> },
@@ -27,6 +49,7 @@ const Navbar: React.FC = () => {
   const [visible, setVisible] = useState(true);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showDebugger, setShowDebugger] = useState(true); // Start with debugger visible
   const colorPickerRef = useRef<HTMLDivElement>(null);
 
   // Predefined color options
@@ -127,6 +150,9 @@ const Navbar: React.FC = () => {
               className="relative font-medium cursor-pointer flex items-center gap-2"
               style={{ color: accentColor }}
             >
+              <div className="mr-2">
+                <VoiceNavigatorButton />
+              </div>
               <span className="text-xl sm:text-xl md:text-2xl font-bold">Portfolio</span>
               <div 
                 className="h-2 w-2 rounded-full animate-pulse"
@@ -312,6 +338,7 @@ const Navbar: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Voice navigation is now fully integrated in the button */}
     </motion.header>
   );
 };

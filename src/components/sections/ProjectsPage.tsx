@@ -18,10 +18,10 @@ import { allProjects, getCategories, filterProjectsByCategory } from '@/data/all
 import BackgroundElements from '../about/BackgroundElements';
 
 interface ProjectsPageProps {
-  // sectionRef removed as it's not used
+  sectionRef: React.RefObject<HTMLDivElement>;
 }
 
-const ProjectsPage: React.FC<ProjectsPageProps> = () => {
+const ProjectsPage: React.FC<ProjectsPageProps> = ({ sectionRef }) => {
   const { theme, accentColor } = useTheme();
   const [activeCategory, setActiveCategory] = useState('All');
   const [filteredProjects, setFilteredProjects] = useState(allProjects);

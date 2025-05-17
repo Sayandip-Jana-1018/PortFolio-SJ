@@ -17,12 +17,14 @@ import FloatingElements from "../components/common/FloatingElements";
 import PremiumParticles from "../components/common/PremiumParticles";
 import DynamicBackground from "../components/common/DynamicBackground";
 import { CanvasRevealEffect } from "../components/common/CanvasRevealEffect";
+import VoiceNavigator from "../components/common/VoiceNavigator";
 import AboutPage from "../components/sections/AboutPage";
 import ProjectsPage from "../components/sections/ProjectsPage";
 import SkillsPage from "../components/sections/SkillsPage";
 import HackathonsPage from "../components/sections/HackathonsPage";
 import CertificatesPage from "../components/sections/CertificatesPage";
 import ContactPage from "../components/sections/ContactPage";
+import EducationPage from "../components/sections/EducationPage";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -134,6 +136,7 @@ export default function Home() {
   const aboutSectionRef = useRef<HTMLDivElement>(null);
   const projectsSectionRef = useRef<HTMLDivElement>(null);
   const skillsSectionRef = useRef<HTMLDivElement>(null);
+  const educationSectionRef = useRef<HTMLDivElement>(null);
   const hackathonsSectionRef = useRef<HTMLDivElement>(null);
   const certificatesSectionRef = useRef<HTMLDivElement>(null);
   const contactSectionRef = useRef<HTMLDivElement>(null);
@@ -717,6 +720,9 @@ export default function Home() {
           
           {/* Skills Section */}
           <SkillsPage sectionRef={skillsSectionRef} />
+          
+          {/* Education Section */}
+          <EducationPage sectionRef={educationSectionRef} />
           
           {/* Hackathons Section */}
           <HackathonsPage sectionRef={hackathonsSectionRef} />

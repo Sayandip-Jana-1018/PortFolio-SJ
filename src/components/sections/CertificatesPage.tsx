@@ -10,7 +10,11 @@ import CertificateModal from '../certificates/CertificateModal';
 import CertificatePagination from '../certificates/CertificatePagination';
 import { Certificate } from '../../data/certificatesData';
 
-const CertificatesPage: React.FC = () => {
+interface CertificatesPageProps {
+  sectionRef: React.RefObject<HTMLDivElement>;
+}
+
+const CertificatesPage: React.FC<CertificatesPageProps> = ({ sectionRef }) => {
   const { theme, accentColor } = useTheme();
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('All');
