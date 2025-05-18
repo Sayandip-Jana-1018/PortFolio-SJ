@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "../context/ThemeContext";
 import Navbar from "../components/layout/Navbar";
 import { useTheme } from "../context/ThemeContext";
+import { useParticles } from "../context/ParticlesContext";
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -17,7 +18,7 @@ import FloatingElements from "../components/common/FloatingElements";
 import PremiumParticles from "../components/common/PremiumParticles";
 import DynamicBackground from "../components/common/DynamicBackground";
 import { CanvasRevealEffect } from "../components/common/CanvasRevealEffect";
-import VoiceNavigator from "../components/common/VoiceNavigator";
+// VoiceNavigator removed as requested
 import AboutPage from "../components/sections/AboutPage";
 import ProjectsPage from "../components/sections/ProjectsPage";
 import SkillsPage from "../components/sections/SkillsPage";
@@ -35,6 +36,80 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+// Component for mobile particles effect only (no toggle button)
+const MobileParticlesEffect: React.FC = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  const { cornerParticlesEnabled } = useParticles();
+  
+  // Check if we're on mobile on mount and when window resizes
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 768px is typical md breakpoint
+    };
+    
+    // Check immediately
+    checkIfMobile();
+    
+    // Add event listener for window resize
+    window.addEventListener('resize', checkIfMobile);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+  
+  // Don't render on desktop
+  if (!isMobile || !cornerParticlesEnabled) return null;
+  
+  return (
+    <CanvasRevealEffect 
+      active={true} 
+      cornerParticles={true}
+      containerClassName="fixed inset-0 pointer-events-none z-10"
+    />
+  );
+};
+
+// Component to handle desktop-only effects
+const DesktopOnlyEffects: React.FC = () => {
+  const [isDesktop, setIsDesktop] = useState(false);
+  const { accentColor } = useTheme();
+  const { cornerParticlesEnabled, toggleCornerParticles } = useParticles();
+  
+  // Check if we're on desktop on mount and when window resizes
+  useEffect(() => {
+    const checkIfDesktop = () => {
+      setIsDesktop(window.innerWidth >= 768); // 768px is typical md breakpoint
+    };
+    
+    // Check immediately
+    checkIfDesktop();
+    
+    // Add event listener for window resize
+    window.addEventListener('resize', checkIfDesktop);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', checkIfDesktop);
+  }, []);
+  
+  // Don't render anything on mobile to improve performance
+  if (!isDesktop) return null;
+  
+  // On desktop, show all effects
+  return (
+    <>
+      <FloatingElements count={8} intensity={0.1} />
+      <PremiumParticles intensity={0.7} />
+      <DynamicBackground intensity={0.6} />
+      <CanvasRevealEffect 
+        active={true} 
+        cornerParticles={cornerParticlesEnabled}
+        containerClassName="fixed inset-0 pointer-events-none z-10"
+      />
+      <AnimatedBackground intensity={0.6} particleCount={40} />
+    </>
+  );
+};
 
 export default function Home() {
   const { theme, accentColor } = useTheme();
@@ -203,20 +278,19 @@ export default function Home() {
           <>
             <CustomCursor />
             <ClickEffect />
-            <FloatingElements count={8} intensity={0.1} />
-            <PremiumParticles intensity={0.7} />
-            <DynamicBackground intensity={0.6} />
-            <CanvasRevealEffect active={true} cornerParticles={true} containerClassName="fixed inset-0 pointer-events-none z-10" />
           </>
         )}
         
-        {/* Animated Background with particles and gradients */}
-        <AnimatedBackground intensity={0.6} particleCount={40} />
+        {/* Desktop-only effects */}
+        <DesktopOnlyEffects />
+        
+        {/* Mobile particles effect */}
+        <MobileParticlesEffect />
         
         {/* Main content */}
         <div 
           ref={mainRef}
-          className={`main-content ${theme === 'dark' ? 'text-white' : 'text-black'}`}
+          className={`main-content ${theme === 'dark' ? 'text-white' : 'text-black bg-white-800'}`}
           style={{ position: 'relative' }}
         >
           {/* Hero section with parallax effects */}

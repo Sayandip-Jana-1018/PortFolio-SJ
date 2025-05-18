@@ -3,7 +3,11 @@ import { motion } from 'framer-motion';
 import { MdMusicNote, MdMusicOff } from 'react-icons/md';
 import { useTheme } from '../../context/ThemeContext';
 
-const MusicPlayer: React.FC = () => {
+interface MusicPlayerProps {
+  small?: boolean;
+}
+
+const MusicPlayer: React.FC<MusicPlayerProps> = ({ small = false }) => {
   const { accentColor, theme } = useTheme();
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -54,8 +58,8 @@ const MusicPlayer: React.FC = () => {
       whileTap={{ scale: 0.95 }}
       className="flex items-center justify-center"
       style={{ 
-        width: '36px',
-        height: '36px',
+        width: small ? '24px' : '36px',
+        height: small ? '24px' : '36px',
         borderRadius: '50%',
         backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
         border: `1px solid ${accentColor}30`,

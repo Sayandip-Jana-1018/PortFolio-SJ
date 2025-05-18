@@ -8,7 +8,7 @@ interface AnimatedTextProps {
 }
 
 const AnimatedText: React.FC<AnimatedTextProps> = ({ scrollProgress }) => {
-  const { accentColor } = useTheme();
+  const { accentColor, theme } = useTheme();
   const nameParallaxRef = useParallax(0.2);
   const titleParallaxRef = useParallax(0.3);
   
@@ -49,6 +49,9 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({ scrollProgress }) => {
   // Calculate opacity based on scroll progress
   const textOpacity = Math.max(0, 1 - scrollProgress * 2);
   
+  // Get text color based on theme
+  const textColor = theme === 'dark' ? '#ffffff' : '#000000';
+  
   const titles = ['Developer', 'Designer', 'Innovator'];
 
   return (
@@ -82,10 +85,10 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({ scrollProgress }) => {
             }}
           />
           
-          <span className="inline-block text-gradient"
+          <span className="inline-block text-gradient dark:text-white text-black"
             style={{ 
-              backgroundImage: `linear-gradient(135deg, #fff 0%, ${accentColor} 50%, #fff 100%)`,
-              textShadow: `0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px ${accentColor}80, 0 0 15px ${accentColor}40`,
+              backgroundImage: theme === 'dark' ? `linear-gradient(135deg, #fff 0%, ${accentColor} 50%, #fff 100%)` : `linear-gradient(135deg, #000 0%, ${accentColor} 50%, #000 100%)`,
+              textShadow: theme === 'dark' ? `0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px ${accentColor}80, 0 0 15px ${accentColor}40` : `0 0 5px rgba(0, 0, 0, 0.3), 0 0 10px ${accentColor}60, 0 0 15px ${accentColor}30`,
               fontWeight: 800,
               letterSpacing: '0.5px'
             }}
@@ -123,7 +126,8 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({ scrollProgress }) => {
               className="glassmorphic px-4 py-2 rounded-full"
               style={{
                 borderColor: `${accentColor}40`,
-                boxShadow: `0 0 10px ${accentColor}30`
+                boxShadow: `0 0 10px ${accentColor}30`,
+                color: textColor
               }}
             >
               {title}
