@@ -290,7 +290,7 @@ export default function Home() {
         {/* Main content */}
         <div 
           ref={mainRef}
-          className={`main-content ${theme === 'dark' ? 'text-white' : 'text-black bg-white-800'}`}
+          className={`main-content ${theme === 'dark' ? 'text-white' : 'text-black bg-white'}`}
           style={{ position: 'relative' }}
         >
           {/* Hero section with parallax effects */}

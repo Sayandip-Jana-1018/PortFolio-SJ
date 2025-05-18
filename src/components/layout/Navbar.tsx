@@ -120,19 +120,32 @@ const Navbar: React.FC = () => {
     >
       <style jsx global>{`
         .no-scrollbar {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
         .no-scrollbar::-webkit-scrollbar {
-          display: none; /* Chrome, Safari, Opera */
+          display: none;
         }
         .navbar-container {
           max-width: 100%;
           overflow-x: hidden;
         }
+        .mobile-menu {
+          background: ${theme === 'dark' ? 'rgba(25, 25, 35, 0.1)' : 'rgba(245, 245, 250, 0.1)'} !important;
+          -webkit-backdrop-filter: blur(12px) saturate(120%) !important;
+          backdrop-filter: blur(12px) saturate(120%) !important;
+          box-shadow: 0 8px 32px 0 ${theme === 'dark' ? 'rgba(0, 0, 0, 0.2)' : 'rgba(0, 0, 0, 0.05)'} !important;
+          border: 1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'} !important;
+          color: ${theme === 'dark' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.95)'} !important;
+          position: relative;
+          z-index: 1000;
+          transform: translateZ(0);
+          -webkit-transform: translateZ(0);
+          will-change: transform, backdrop-filter, -webkit-backdrop-filter;
+        }
       `}</style>
       <div className="container mx-auto px-1 sm:px-2 md:px-4 py-2 flex justify-between items-center navbar-container">
-        {/* Logo - Optimized for fold phone */}
+        {/* Logo */}
         <motion.div 
           className="flex items-center shrink-0"
           whileHover={{ scale: 1.05 }}
@@ -152,7 +165,7 @@ const Navbar: React.FC = () => {
           </Link>
         </motion.div>
 
-        {/* Desktop Navigation - Responsive for fold phones - Icons only on tablet/fold */}
+        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-3 lg:space-x-6 overflow-x-auto no-scrollbar">
           {navItems.map((item) => (
             <motion.div
@@ -183,15 +196,12 @@ const Navbar: React.FC = () => {
           ))}
         </nav>
 
+        {/* Control Buttons */}
         <div className="flex items-center space-x-1.5 sm:space-x-2 md:space-x-3">
-          {/* Control buttons group - Optimized for fold phones */}
           <div className="flex items-center gap-1 sm:gap-2">
-            {/* Theme Toggle Button - Desktop Only */}
             <div className="hidden md:block">
               <MusicPlayer />
             </div>
-            
-            {/* Theme Toggle Button - Desktop Only */}
             <motion.button
               onClick={toggleTheme}
               whileHover={{ scale: 1.05 }}
@@ -205,7 +215,6 @@ const Navbar: React.FC = () => {
                 border: `1px solid ${accentColor}30`
               }}
               aria-label="Toggle theme"
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {theme === 'dark' ? (
                 <FiSun style={{ color: accentColor }} size={18} />
@@ -213,8 +222,6 @@ const Navbar: React.FC = () => {
                 <FiMoon style={{ color: accentColor }} size={18} />
               )}
             </motion.button>
-            
-            {/* Rocket Toggle Button for Particles - Desktop Only */}
             <motion.button
               onClick={toggleCornerParticles}
               whileHover={{ scale: 1.05 }}
@@ -229,7 +236,6 @@ const Navbar: React.FC = () => {
                 boxShadow: cornerParticlesEnabled ? `0 0 8px ${accentColor}40` : 'none'
               }}
               aria-label={cornerParticlesEnabled ? "Turn off particles" : "Turn on particles"}
-              title={cornerParticlesEnabled ? "Turn off particles" : "Turn on particles"}
             >
               <FaRocket 
                 size={16}
@@ -239,8 +245,9 @@ const Navbar: React.FC = () => {
                 }} 
               />
             </motion.button>
-            
-            {/* Color Picker - Fixed positioning */}
+            <div className="md:hidden">
+              <MusicPlayer/>
+            </div>
             <div className="relative" style={{ zIndex: 60 }}>
               <motion.button
                 onClick={() => setColorPickerOpen(!colorPickerOpen)}
@@ -266,8 +273,6 @@ const Navbar: React.FC = () => {
                   <FiSettings style={{ color: accentColor }} size={16} />
                 </motion.div>
               </motion.button>
-              
-              {/* Color Picker Button - Mobile */}
               <motion.button
                 onClick={() => setColorPickerOpen(!colorPickerOpen)}
                 whileHover={{ scale: 1.05 }}
@@ -292,8 +297,6 @@ const Navbar: React.FC = () => {
                   <FiSettings style={{ color: accentColor }} size={14} />
                 </motion.div>
               </motion.button>
-
-              {/* Color Picker Dropdown - Fixed positioning */}
               <AnimatePresence>
                 {colorPickerOpen && (
                   <motion.div 
@@ -316,7 +319,6 @@ const Navbar: React.FC = () => {
                     <div className="mb-4">
                       <HexColorPicker color={accentColor} onChange={setAccentColor} />
                     </div>
-                    
                     <div className="flex flex-wrap gap-2 justify-center">
                       <p className="text-xs w-full text-center mb-1" style={{ color: theme === 'dark' ? 'white' : 'black' }}>
                         Choose a color
@@ -343,8 +345,6 @@ const Navbar: React.FC = () => {
                 )}
               </AnimatePresence>
             </div>
-            
-            {/* Mobile menu button - Only visible on mobile */}
             <motion.button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden flex items-center justify-center ml-1"
@@ -354,7 +354,7 @@ const Navbar: React.FC = () => {
                 borderRadius: '8px',
                 backgroundColor: mobileMenuOpen ? `${accentColor}20` : theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
                 border: `1px solid ${mobileMenuOpen ? accentColor : `${accentColor}30`}`,
-                boxShadow: mobileMenuOpen ? `0 0 10px ${accentColor}40` : 'none'
+                boxShadow: mobileMenuOpen ? `0 0 10px ${accentColor}40` : 'none',
               }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -374,22 +374,19 @@ const Navbar: React.FC = () => {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-            animate={{ opacity: 1, backdropFilter: 'blur(30px)' }}
-            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className={`md:hidden fixed top-[60px] left-0 right-0 overflow-hidden z-50`}
-            style={{ 
-              backgroundColor: theme === 'dark' ? 'rgba(10, 10, 15, 0.3)' : 'rgba(255, 255, 255, 0.3)',
-              boxShadow: `0 10px 25px rgba(0,0,0,0.2), 0 0 10px ${accentColor}20`,
-              borderBottom: `1px solid ${accentColor}30`,
-              color: theme === 'dark' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)',
-              backdropFilter: 'blur(30px)',
-              WebkitBackdropFilter: 'blur(30px)'
+            className="md:hidden fixed inset-0 top-0 pt-[60px] z-[1000] mobile-menu"
+            style={{
+              background: 'transparent',
+              pointerEvents: 'auto',
+              height: '35vh'
             }}
           >
-            <div className="container mx-auto px-2 sm:px-4 py-3">
-              {/* Grid layout for mobile menu - 3 cols on very small screens, 4 cols on larger mobile/tablet */}
+            <div className="absolute inset-0 overflow-y-auto">
+              <div className="container mx-auto px-2 sm:px-4 py-3 relative" style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}>
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 py-3">
                 {navItems.map((item) => (
                   <Link key={item.name} href={item.href} passHref>
@@ -397,10 +394,10 @@ const Navbar: React.FC = () => {
                       className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-200"
                       style={{ 
                         backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.25)',
-                        backdropFilter: 'blur(10px)',
-                        WebkitBackdropFilter: 'blur(10px)',
                         border: `1px solid ${accentColor}30`,
-                        boxShadow: `0 4px 6px rgba(0,0,0,0.1), 0 0 2px ${accentColor}30 inset`
+                        boxShadow: `0 4px 6px rgba(0,0,0,0.1), 0 0 2px ${accentColor}30 inset`,
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)'
                       }}
                       onClick={() => setMobileMenuOpen(false)}
                       whileHover={{ 
@@ -419,9 +416,6 @@ const Navbar: React.FC = () => {
                     </motion.div>
                   </Link>
                 ))}
-                
-                {/* Close button - Added after the navigation items */}
-                {/* Theme Toggle Button */}
                 <motion.div 
                   className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-200"
                   style={{ 
@@ -448,8 +442,6 @@ const Navbar: React.FC = () => {
                     {theme === 'dark' ? 'Light' : 'Dark'}
                   </span>
                 </motion.div>
-                
-                {/* Music Player Button */}
                 <motion.div 
                   className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-200"
                   style={{ 
@@ -476,8 +468,6 @@ const Navbar: React.FC = () => {
                     Music
                   </span>
                 </motion.div>
-                
-                {/* Particles Toggle Button */}
                 <motion.div 
                   className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-200"
                   style={{ 
@@ -504,8 +494,6 @@ const Navbar: React.FC = () => {
                     Particles
                   </span>
                 </motion.div>
-
-                {/* Close button */}
                 <motion.div 
                   className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-200"
                   style={{ 
@@ -534,10 +522,10 @@ const Navbar: React.FC = () => {
                 </motion.div>
               </div>
             </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
-      {/* Voice navigation is now fully integrated in the button */}
     </motion.header>
   );
 };
