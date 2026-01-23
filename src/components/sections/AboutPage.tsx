@@ -26,7 +26,7 @@ interface AboutPageProps {
 const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
   const { theme, accentColor } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   // Individual refs for each section
   const titleRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -35,7 +35,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
   const statsRef = useRef<HTMLDivElement>(null);
   const quoteRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
-  
+
   // Individual inView states for each section with different thresholds
   const titleInView = useInView(titleRef, { once: false, amount: 0.5 });
   const profileInView = useInView(profileRef, { once: false, amount: 0.3 });
@@ -44,21 +44,21 @@ const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
   const statsInView = useInView(statsRef, { once: false, amount: 0.2 });
   const quoteInView = useInView(quoteRef, { once: false, amount: 0.15 });
   const timelineInView = useInView(timelineRef, { once: false, amount: 0.15 });
-  
+
   // Animation variants for fade-in effect
   const fadeInUpVariant = {
     hidden: { opacity: 0, y: 80, scale: 0.95 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       scale: 1,
-      transition: { 
-        duration: 0.8, 
+      transition: {
+        duration: 0.8,
         ease: [0.25, 0.1, 0.25, 1.0]
       }
     }
   };
-  
+
   // Container animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -71,13 +71,13 @@ const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
   };
 
   return (
-    <div 
-      id="about" 
+    <section
+      id="about"
       ref={sectionRef}
       className="min-h-screen flex items-center justify-center relative section-container py-10 overflow-hidden"
-      style={{ 
-        background: theme === 'dark' 
-          ? `linear-gradient(135deg, #000000, #0a0a18, ${accentColor}40)` 
+      style={{
+        background: theme === 'dark'
+          ? `linear-gradient(135deg, #000000, #0a0a18, ${accentColor}40)`
           : `linear-gradient(135deg, #ffffff, #f0f0f5, ${accentColor}20)`,
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)'
@@ -85,9 +85,9 @@ const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
     >
       {/* Dynamic background elements */}
       <BackgroundElements accentColor={accentColor} theme={theme} />
-      
+
       {/* Main content container */}
-      <motion.div 
+      <motion.div
         ref={containerRef}
         className="w-full max-w-7xl mx-auto px-4 z-20 content-block"
         initial="hidden"
@@ -101,9 +101,9 @@ const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
           animate={titleInView ? "visible" : "hidden"}
           variants={fadeInUpVariant}
         >
-          <TitleSection 
-            accentColor={accentColor} 
-            theme={theme} 
+          <TitleSection
+            accentColor={accentColor}
+            theme={theme}
             title="About Me"
             subtitlePrefix="I am a"
             subtitles={[
@@ -114,7 +114,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
             ]}
           />
         </motion.div>
-        
+
         {/* Main content with card-based layout */}
         <div className="grid grid-cols-1 gap-8 mb-10 w-full">
           {/* Profile Card */}
@@ -126,7 +126,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
           >
             <ProfileCard accentColor={accentColor} theme={theme} />
           </motion.div>
-          
+
           {/* Core Expertise Cards */}
           <motion.div
             ref={expertiseRef}
@@ -136,7 +136,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
           >
             <ExpertiseCards accentColor={accentColor} theme={theme} />
           </motion.div>
-          
+
           {/* Technical Skills Grid */}
           <motion.div
             ref={skillsRef}
@@ -147,7 +147,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
             <TechnicalSkills accentColor={accentColor} theme={theme} />
           </motion.div>
         </div>
-        
+
         {/* Stats Section */}
         <motion.div
           ref={statsRef}
@@ -157,7 +157,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
         >
           <StatsSection accentColor={accentColor} theme={theme} />
         </motion.div>
-        
+
         {/* Two-column layout for Quote and Experience */}
         <div className="grid grid-cols-1 gap-6 mt-8">
           {/* Quote */}
@@ -171,7 +171,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
           </motion.div>
         </div>
       </motion.div>
-    </div>
+    </section>
   );
 };
 

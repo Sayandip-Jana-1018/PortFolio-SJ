@@ -3,10 +3,10 @@ import type { Container } from "tsparticles-engine";
 export const particlesConfig = {
   particles: {
     number: {
-      value: 80,
+      value: 30, // Reduced from 80 for better performance
       density: {
         enable: true,
-        area: 800
+        area: 1000 // Increased area for less particle density
       }
     },
     color: {
@@ -21,33 +21,33 @@ export const particlesConfig = {
       }
     },
     opacity: {
-      value: { min: 0.1, max: 0.5 },
+      value: { min: 0.1, max: 0.4 }, // Reduced max opacity
       animation: {
-        enable: true,
+        enable: false, // Disabled for performance
         speed: 1,
         sync: false
       }
     },
     size: {
-      value: { min: 0.1, max: 3 },
+      value: { min: 0.5, max: 2 }, // Reduced size range
       animation: {
-        enable: true,
+        enable: false, // Disabled for performance
         speed: 2,
         sync: false
       }
     },
     links: {
-      enable: true,
+      enable: false, // Disabled - very expensive to render
       distance: 150,
       color: "#ffffff",
-      opacity: 0.4,
+      opacity: 0.3,
       width: 1
     },
     move: {
-      enable: true,
-      speed: 1,
+      enable: false, // Disabled for static background as requested
+      speed: 0,
       direction: "none",
-      random: true,
+      random: false,
       straight: false,
       outModes: "out",
       attract: {
@@ -63,11 +63,11 @@ export const particlesConfig = {
     detectsOn: "canvas",
     events: {
       onHover: {
-        enable: true,
+        enable: false, // Disabled hover effects
         mode: "bubble"
       },
       onClick: {
-        enable: true,
+        enable: false, // Disabled click effects
         mode: "push"
       },
       resize: {
@@ -128,21 +128,21 @@ export const updateParticlesColors = (
   try {
     // Type assertion to access properties safely
     const options = container.options as any;
-    
+
     if (options.particles) {
       if (options.particles.color) {
         options.particles.color.value = accentColor;
       }
-      
+
       if (options.particles.links) {
         options.particles.links.color = baseColor;
       }
-      
+
       if (options.particles.opacity) {
         options.particles.opacity.value = opacity;
       }
     }
-    
+
     container.refresh();
   } catch (error) {
     console.error('Error updating particle colors:', error);

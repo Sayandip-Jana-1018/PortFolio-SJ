@@ -39,19 +39,19 @@ const Book = () => {
         <boxGeometry args={[1.4, 0.1, 2]} />
         <meshStandardMaterial color="#ff5757" metalness={0.3} roughness={0.4} />
       </mesh>
-      
+
       {/* Book pages */}
       <mesh position={[0, 0.1, 0]}>
         <boxGeometry args={[1.3, 0.2, 1.9]} />
         <meshStandardMaterial color="#f5f5f5" metalness={0.1} roughness={0.5} />
       </mesh>
-      
+
       {/* Book title */}
       <mesh position={[0, 0.06, 1.01]} rotation={[0, 0, 0]}>
         <planeGeometry args={[1, 0.3]} />
         <meshStandardMaterial color="#ff5757" metalness={0.5} roughness={0.2} />
       </mesh>
-      
+
       {/* Book binding */}
       <mesh position={[-0.7, 0.15, 0]}>
         <boxGeometry args={[0.1, 0.3, 2]} />
@@ -70,25 +70,25 @@ const Certificate = () => {
         <boxGeometry args={[2, 0.02, 1.5]} />
         <meshStandardMaterial color="#f8f8e8" metalness={0.1} roughness={0.3} />
       </mesh>
-      
+
       {/* Certificate border */}
       <mesh position={[0, 0.02, 0]} rotation={[0, 0, 0]}>
         <ringGeometry args={[0.65, 0.75, 32]} />
         <meshStandardMaterial color="#4CAF50" metalness={0.6} roughness={0.2} />
       </mesh>
-      
+
       {/* Certificate seal */}
       <mesh position={[0.7, 0.04, -0.5]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.2, 0.2, 0.05, 32]} />
         <meshStandardMaterial color="gold" metalness={0.8} roughness={0.2} />
       </mesh>
-      
+
       {/* Certificate ribbon */}
       <mesh position={[0.7, 0, -0.6]} rotation={[0, 0, Math.PI / 4]}>
         <boxGeometry args={[0.5, 0.02, 0.1]} />
         <meshStandardMaterial color="#4CAF50" metalness={0.3} roughness={0.4} />
       </mesh>
-      
+
       <mesh position={[0.7, 0, -0.6]} rotation={[0, 0, -Math.PI / 4]}>
         <boxGeometry args={[0.5, 0.02, 0.1]} />
         <meshStandardMaterial color="#4CAF50" metalness={0.3} roughness={0.4} />
@@ -158,48 +158,48 @@ const EducationPage: React.FC<EducationPageProps> = ({ sectionRef }) => {
   const educationItemRefs = useRef<React.RefObject<HTMLDivElement>[]>(
     Array(educationData.length).fill(0).map(() => React.createRef<HTMLDivElement>())
   );
-  
+
   // Set up InView hooks for scroll animations
   const isTitleInView = useInView(titleRef, { once: false, margin: "-100px 0px -100px 0px" });
   const isModelInView = useInView(modelRef, { once: false, margin: "-100px 0px -100px 0px" });
   const isBookInView = useInView(bookRef, { once: false, margin: "-100px 0px -100px 0px" });
   const isCertificateInView = useInView(certificateRef, { once: false, margin: "-100px 0px -100px 0px" });
   const isEducationInView = useInView(educationRef, { once: false, margin: "-100px 0px -100px 0px" });
-  
+
   // Animation controls
   const modelControls = useAnimation();
   const bookControls = useAnimation();
   const certificateControls = useAnimation();
   const educationControls = useAnimation();
-  
+
   // Trigger animations when elements come into view
   React.useEffect(() => {
     if (isModelInView) modelControls.start('visible');
     if (isBookInView) bookControls.start('visible');
     if (isCertificateInView) certificateControls.start('visible');
     if (isEducationInView) educationControls.start('visible');
-  }, [isModelInView, isBookInView, isCertificateInView, isEducationInView, 
-      modelControls, bookControls, certificateControls, educationControls]);
-  
+  }, [isModelInView, isBookInView, isCertificateInView, isEducationInView,
+    modelControls, bookControls, certificateControls, educationControls]);
+
   return (
-    <div 
-      ref={sectionRef} 
+    <section
+      ref={sectionRef}
       className="min-h-screen relative overflow-hidden"
       id="education"
-      style={{ 
-        background: theme === 'dark' 
-          ? `linear-gradient(135deg, #000000, #0a0a18, ${accentColor}40)` 
+      style={{
+        background: theme === 'dark'
+          ? `linear-gradient(135deg, #000000, #0a0a18, ${accentColor}40)`
           : `linear-gradient(135deg, #ffffff, #f0f0f5, ${accentColor}20)`,
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)'
       }}
     >
       <BackgroundElements accentColor={accentColor} theme={theme} />
-      
+
       {/* Main content container */}
       <div className="container mx-auto px-4 py-20 relative z-10">
         {/* Section title */}
-        <motion.div 
+        <motion.div
           ref={titleRef}
           className="mb-16 text-center max-w-4xl mx-auto"
           initial={{ opacity: 0, y: 30 }}
@@ -213,32 +213,32 @@ const EducationPage: React.FC<EducationPageProps> = ({ sectionRef }) => {
             subtitlePrefix="My"
             subtitles={["Academic Background", "Learning Path", "Educational Milestones"]}
           />
-          <motion.p 
+          <motion.p
             className="mt-6 text-lg max-w-2xl mx-auto text-center"
             style={{ color: theme === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)' }}
             initial={{ opacity: 0 }}
             animate={isTitleInView ? { opacity: 1 } : { opacity: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
           >
-            My educational journey has equipped me with the knowledge and skills to excel in the tech industry. 
+            My educational journey has equipped me with the knowledge and skills to excel in the tech industry.
             Here's a look at my academic path and achievements along the way.
           </motion.p>
         </motion.div>
 
-        
-        
+
+
         {/* 3D Models and Education Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
           {/* 3D Models Column */}
           <div className="lg:col-span-1 space-y-6 md:px-4">
-            
+
             {/* Graduation Cap */}
             <motion.div
               ref={modelRef}
               className="h-[300px] md:h-[310px] rounded-2xl overflow-hidden shadow-xl"
               style={{
-                background: theme === 'dark' 
-                  ? 'rgba(20, 20, 30, 0.3)' 
+                background: theme === 'dark'
+                  ? 'rgba(20, 20, 30, 0.3)'
                   : 'rgba(255, 255, 255, 0.2)',
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)',
@@ -270,16 +270,16 @@ const EducationPage: React.FC<EducationPageProps> = ({ sectionRef }) => {
                 </PresentationControls>
                 <Environment preset="city" />
               </Canvas>
-              
+
             </motion.div>
-            
+
             {/* Book */}
             <motion.div
               ref={bookRef}
               className="h-[300px] md:h-[310px] rounded-2xl overflow-hidden shadow-xl"
               style={{
-                background: theme === 'dark' 
-                  ? 'rgba(20, 20, 30, 0.3)' 
+                background: theme === 'dark'
+                  ? 'rgba(20, 20, 30, 0.3)'
                   : 'rgba(255, 255, 255, 0.2)',
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)',
@@ -311,16 +311,16 @@ const EducationPage: React.FC<EducationPageProps> = ({ sectionRef }) => {
                 </PresentationControls>
                 <Environment preset="city" />
               </Canvas>
-              
+
             </motion.div>
-            
+
             {/* Certificate */}
             <motion.div
               ref={certificateRef}
               className="h-[260px] md:h-[275px] rounded-2xl overflow-hidden shadow-xl"
               style={{
-                background: theme === 'dark' 
-                  ? 'rgba(20, 20, 30, 0.3)' 
+                background: theme === 'dark'
+                  ? 'rgba(20, 20, 30, 0.3)'
                   : 'rgba(255, 255, 255, 0.2)',
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)',
@@ -355,7 +355,7 @@ const EducationPage: React.FC<EducationPageProps> = ({ sectionRef }) => {
 
             </motion.div>
           </div>
-          
+
           {/* Education Cards */}
           <motion.div
             ref={educationRef}
@@ -364,22 +364,22 @@ const EducationPage: React.FC<EducationPageProps> = ({ sectionRef }) => {
             animate={educationControls}
             variants={{
               hidden: { opacity: 0 },
-              visible: { 
+              visible: {
                 opacity: 1,
                 transition: { staggerChildren: 0.2 }
               }
             }}
           >
 
-            
+
             {educationData.map((education, index) => (
-              <motion.div 
+              <motion.div
                 key={`education-${index}`}
                 ref={educationItemRefs.current[index]}
                 className="p-6 rounded-xl shadow-xl"
                 style={{
-                  background: theme === 'dark' 
-                    ? 'rgba(30, 30, 50, 0.4)' 
+                  background: theme === 'dark'
+                    ? 'rgba(30, 30, 50, 0.4)'
                     : 'rgba(255, 255, 255, 0.4)',
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
@@ -404,20 +404,20 @@ const EducationPage: React.FC<EducationPageProps> = ({ sectionRef }) => {
               >
                 <div className="flex flex-col md:flex-row gap-4 items-center md:items-start text-center md:text-left">
                   {/* Icon */}
-                  <div 
+                  <div
                     className="w-16 h-16 rounded-full flex items-center justify-center md:mr-4 mx-auto md:mx-0 flex-shrink-0"
-                    style={{ 
+                    style={{
                       background: `linear-gradient(135deg, ${education.color}, ${education.color}80)`,
                       boxShadow: `0 5px 15px ${education.color}40`
                     }}
                   >
                     {React.cloneElement(education.icon, { color: 'white' })}
                   </div>
-                  
+
                   <div className="flex-grow">
                     {/* Title and period */}
                     <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-2">
-                      <h3 
+                      <h3
                         className="text-xl font-bold"
                         style={{ color: theme === 'dark' ? 'white' : 'black' }}
                       >
@@ -430,10 +430,10 @@ const EducationPage: React.FC<EducationPageProps> = ({ sectionRef }) => {
                         </span>
                       </div>
                     </div>
-                    
+
                     {/* Institution and location */}
                     <div className="mb-3">
-                      <div 
+                      <div
                         className="text-lg font-medium"
                         style={{ color: education.color }}
                       >
@@ -446,18 +446,18 @@ const EducationPage: React.FC<EducationPageProps> = ({ sectionRef }) => {
                         </span>
                       </div>
                     </div>
-                    
+
                     {/* Description */}
-                    <p 
+                    <p
                       className="mb-4 text-sm md:text-base"
                       style={{ color: theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)' }}
                     >
                       {education.description}
                     </p>
-                    
+
                     {/* Achievements */}
                     <div>
-                      <h4 
+                      <h4
                         className="text-sm font-semibold mb-2 flex items-center justify-center md:justify-start"
                         style={{ color: theme === 'dark' ? 'white' : 'black' }}
                       >
@@ -465,8 +465,8 @@ const EducationPage: React.FC<EducationPageProps> = ({ sectionRef }) => {
                       </h4>
                       <ul className="list-disc list-inside space-y-1 pl-1 text-center md:text-left">
                         {education.achievements.map((achievement, i) => (
-                          <motion.li 
-                            key={i} 
+                          <motion.li
+                            key={i}
                             className="text-sm"
                             style={{ color: theme === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)' }}
                             initial={{ opacity: 0, x: -10 }}
@@ -486,7 +486,7 @@ const EducationPage: React.FC<EducationPageProps> = ({ sectionRef }) => {
           </motion.div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

@@ -35,3 +35,111 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+
+/* ========================================
+   VIEWPORT & SCALING FIXES
+   Prevents content from appearing zoomed-in on different screen sizes
+   ======================================== */
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+/* Responsive base font sizes for different screen widths */
+@media (max-width: 1600px) {
+  html { font-size: 15px; }
+}
+
+@media (max-width: 1400px) {
+  html { font-size: 14.5px; }
+}
+
+@media (max-width: 1200px) {
+  html { font-size: 14px; }
+}
+
+@media (max-width: 992px) {
+  html { font-size: 13.5px; }
+}
+
+/* Ensure body fills viewport properly */
+body {
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
+  overflow-x: hidden;
+}
+
+/* Prevent horizontal scroll and ensure proper sizing */
+#__next {
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* ========================================
+   RESPONSIVE TYPOGRAPHY UTILITIES
+   ======================================== */
+
+/* Fluid typography for headings */
+.text-fluid-xl {
+  font-size: clamp(2rem, 5vw, 4rem);
+}
+
+.text-fluid-lg {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+}
+
+.text-fluid-md {
+  font-size: clamp(1.25rem, 3vw, 2rem);
+}
+
+.text-fluid-sm {
+  font-size: clamp(1rem, 2vw, 1.5rem);
+}
+
+/* ========================================
+   CONTAINER FIXES
+   ======================================== */
+
+/* Better max-width handling for large screens */
+.container-safe {
+  width: 100%;
+  max-width: min(1280px, 90vw);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 768px) {
+  .container-safe {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* ========================================
+   SMOOTH PERFORMANCE OPTIMIZATIONS
+   ======================================== */
+
+/* GPU acceleration for smooth animations */
+.gpu-accelerate {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

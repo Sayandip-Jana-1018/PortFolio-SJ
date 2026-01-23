@@ -13,18 +13,18 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
   const photoRef = useRef<HTMLDivElement>(null);
   const magneticRef = useMagneticEffect();
   const glowRef = useRef<HTMLDivElement>(null);
-  
+
   // Handle the photo scaling and fading on scroll
   useEffect(() => {
     if (photoRef.current) {
       // Start with a circular frame and expand to fill screen
       const scale = 1 + scrollProgress * 0.5; // Scale from 1 to 1.5
       const opacity = 1 - scrollProgress * 0.8; // Fade from 1 to 0.2
-      
+
       photoRef.current.style.transform = `scale(${scale})`;
       photoRef.current.style.opacity = `${opacity}`;
     }
-    
+
     // Animate the glow effect based on scroll
     if (glowRef.current) {
       const glowOpacity = 1 - scrollProgress;
@@ -49,18 +49,16 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
           transform: 'perspective(800px) rotateX(5deg)'
         }}
         animate={{
-          scale: [1, 1.08, 1],
-          opacity: [0.7, 0.9, 0.7],
-          rotateX: ['5deg', '2deg', '5deg'],
-          rotateY: ['0deg', '2deg', '0deg']
+          scale: [1, 1.05, 1],
+          opacity: [0.7, 0.85, 0.7],
         }}
         transition={{
-          duration: 4,
+          duration: 8,
           repeat: Infinity,
           ease: "easeInOut"
         }}
       />
-      
+
       {/* Second Wave - Middle with 3D effect */}
       <motion.div
         className="absolute w-[240px] h-[240px] sm:w-[420px] sm:h-[420px]"
@@ -73,19 +71,17 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
           transform: 'perspective(800px) rotateX(3deg)'
         }}
         animate={{
-          scale: [1, 1.12, 1],
-          opacity: [0.6, 0.8, 0.6],
-          rotateX: ['3deg', '6deg', '3deg'],
-          rotateY: ['0deg', '-2deg', '0deg']
+          scale: [1, 1.08, 1],
+          opacity: [0.6, 0.75, 0.6],
         }}
         transition={{
-          duration: 3.5,
+          duration: 7,
           repeat: Infinity,
           ease: "easeInOut",
           delay: 0.5
         }}
       />
-      
+
       {/* Third Wave - Inner with 3D effect */}
       <motion.div
         className="absolute w-[200px] h-[200px] sm:w-[350px] sm:h-[350px]"
@@ -98,28 +94,22 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
           transform: 'perspective(800px) rotateX(2deg)'
         }}
         animate={{
-          scale: [1, 1.15, 1],
-          opacity: [0.5, 0.7, 0.5],
-          rotateX: ['2deg', '-2deg', '2deg'],
-          rotateY: ['0deg', '3deg', '0deg']
+          scale: [1, 1.1, 1],
+          opacity: [0.5, 0.65, 0.5],
         }}
         transition={{
-          duration: 3,
+          duration: 6,
           repeat: Infinity,
           ease: "easeInOut",
           delay: 1
         }}
       />
-      
-      {/* Enhanced 3D accent particles floating around */}
-      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => {
-        // Randomize particle size for more dynamic effect
-        const size = 3 + Math.random() * 3;
-        // Create varying distances from center
-        const distance = 170 + Math.random() * 40;
-        // Random z-index for 3D depth effect
-        const zIndex = Math.floor(Math.random() * 5);
-        
+
+      {/* Reduced accent particles - only 4 instead of 8 */}
+      {[0, 90, 180, 270].map((angle) => {
+        const size = 2 + Math.random() * 2; // Smaller size
+        const distance = 180 + Math.random() * 30;
+
         return (
           <motion.div
             key={angle}
@@ -129,29 +119,20 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
               height: `${size}px`,
               borderRadius: '50%',
               backgroundColor: accentColor,
-              boxShadow: `0 0 ${size * 3}px ${accentColor}`,
+              boxShadow: `0 0 ${size * 2}px ${accentColor}60`,
               left: 'calc(50% - 2px)',
               top: 'calc(50% - 2px)',
               transform: `rotate(${angle}deg) translateY(-${distance}px)`,
-              zIndex: zIndex
             }}
             animate={{
-              scale: [1, 1.8, 1],
-              opacity: [0.4, 0.9, 0.4],
-              filter: [`blur(0px)`, `blur(2px)`, `blur(0px)`],
-              boxShadow: [
-                `0 0 ${size * 2}px ${accentColor}80`,
-                `0 0 ${size * 4}px ${accentColor}`,
-                `0 0 ${size * 2}px ${accentColor}80`
-              ],
-              // Add subtle movement in 3D space
-              z: ['-5px', '5px', '-5px']
+              scale: [1, 1.3, 1],
+              opacity: [0.3, 0.6, 0.3],
             }}
             transition={{
-              duration: 3 + Math.random() * 3,
+              duration: 8 + Math.random() * 4, // Much slower
               repeat: Infinity,
               ease: "easeInOut",
-              delay: angle / 45,
+              delay: angle / 90,
             }}
           />
         );
@@ -170,13 +151,11 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
           transform: 'perspective(800px) rotateX(4deg)'
         }}
         animate={{
-          scale: [1, 1.05, 1],
-          opacity: [0.4, 0.6, 0.4],
-          rotateX: ['4deg', '0deg', '4deg'],
-          rotateY: ['0deg', '4deg', '0deg']
+          scale: [1, 1.03, 1],
+          opacity: [0.4, 0.5, 0.4],
         }}
         transition={{
-          duration: 4.5,
+          duration: 9,
           repeat: Infinity,
           ease: "easeInOut",
           delay: 1.5
@@ -193,7 +172,7 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
         transition={{ duration: 1, ease: "easeOut" }}
       >
         {/* Glassmorphic border */}
-        <div 
+        <div
           ref={glowRef}
           className="absolute inset-0 rounded-full"
           style={{
@@ -201,27 +180,26 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
             zIndex: 1
           }}
         />
-        
+
         {/* Glassmorphic overlay */}
         <div className="absolute inset-0 glassmorphic-dark rounded-full z-10 opacity-30" />
-        
+
         {/* Profile image */}
         <div className="relative w-full h-full">
-          <Image 
-            src="/MyPhoto.jpeg" 
-            alt="Profile Picture" 
-            fill 
+          <Image
+            src="/profile_photo.jpg"
+            alt="Profile Picture"
+            fill
             priority
             sizes="450px"
-            className="object-contain" 
+            className="object-cover"
             style={{
-              objectFit: 'cover',
-              objectPosition: 'center 30%' // Adjust this value to center the face
+              objectPosition: 'center center'
             }}
           />
         </div>
       </motion.div>
-      
+
       {/* Magnetic effect button */}
       <div ref={magneticRef} className="absolute bottom-0 z-20 transform translate-y-1/2">
         <motion.a
@@ -229,9 +207,9 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
           className="btn-glassmorphic px-8 py-4 mt-24 rounded-full font-medium flex items-center justify-center gap-2 transition-all duration-300 text-white text-sm"
           data-accent-color="true"
           style={{ backgroundColor: accentColor }}
-          whileHover={{ 
-            scale: 1.05, 
-            boxShadow: `0 10px 25px rgba(0,0,0,0.2), 0 0 15px ${accentColor}80` 
+          whileHover={{
+            scale: 1.05,
+            boxShadow: `0 10px 25px rgba(0,0,0,0.2), 0 0 15px ${accentColor}80`
           }}
           whileTap={{ scale: 0.95 }}
           initial={{ opacity: 0, y: 50 }}

@@ -14,24 +14,24 @@ interface HackathonsPageProps {
 
 const HackathonsPage: React.FC<HackathonsPageProps> = ({ sectionRef }) => {
   const { theme, accentColor } = useTheme();
-  
+
   // Refs for scroll animations
   const titleRef = useRef(null);
   const carouselRef = useRef(null);
   const statsRef = useRef(null);
   const timelineRef = useRef(null);
-  
+
   // InView hooks for animations
   const titleInView = useInView(titleRef, { once: true, margin: "-100px" });
   const carouselInView = useInView(carouselRef, { once: true, margin: "-100px" });
   const statsInView = useInView(statsRef, { once: true, margin: "-100px" });
   const timelineInView = useInView(timelineRef, { once: true, margin: "-100px" });
-  
+
   // Animation variants
   const fadeInUpVariant = {
     hidden: { opacity: 0, y: 50 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: {
         duration: 0.8,
@@ -39,15 +39,15 @@ const HackathonsPage: React.FC<HackathonsPageProps> = ({ sectionRef }) => {
       }
     }
   };
-  
+
   return (
-    <div 
-      id="hackathons" 
+    <section
+      id="hackathons"
       ref={sectionRef}
       className="min-h-screen relative section-container py-20 overflow-hidden"
-      style={{ 
-        background: theme === 'dark' 
-          ? `linear-gradient(135deg, #000000, #0a0a18, ${accentColor}40)` 
+      style={{
+        background: theme === 'dark'
+          ? `linear-gradient(135deg, #000000, #0a0a18, ${accentColor}40)`
           : `linear-gradient(135deg, #ffffff, #f0f0f5, ${accentColor}20)`,
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)'
@@ -55,7 +55,7 @@ const HackathonsPage: React.FC<HackathonsPageProps> = ({ sectionRef }) => {
     >
       {/* Dynamic background elements */}
       <BackgroundElements accentColor={accentColor} theme={theme} />
-      
+
       <div className="container mx-auto px-4 relative z-10">
         {/* Title Section with Typing Effect */}
         <motion.div
@@ -65,9 +65,9 @@ const HackathonsPage: React.FC<HackathonsPageProps> = ({ sectionRef }) => {
           variants={fadeInUpVariant}
           className="mb-12"
         >
-          <TitleSection 
-            accentColor={accentColor} 
-            theme={theme} 
+          <TitleSection
+            accentColor={accentColor}
+            theme={theme}
             title="Hackathons"
             subtitlePrefix="I create"
             subtitles={[
@@ -78,8 +78,8 @@ const HackathonsPage: React.FC<HackathonsPageProps> = ({ sectionRef }) => {
             ]}
           />
         </motion.div>
-        
-        <motion.p 
+
+        <motion.p
           className="text-center max-w-2xl mx-auto mb-16 text-lg"
           initial={{ opacity: 0, y: 20 }}
           animate={titleInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
@@ -88,7 +88,7 @@ const HackathonsPage: React.FC<HackathonsPageProps> = ({ sectionRef }) => {
           A showcase of my competitive coding achievements and hackathon experiences,
           where innovation meets technical excellence.
         </motion.p>
-        
+
         {/* Hackathon Stats Section */}
         <motion.div
           ref={statsRef}
@@ -96,13 +96,13 @@ const HackathonsPage: React.FC<HackathonsPageProps> = ({ sectionRef }) => {
           animate={statsInView ? "visible" : "hidden"}
           variants={fadeInUpVariant}
         >
-          <HackathonStats 
-            accentColor={accentColor} 
-            theme={theme} 
-            stats={hackathonStats} 
+          <HackathonStats
+            accentColor={accentColor}
+            theme={theme}
+            stats={hackathonStats}
           />
         </motion.div>
-        
+
         {/* Hackathon Carousel */}
         <motion.div
           ref={carouselRef}
@@ -112,13 +112,13 @@ const HackathonsPage: React.FC<HackathonsPageProps> = ({ sectionRef }) => {
           className="my-20"
         >
           <h2 className="text-2xl font-bold mb-8 text-center">Featured Hackathons</h2>
-          <HackathonCarousel 
-            hackathons={hackathonsData} 
-            accentColor={accentColor} 
-            theme={theme} 
+          <HackathonCarousel
+            hackathons={hackathonsData}
+            accentColor={accentColor}
+            theme={theme}
           />
         </motion.div>
-        
+
         {/* Hackathon Timeline */}
         <motion.div
           ref={timelineRef}
@@ -127,14 +127,14 @@ const HackathonsPage: React.FC<HackathonsPageProps> = ({ sectionRef }) => {
           variants={fadeInUpVariant}
           className="mt-20"
         >
-          <HackathonTimeline 
-            hackathons={hackathonsData} 
-            accentColor={accentColor} 
-            theme={theme} 
+          <HackathonTimeline
+            hackathons={hackathonsData}
+            accentColor={accentColor}
+            theme={theme}
           />
         </motion.div>
       </div>
-    </div>
+    </section>
   );
 };
 
