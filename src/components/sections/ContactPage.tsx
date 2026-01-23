@@ -19,85 +19,83 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
   const modelRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const infoRef = useRef<HTMLDivElement>(null);
-  
+
   // Check if elements are in view
   const titleInView = useInView(titleRef, { once: false, amount: 0.5 });
   const modelInView = useInView(modelRef, { once: false, amount: 0.3 });
   const formInView = useInView(formRef, { once: false, amount: 0.2 });
   const infoInView = useInView(infoRef, { once: false, amount: 0.2 });
-  
+
   // Animation controls
   const titleControls = useAnimation();
   const modelControls = useAnimation();
   const formControls = useAnimation();
   const infoControls = useAnimation();
-  
+
   // 3D model URL
   const modelUrl = '/models/virtual_coach.glb';
-  
+
   // Update animations when elements come into view
   useEffect(() => {
     if (titleInView) titleControls.start('visible');
     else titleControls.start('hidden');
-    
+
     if (modelInView) modelControls.start('visible');
     else modelControls.start('hidden');
-    
+
     if (formInView) formControls.start('visible');
     else formControls.start('hidden');
-    
+
     if (infoInView) infoControls.start('visible');
     else infoControls.start('hidden');
   }, [titleInView, modelInView, formInView, infoInView, titleControls, modelControls, formControls, infoControls]);
-  
+
   // Animation variants
   const fadeInUpVariant = {
     hidden: { opacity: 0, y: 50 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: { duration: 0.8, ease: "easeOut" }
     }
   };
-  
+
   const fadeInLeftVariant = {
     hidden: { opacity: 0, x: -50 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       x: 0,
       transition: { duration: 0.8, ease: "easeOut" }
     }
   };
-  
+
   const fadeInRightVariant = {
     hidden: { opacity: 0, x: 50 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       x: 0,
       transition: { duration: 0.8, ease: "easeOut" }
     }
   };
 
   return (
-    <div 
-      id="contact" 
+    <div
+      id="contact"
       ref={sectionRef}
       className="min-h-screen flex items-center justify-center relative section-container py-20 overflow-hidden"
-      style={{ 
-        background: theme === 'dark' 
-          ? `linear-gradient(135deg, #000000, #0a0a18, ${accentColor}40)` 
-          : `linear-gradient(135deg, #ffffff, #f0f0f5, ${accentColor}20)`,
+      style={{
+        background: theme === 'dark' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)'
       }}
     >
       {/* Background Elements */}
-      <BackgroundElements accentColor={accentColor} theme={theme} />
+      < BackgroundElements accentColor={accentColor} theme={theme} />
       <FloatingParticles accentColor={accentColor} theme={theme} count={12} />
-      
+
       {/* Decorative Lines */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div 
+        <motion.div
           className="absolute top-0 left-0 w-full h-1 opacity-20"
           style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }}
           animate={{
@@ -106,7 +104,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
           }}
           transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
         />
-        <motion.div 
+        <motion.div
           className="absolute bottom-0 left-0 w-full h-1 opacity-20"
           style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }}
           animate={{
@@ -116,7 +114,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
           transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
         />
       </div>
-      
+
       {/* Main Content */}
       <div className="w-full max-w-7xl mx-auto px-4 z-20 content-block">
         {/* Title Section */}
@@ -127,9 +125,9 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
           variants={fadeInUpVariant}
           className="mb-10 text-center"
         >
-          <motion.h2 
+          <motion.h2
             className="text-4xl md:text-6xl font-bold mb-4 text-center"
-            style={{ 
+            style={{
               backgroundImage: `linear-gradient(135deg, #fff 0%, ${accentColor} 50%, #fff 100%)`,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -139,8 +137,8 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
           >
             Get In Touch
           </motion.h2>
-          
-          <motion.p 
+
+          <motion.p
             className="text-center max-w-2xl mx-auto opacity-80 text-lg"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -149,13 +147,13 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
             Have a project in mind or want to collaborate? I'd love to hear from you!
           </motion.p>
         </motion.div>
-        
+
         {/* Main Content Grid - Centered Layout */}
         <div className="max-w-5xl mx-auto">
           {/* Main Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             {/* Form Section - Now on the left */}
-            <motion.div 
+            <motion.div
               className="order-1"
               ref={formRef}
               animate={formControls}
@@ -166,9 +164,9 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
                 <ContactForm accentColor={accentColor} theme={theme} />
               </div>
             </motion.div>
-            
+
             {/* 3D Model Section - Now on the right */}
-            <motion.div 
+            <motion.div
               className="flex items-center justify-center order-2"
               ref={modelRef}
               animate={modelControls}
@@ -176,25 +174,25 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
               variants={fadeInRightVariant}
             >
               <div className="relative w-full aspect-square max-w-md bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 shadow-xl mx-auto">
-                <VirtualCoach 
-                  modelUrl={modelUrl} 
+                <VirtualCoach
+                  modelUrl={modelUrl}
                   className="w-full h-full rounded-2xl overflow-hidden"
                 />
-                
+
                 {/* Decorative elements around the 3D model */}
-                <motion.div 
+                <motion.div
                   className="absolute -top-5 -left-5 w-12 h-12 rounded-full"
                   style={{ backgroundColor: accentColor, filter: 'blur(25px)', opacity: 0.6 }}
                   animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
                   transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                 />
-                <motion.div 
+                <motion.div
                   className="absolute -bottom-5 -right-5 w-16 h-16 rounded-full"
                   style={{ backgroundColor: accentColor, filter: 'blur(25px)', opacity: 0.6 }}
                   animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0.8, 0.4] }}
                   transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
                 />
-                
+
                 {/* Caption for the 3D model */}
                 <motion.div
                   className="absolute bottom-4 left-4 right-4 bg-black/40 backdrop-blur-md p-3 rounded-lg text-center border border-white/10"
@@ -206,8 +204,8 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
                 </motion.div>
               </div>
             </motion.div>
-          </div>  
-            
+          </div>
+
           {/* Additional Contact Info Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <motion.div
@@ -221,7 +219,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
                 <ContactInfo accentColor={accentColor} theme={theme} />
               </div>
             </motion.div>
-            
+
             <motion.div
               animate={infoControls}
               initial="hidden"
@@ -235,7 +233,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
             </motion.div>
           </div>
         </div>
-        
+
         {/* Back to top button */}
         <motion.div
           className="flex flex-col items-center justify-center mt-12 mb-8"
@@ -243,7 +241,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
         >
-          <button 
+          <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="flex flex-col items-center justify-center p-3 transition-all duration-300 hover:opacity-80"
             aria-label="Scroll to top"
@@ -252,22 +250,22 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
               animate={{ y: [0, -10, 0] }}
               transition={{ repeat: Infinity, duration: 1.5 }}
               className="w-10 h-10 flex items-center justify-center rounded-full border-2"
-              style={{ 
+              style={{
                 borderColor: accentColor,
                 backgroundColor: `${accentColor}20`,
               }}
             >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-5 w-5" 
-                fill="none" 
-                viewBox="0 0 24 24" 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
                 stroke={accentColor}
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
               </svg>
             </motion.div>
-            <span 
+            <span
               className="text-sm mt-2"
               style={{ color: accentColor }}
             >
@@ -275,9 +273,9 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
             </span>
           </button>
         </motion.div>
-        
+
         {/* Footer */}
-        <motion.div 
+        <motion.div
           className="mt-6 text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -288,7 +286,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
           </p>
         </motion.div>
       </div>
-    </div>
+    </div >
   );
 };
 

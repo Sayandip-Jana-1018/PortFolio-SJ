@@ -1,7 +1,7 @@
 import React, { Suspense, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
-import { 
+import {
   SiHtml5, SiCss3, SiJavascript, SiTypescript, SiReact, SiRedux,
   SiTailwindcss, SiNextdotjs, SiNodedotjs, SiExpress, SiMongodb,
   SiFirebase, SiPostgresql, SiPython, SiDjango, SiGit,
@@ -23,37 +23,37 @@ interface SkillsPageProps {
 const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
   const { accentColor, theme } = useTheme();
 
-    // Individual refs for each section
-    const titleRef = useRef<HTMLDivElement>(null);
-    
-    // Individual inView states for each section with different thresholds
-    const titleInView = useInView(titleRef, { once: false, amount: 0.5 });
-    
-    // Animation variants for fade-in effect
-    const fadeInUpVariant = {
-      hidden: { opacity: 0, y: 80, scale: 0.95 },
-      visible: { 
-        opacity: 1, 
-        y: 0,
-        scale: 1,
-        transition: { 
-          duration: 0.8, 
-          ease: [0.25, 0.1, 0.25, 1.0]
-        }
+  // Individual refs for each section
+  const titleRef = useRef<HTMLDivElement>(null);
+
+  // Individual inView states for each section with different thresholds
+  const titleInView = useInView(titleRef, { once: false, amount: 0.5 });
+
+  // Animation variants for fade-in effect
+  const fadeInUpVariant = {
+    hidden: { opacity: 0, y: 80, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.8,
+        ease: [0.25, 0.1, 0.25, 1.0]
       }
-    };
-    
-    // Container animation variants
-    const containerVariants = {
-      hidden: { opacity: 0 },
-      visible: {
-        opacity: 1,
-        transition: {
-          duration: 0.5
-        }
+    }
+  };
+
+  // Container animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.5
       }
-    };
-  
+    }
+  };
+
   // Define skill categories with icons
   const skillCategories = [
     {
@@ -109,20 +109,18 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
   ];
 
   return (
-    <section 
-      id="skills" 
+    <section
+      id="skills"
       ref={sectionRef}
       className="min-h-screen py-20 relative overflow-hidden"
-      style={{ 
-        background: theme === 'dark' 
-          ? `linear-gradient(135deg, #000000, #0a0a18, ${accentColor}40)` 
-          : `linear-gradient(135deg, #ffffff, #f0f0f5, ${accentColor}20)`,
+      style={{
+        background: theme === 'dark' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)'
       }}
     >
-            {/* Dynamic background elements */}
-            <BackgroundElements accentColor={accentColor} theme={theme} />   
+      {/* Dynamic background elements */}
+      < BackgroundElements accentColor={accentColor} theme={theme} />
       <div className="container mx-auto px-4 relative z-10">
         {/* Title Section with Typing Effect */}
         <motion.div
@@ -131,9 +129,9 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
           animate={titleInView ? "visible" : "hidden"}
           variants={fadeInUpVariant}
         >
-          <TitleSection 
-            accentColor={accentColor} 
-            theme={theme} 
+          <TitleSection
+            accentColor={accentColor}
+            theme={theme}
             title="Skills & Expertise"
             subtitlePrefix="I specialize in"
             subtitles={[
@@ -144,7 +142,7 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
             ]}
           />
         </motion.div>
-        
+
         <motion.p
           className="text-xl text-center max-w-3xl mx-auto mb-16 opacity-80"
           initial={{ opacity: 0, y: 20 }}
@@ -154,7 +152,7 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
         >
           A comprehensive overview of my technical skills and areas of expertise
         </motion.p>
-        
+
         {/* 3D Skill Balls */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -164,7 +162,7 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
         >
           <Suspense fallback={
             <div className="flex justify-center items-center h-64">
-              <div 
+              <div
                 className="animate-pulse text-center p-4 rounded-lg"
                 style={{ backgroundColor: `${accentColor}20` }}
               >
@@ -175,13 +173,13 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
             <SkillBalls />
           </Suspense>
         </motion.div>
-        
+
         {/* Skill Stats */}
         <SkillStats />
-        
+
         {/* Skill Proficiency Bars */}
         <SkillProficiency />
-        
+
         {/* Call to action */}
         <motion.div
           className="mt-24 text-center"
@@ -205,7 +203,7 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
           </motion.a>
         </motion.div>
       </div>
-    </section>
+    </section >
   );
 };
 

@@ -76,9 +76,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
       ref={sectionRef}
       className="min-h-screen flex items-center justify-center relative section-container py-10 overflow-hidden"
       style={{
-        background: theme === 'dark'
-          ? `linear-gradient(135deg, #000000, #0a0a18, ${accentColor}40)`
-          : `linear-gradient(135deg, #ffffff, #f0f0f5, ${accentColor}20)`,
+        background: theme === 'dark' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)'
       }}

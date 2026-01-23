@@ -1,8 +1,12 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "../components/layout/Navbar";
 import { useTheme } from "../context/ThemeContext";
+import { useParticles } from "../context/ParticlesContext";
+import Plasma from "../components/common/Plasma";
+import ColorBends from "../components/common/ColorBends";
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
+import CanvasRevealEffect from "../components/common/CanvasRevealEffect";
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from "framer-motion";
 import { FiAward, FiCode, FiUser, FiFileText, FiArrowDown } from "react-icons/fi";
 import { FaTrophy } from "react-icons/fa";
@@ -37,6 +41,7 @@ const geistMono = Geist_Mono({
 
 export default function Home() {
   const { theme, accentColor } = useTheme();
+  const { cornerParticlesEnabled, toggleCornerParticles } = useParticles();
   const [isClient, setIsClient] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
   const wallpaperSectionRef = useRef<HTMLDivElement>(null);
@@ -78,6 +83,12 @@ export default function Home() {
 
   // Transform scroll progress for various effects
   const scrollProgress = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
+  // ColorBends opacity: 0 at top, fades in quickly (0.05-0.15) to be ready for About section
+  const colorBendsOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.05, 0.15],
+    [0, 0, 0.8]
+  );
   const [scrollValue, setScrollValue] = useState(0);
 
   // Update scroll value for components that can't use motion values directly
@@ -202,6 +213,26 @@ export default function Home() {
           <>
             <CustomCursor />
             <ClickEffect />
+            {/* Global Background Effect */}
+            {/* Global Background Effect - Fades in after Hero section */}
+            <motion.div
+              className="fixed inset-0 z-0 pointer-events-none"
+              style={{ opacity: colorBendsOpacity }}
+            >
+              <ColorBends
+                colors={[accentColor, theme === 'dark' ? '#333333' : '#f0f0f0', accentColor]}
+                speed={0.14}
+                scale={0.6}
+                autoRotate={5}
+                transparent={true}
+              />
+            </motion.div>
+            <CanvasRevealEffect
+              cornerParticles={cornerParticlesEnabled}
+              onToggleCornerParticles={toggleCornerParticles}
+              containerClassName="fixed inset-0 pointer-events-none z-20"
+              active={true}
+            />
           </>
         )}
 
@@ -214,13 +245,28 @@ export default function Home() {
         {/* Main content */}
         <div
           ref={mainRef}
-          className={`main-content ${theme === 'dark' ? 'text-white' : 'text-black bg-white'}`}
-          style={{ position: 'relative' }}
+          className={`main-content ${theme === 'dark' ? 'text-white' : 'text-black'}`}
+          style={{ position: 'relative', background: 'transparent' }}
         >
           {/* Hero section with parallax effects */}
-          <div className="h-screen relative overflow-hidden flex flex-col items-center justify-center px-4 py-8 sm:py-4 md:py-2 lg:py-0 section-container">
+          <div className="h-screen relative overflow-hidden flex flex-col items-center justify-center px-4 py-8 sm:py-4 md:py-2 lg:py-0 section-container text-white">
             {/* Premium visual elements */}
             <div className="absolute inset-0 z-0 overflow-hidden">
+              {/* Plasma Background */}
+              <div
+                className="absolute bottom-0 left-0 w-full h-[90%] opacity-100 z-[-1]"
+                style={{ maskImage: 'linear-gradient(to top, black 30%, transparent 100%)' }}
+              >
+                <Plasma
+                  color={accentColor}
+                  speed={1.5}
+                  direction="forward"
+                  scale={2.0}
+                  opacity={1.0}
+                  mouseInteractive={false}
+                />
+              </div>
+
               <motion.div
                 className="absolute top-0 left-0 w-full h-1 opacity-20"
                 style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }}
@@ -326,9 +372,16 @@ export default function Home() {
               animate={{ y: [0, 10, 0] }}
               transition={{ repeat: Infinity, duration: 1.5 }}
               style={{ opacity: 1 - scrollValue * 2 }}
-              onClick={scrollToWallpaper}
             >
-              <p className="text-sm mb-2 opacity-70">Scroll to explore</p>
+              <p
+                className="text-sm mb-2 opacity-70"
+                style={{
+                  color: theme === 'dark' ? '#ffffff' : '#000000',
+                  fontWeight: 500
+                }}
+              >
+                Scroll to explore
+              </p>
 
               {/* Premium scroll indicator */}
               <motion.div
@@ -490,15 +543,15 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8 }}
                 >
-                  Welcome to My World
+                  Welcome to My Portfolio
                 </motion.h2>
               </motion.div>
               <motion.p
                 ref={welcomeTextRef}
                 className="text-xl mb-8"
                 style={{
-                  color: '#ffffff',
-                  textShadow: `0 0 15px ${accentColor}80, 0 0 10px rgba(255, 255, 255, 0.5)`,
+                  color: theme === 'dark' ? '#ffffff' : '#000000',
+                  textShadow: theme === 'dark' ? `0 0 15px ${accentColor}80, 0 0 10px rgba(255, 255, 255, 0.5)` : 'none',
                   fontWeight: 500
                 }}
                 initial={{ opacity: 0, y: 20 }}
@@ -521,7 +574,7 @@ export default function Home() {
                   <motion.a
                     key={item.title}
                     href={item.path}
-                    className="glassmorphic-card p-8 flex flex-col items-center hover-3d"
+                    className="glassmorphic-card p-8 flex flex-col items-center hover-3d text-white"
                     style={{ boxShadow: `0 8px 32px rgba(0, 0, 0, 0.2), 0 0 10px ${accentColor}20` }}
                     initial="hidden"
                     animate={cardGridInView ? "visible" : "hidden"}
@@ -562,9 +615,9 @@ export default function Home() {
                       />
                       {item.icon}
                     </motion.div>
-                    <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+                    <h3 className="text-xl font-semibold mb-2 text-white">{item.title}</h3>
                     <div className="w-12 h-1 rounded-full mb-4" style={{ backgroundColor: `${accentColor}40` }} />
-                    <p className="text-sm opacity-70">Explore my {item.title.toLowerCase()}</p>
+                    <p className="text-sm opacity-70 text-white">Explore my {item.title.toLowerCase()}</p>
                   </motion.a>
                 ))}
               </div>
@@ -578,7 +631,7 @@ export default function Home() {
                   <motion.a
                     key={item.title}
                     href={item.path}
-                    className="glassmorphic-card p-6 flex items-center gap-4 hover-3d"
+                    className="glassmorphic-card p-6 flex items-center gap-4 hover-3d text-white"
                     style={{ boxShadow: `0 8px 32px rgba(0, 0, 0, 0.2), 0 0 10px ${accentColor}20` }}
                     initial="hidden"
                     animate={additionalCardsInView ? "visible" : "hidden"}

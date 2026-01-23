@@ -40,9 +40,9 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ sectionRef }) => {
 
   // Get the featured project
   const featuredProject = allProjects.find(project => project.featured === true);
-  
+
   // Determine if the featured project should be shown based on the active category
-  const shouldShowFeaturedProject = featuredProject && 
+  const shouldShowFeaturedProject = featuredProject &&
     (activeCategory === 'All' || featuredProject.category === activeCategory);
 
   // Animation variants for container
@@ -71,25 +71,23 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ sectionRef }) => {
   };
 
   return (
-    <section 
+    <section
       className="relative min-h-screen w-full overflow-hidden py-20 px-4 md:px-8"
-      style={{ 
-        background: theme === 'dark' 
-          ? `linear-gradient(135deg, #000000, #0a0a18, ${accentColor}40)` 
-          : `linear-gradient(135deg, #ffffff, #f0f0f5, ${accentColor}20)`,
+      style={{
+        background: theme === 'dark' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         color: theme === 'dark' ? '#ffffff' : '#000000'
       }}
     >
       {/* Dynamic background elements */}
-      <BackgroundElements accentColor={accentColor} theme={theme} />   
+      <BackgroundElements accentColor={accentColor} theme={theme} />
       <div className="container mx-auto relative z-10">
         {/* Section Title with Typing Effect */}
         <div className="mb-12">
-          <TitleSection 
-            accentColor={accentColor} 
-            theme={theme} 
+          <TitleSection
+            accentColor={accentColor}
+            theme={theme}
             title="Projects"
             subtitlePrefix="I build"
             subtitles={[
@@ -103,7 +101,7 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ sectionRef }) => {
 
         {/* Project Filters */}
         <div className="my-8">
-          <ProjectFilter 
+          <ProjectFilter
             categories={categories.filter(cat => cat !== 'All')}
             activeCategory={activeCategory}
             setActiveCategory={setActiveCategory}
@@ -114,7 +112,7 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ sectionRef }) => {
 
         {/* Featured Project */}
         {shouldShowFeaturedProject && featuredProject && (
-          <motion.div 
+          <motion.div
             className="mb-16"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -125,7 +123,7 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ sectionRef }) => {
         )}
 
         {/* Project Grid */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           variants={containerVariants}
           initial="hidden"
@@ -135,11 +133,11 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ sectionRef }) => {
             .filter(project => !project.featured || activeCategory !== 'All')
             .map((project, index) => (
               <motion.div key={project.title} variants={itemVariants}>
-                <ProjectCard 
-                  project={project} 
-                  accentColor={accentColor} 
-                  theme={theme} 
-                  index={index} 
+                <ProjectCard
+                  project={project}
+                  accentColor={accentColor}
+                  theme={theme}
+                  index={index}
                 />
               </motion.div>
             ))}
@@ -147,7 +145,7 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ sectionRef }) => {
 
         {/* Empty State */}
         {filteredProjects.length === 0 && (
-          <motion.div 
+          <motion.div
             className="text-center py-20"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

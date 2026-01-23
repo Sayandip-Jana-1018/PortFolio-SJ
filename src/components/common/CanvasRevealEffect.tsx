@@ -25,9 +25,9 @@ interface Particle {
   shape: 'circle' | 'triangle' | 'square' | 'pentagon' | 'hexagon' | 'star'
 }
 
-export const CanvasRevealEffect = ({ 
-  animationSpeed = 1, 
-  colors = [[255, 215, 0], [255, 165, 0], [255, 140, 0]], 
+export const CanvasRevealEffect = ({
+  animationSpeed = 1,
+  colors = [[255, 215, 0], [255, 165, 0], [255, 140, 0]],
   containerClassName = "",
   active = false,
   cornerParticles = false,
@@ -44,10 +44,10 @@ export const CanvasRevealEffect = ({
   const isFirstRender = useRef(true);
 
   // Colors
-  const colorPalette = colors.map(color => 
+  const colorPalette = colors.map(color =>
     `rgb(${color[0]}, ${color[1]}, ${color[2]})`
   );
-  
+
   const alternateColors = [
     '#FF3366',
     '#36FF33',
@@ -64,7 +64,7 @@ export const CanvasRevealEffect = ({
     ];
     return shapes[Math.floor(Math.random() * shapes.length)];
   };
-  
+
   // Create a particle
   const createParticle = (x: number, y: number): Particle => ({
     x,
@@ -76,17 +76,17 @@ export const CanvasRevealEffect = ({
     alpha: 1,
     shape: getRandomShape()
   });
-  
+
   // Create corner particles shooting diagonally
   const createLeftCornerParticle = (): Particle => {
     const canvas = canvasRef.current;
     if (!canvas) return createParticle(0, 0);
-    
+
     const speedFactor = Math.random() * 2 + 2;
     return {
       x: 0,
       y: canvas.height,
-      radius: Math.random() * 4 + 2,
+      radius: Math.random() * 2.5 + 1, // Smaller size: 1px to 3.5px
       color: alternateColors[Math.floor(Math.random() * alternateColors.length)],
       speedX: speedFactor * (Math.random() * 2 + 1) * animationSpeed,
       speedY: -speedFactor * (Math.random() * 2 + 1) * animationSpeed,
@@ -94,16 +94,16 @@ export const CanvasRevealEffect = ({
       shape: getRandomShape()
     };
   };
-  
+
   const createRightCornerParticle = (): Particle => {
     const canvas = canvasRef.current;
     if (!canvas) return createParticle(0, 0);
-    
+
     const speedFactor = Math.random() * 2 + 2;
     return {
       x: canvas.width,
       y: canvas.height,
-      radius: Math.random() * 4 + 2,
+      radius: Math.random() * 2.5 + 1, // Smaller size: 1px to 3.5px
       color: alternateColors[Math.floor(Math.random() * alternateColors.length)],
       speedX: -speedFactor * (Math.random() * 2 + 1) * animationSpeed,
       speedY: -speedFactor * (Math.random() * 2 + 1) * animationSpeed,
@@ -123,8 +123,8 @@ export const CanvasRevealEffect = ({
   const drawShape = (ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, shape: Particle['shape'], color: string) => {
     ctx.fillStyle = color;
     ctx.beginPath();
-    
-    switch(shape) {
+
+    switch (shape) {
       case 'circle':
         ctx.arc(x, y, radius, 0, Math.PI * 2);
         break;
@@ -165,7 +165,7 @@ export const CanvasRevealEffect = ({
         }
         break;
     }
-    
+
     ctx.closePath();
     ctx.fill();
   };
@@ -178,24 +178,24 @@ export const CanvasRevealEffect = ({
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = 0;
       }
-      
+
       // Clear the canvas
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext('2d');
       if (canvas && ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
-      
+
       return;
     }
-    
+
     // Calculate delta time for consistent animation speed
     const deltaTime = timestamp - lastTimeRef.current;
     lastTimeRef.current = timestamp;
-    
+
     // Fixed time step to ensure consistent speed regardless of frame rate
     const timeStep = Math.min(deltaTime / 16.667, 2); // Cap at 2x speed to prevent huge jumps
-    
+
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) {
@@ -213,66 +213,66 @@ export const CanvasRevealEffect = ({
 
       const alphaHex = Math.floor(particle.alpha * 255).toString(16).padStart(2, '0');
       const color = `${particle.color}${alphaHex}`;
-      
+
       drawShape(ctx, particle.x, particle.y, particle.radius, particle.shape, color);
 
       return particle.alpha > 0;
     });
-    
+
     // Only process corner particles if explicitly enabled
     if (cornerParticlesRef.current) {
       // Left corner particles
       cornerParticlesLeftRef.current = cornerParticlesLeftRef.current.filter(particle => {
         particle.x += particle.speedX * timeStep;
         particle.y += particle.speedY * timeStep;
-        
+
         // Accelerate particles for dynamic effect
         particle.speedX *= 1.01;
         particle.speedY *= 1.01;
-        
+
         particle.alpha -= 0.01 * animationSpeed * timeStep;
 
         const alphaHex = Math.floor(particle.alpha * 255).toString(16).padStart(2, '0');
         const color = `${particle.color}${alphaHex}`;
-        
+
         drawShape(ctx, particle.x, particle.y, particle.radius, particle.shape, color);
 
-        return particle.alpha > 0 && 
-               particle.x > -50 && 
-               particle.x < canvas.width + 50 && 
-               particle.y > -50 && 
-               particle.y < canvas.height + 50;
+        return particle.alpha > 0 &&
+          particle.x > -50 &&
+          particle.x < canvas.width + 50 &&
+          particle.y > -50 &&
+          particle.y < canvas.height + 50;
       });
-      
+
       // Right corner particles
       cornerParticlesRightRef.current = cornerParticlesRightRef.current.filter(particle => {
         particle.x += particle.speedX * timeStep;
         particle.y += particle.speedY * timeStep;
-        
+
         // Accelerate particles for dynamic effect
         particle.speedX *= 1.01;
         particle.speedY *= 1.01;
-        
+
         particle.alpha -= 0.01 * animationSpeed * timeStep;
 
         const alphaHex = Math.floor(particle.alpha * 255).toString(16).padStart(2, '0');
         const color = `${particle.color}${alphaHex}`;
-        
+
         drawShape(ctx, particle.x, particle.y, particle.radius, particle.shape, color);
 
-        return particle.alpha > 0 && 
-               particle.x > -50 && 
-               particle.x < canvas.width + 50 && 
-               particle.y > -50 && 
-               particle.y < canvas.height + 50;
+        return particle.alpha > 0 &&
+          particle.x > -50 &&
+          particle.x < canvas.width + 50 &&
+          particle.y > -50 &&
+          particle.y < canvas.height + 50;
       });
     }
 
     // Continue animation if there are particles to animate
-    if (cornerParticlesRef.current || 
-        particlesRef.current.length > 0 || 
-        cornerParticlesLeftRef.current.length > 0 || 
-        cornerParticlesRightRef.current.length > 0) {
+    if (cornerParticlesRef.current ||
+      particlesRef.current.length > 0 ||
+      cornerParticlesLeftRef.current.length > 0 ||
+      cornerParticlesRightRef.current.length > 0) {
       animationFrameRef.current = requestAnimationFrame(animate);
     } else {
       animationFrameRef.current = 0;
@@ -312,7 +312,7 @@ export const CanvasRevealEffect = ({
 
     particlesRef.current = [];
     initParticles(x, y);
-    
+
     if (!animationFrameRef.current) {
       animate();
     }
@@ -324,19 +324,19 @@ export const CanvasRevealEffect = ({
     cornerParticlesLeftRef.current = [];
     cornerParticlesRightRef.current = [];
     particlesRef.current = [];
-    
+
     // Stop animation
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = 0;
     }
-    
+
     // Clear interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-    
+
     // Clear canvas
     const canvas = canvasRef.current;
     if (canvas) {
@@ -353,7 +353,7 @@ export const CanvasRevealEffect = ({
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
-    
+
     // Create new interval
     intervalRef.current = setInterval(() => {
       // Skip if particles are disabled
@@ -364,27 +364,27 @@ export const CanvasRevealEffect = ({
         }
         return;
       }
-      
-      const count = Math.floor(Math.random() * 3) + 2; // 2-4 particles per interval
-      
+
+      const count = Math.floor(Math.random() * 4) + 3; // 3-6 particles per interval (increased density)
+
       for (let i = 0; i < count; i++) {
         cornerParticlesLeftRef.current.push(createLeftCornerParticle());
         cornerParticlesRightRef.current.push(createRightCornerParticle());
       }
-      
+
       // Start animation if not already running
       if (!animationFrameRef.current) {
         animationFrameRef.current = requestAnimationFrame(animate);
       }
     }, 300);
-    
+
     return intervalRef.current;
   }, [animationSpeed]);
 
   // Update corner particles state when the cornerParticles prop changes
   useEffect(() => {
     cornerParticlesRef.current = cornerParticles;
-    
+
     if (cornerParticles) {
       // Initialize corner particles
       const canvas = canvasRef.current;
@@ -392,24 +392,24 @@ export const CanvasRevealEffect = ({
         // Clear existing particles first
         cornerParticlesLeftRef.current = [];
         cornerParticlesRightRef.current = [];
-        
+
         // Add particles from both corners
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 50; i++) {
           cornerParticlesLeftRef.current.push({
             x: 20,
             y: canvas.height - 20,
-            radius: Math.random() * 4 + 2,
+            radius: Math.random() * 2.5 + 1,
             color: alternateColors[Math.floor(Math.random() * alternateColors.length)],
             speedX: (Math.random() * 2 + 1) * animationSpeed,
             speedY: -(Math.random() * 2 + 1) * animationSpeed,
             alpha: 1,
             shape: getRandomShape()
           });
-          
+
           cornerParticlesRightRef.current.push({
             x: canvas.width - 20,
             y: canvas.height - 20,
-            radius: Math.random() * 4 + 2,
+            radius: Math.random() * 2.5 + 1,
             color: alternateColors[Math.floor(Math.random() * alternateColors.length)],
             speedX: -(Math.random() * 2 + 1) * animationSpeed,
             speedY: -(Math.random() * 2 + 1) * animationSpeed,
@@ -418,7 +418,7 @@ export const CanvasRevealEffect = ({
           });
         }
       }
-      
+
       // Start animation and particle generation
       if (!animationFrameRef.current) {
         animationFrameRef.current = requestAnimationFrame(animate);
@@ -435,7 +435,7 @@ export const CanvasRevealEffect = ({
     const handleParticlesToggle = (event: CustomEvent) => {
       const enabled = event.detail?.enabled;
       cornerParticlesRef.current = enabled;
-      
+
       if (!enabled) {
         clearAllParticles();
       } else if (!animationFrameRef.current) {
@@ -443,9 +443,9 @@ export const CanvasRevealEffect = ({
         startParticleGeneration();
       }
     };
-    
+
     window.addEventListener('particles-toggle-event', handleParticlesToggle as EventListener);
-    
+
     return () => {
       window.removeEventListener('particles-toggle-event', handleParticlesToggle as EventListener);
     };
@@ -456,7 +456,7 @@ export const CanvasRevealEffect = ({
     if (active && isFirstRender.current) {
       // Only run confetti on first render (page load)
       isFirstRender.current = false;
-      
+
       const launchConfetti = () => {
         confetti({
           particleCount: 100,
@@ -469,7 +469,7 @@ export const CanvasRevealEffect = ({
           ticks: 200
         });
       };
-      
+
       launchConfetti();
     }
   }, [active, colorPalette]);
@@ -484,7 +484,7 @@ export const CanvasRevealEffect = ({
           onClick={startEffect}
         />
       </div>
-      
+
       {/* Rocket Toggle Button removed as requested */}
     </>
   );
