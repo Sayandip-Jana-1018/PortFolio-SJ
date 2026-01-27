@@ -142,6 +142,43 @@ body {
   perspective: 1000px;
 }
 
+/* ========================================
+   SCROLL PERFORMANCE OPTIMIZATIONS
+   ======================================== */
+
+/* Force GPU layer for heavy canvas/WebGL containers */
+canvas,
+.canvas-container,
+[class*="plasma"],
+[class*="color-bends"] {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Optimize fixed background elements */
+.fixed {
+  will-change: opacity;
+  contain: layout style paint;
+}
+
+/* Off-screen sections don't need full rendering */
+.section-container {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 100vh;
+}
+
+/* Smoother scroll for main container */
+.main-content {
+  scroll-behavior: smooth;
+  overflow-anchor: none;
+}
+
+/* Optimize Framer Motion elements during scroll */
+[data-framer-component-type] {
+  will-change: transform, opacity;
+}
+
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Chart as ChartJS, 
-  ArcElement, 
-  Tooltip, 
-  Legend, 
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
   CategoryScale,
   LinearScale,
   BarElement,
@@ -15,8 +15,8 @@ import { FiPieChart, FiBarChart2 } from 'react-icons/fi';
 
 // Register ChartJS components
 ChartJS.register(
-  ArcElement, 
-  Tooltip, 
+  ArcElement,
+  Tooltip,
   Legend,
   CategoryScale,
   LinearScale,
@@ -54,10 +54,10 @@ const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
 
   // Skill categories data for pie chart
   const skillCategories = {
-    labels: ['Frontend', 'Backend', 'Mobile', 'DevOps'],
+    labels: ['Machine Learning', 'Data Science', 'Full Stack', 'DevOps'],
     datasets: [
       {
-        data: [40, 30, 15, 15],
+        data: [35, 30, 25, 10],
         backgroundColor: generateColorGradient(accentColor, 4),
         borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
         borderWidth: 1,
@@ -65,13 +65,13 @@ const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
     ],
   };
 
-  // Skill proficiency data for horizontal bar chart
+  // Skill proficiency data for horizontal bar chart (Experience in Months)
   const skillProficiency = {
-    labels: ['React', 'TypeScript', 'Node.js', 'Python', 'MongoDB', 'AWS'],
+    labels: ['Machine Learning', 'Data Science', 'Web Development'],
     datasets: [
       {
-        label: 'Proficiency',
-        data: [95, 85, 80, 75, 70, 65],
+        label: 'Months Experience',
+        data: [30, 24, 36], // Converted to months
         backgroundColor: adjustColorOpacity(accentColor, 0.7),
         borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
         borderWidth: 1,
@@ -112,12 +112,16 @@ const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
     scales: {
       x: {
         beginAtZero: true,
-        max: 100,
+        max: 40, // Max 40 months
         grid: {
           color: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
         },
         ticks: {
           color: theme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)',
+          stepSize: 6,
+          callback: function (value: any) {
+            return value + ' Mos';
+          }
         },
       },
       y: {
@@ -140,8 +144,8 @@ const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
         borderColor: adjustColorOpacity(accentColor, 0.5),
         borderWidth: 1,
         callbacks: {
-          label: function(context: any) {
-            return `Proficiency: ${context.raw}%`;
+          label: function (context: any) {
+            return `Experience: ${context.raw} Months`;
           }
         }
       },
@@ -151,14 +155,14 @@ const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
       {/* Pie Chart */}
-      <motion.div 
+      <motion.div
         className="glassmorphic-card p-6 rounded-xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        whileHover={{ 
-          y: -5, 
-          boxShadow: `0 10px 20px rgba(0, 0, 0, 0.1), 0 0 10px ${accentColor}30` 
+        whileHover={{
+          y: -5,
+          boxShadow: `0 10px 20px rgba(0, 0, 0, 0.1), 0 0 10px ${accentColor}30`
         }}
       >
         <h4 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -171,19 +175,19 @@ const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
       </motion.div>
 
       {/* Horizontal Bar Chart */}
-      <motion.div 
+      <motion.div
         className="glassmorphic-card p-6 rounded-xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        whileHover={{ 
-          y: -5, 
-          boxShadow: `0 10px 20px rgba(0, 0, 0, 0.1), 0 0 10px ${accentColor}30` 
+        whileHover={{
+          y: -5,
+          boxShadow: `0 10px 20px rgba(0, 0, 0, 0.1), 0 0 10px ${accentColor}30`
         }}
       >
         <h4 className="text-xl font-semibold mb-4 flex items-center gap-2">
           <span style={{ color: accentColor }}><FiBarChart2 /></span>
-          Skill Proficiency
+          Skill Growth & Experience
         </h4>
         <div className="h-[250px] w-full">
           <Bar data={skillProficiency} options={barOptions} />

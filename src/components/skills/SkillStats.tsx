@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useTheme } from '../../context/ThemeContext';
-import { FiCode, FiCoffee, FiAward, FiClock } from 'react-icons/fi';
+import { FiCode, FiCpu, FiAward, FiTarget } from 'react-icons/fi';
 
 interface StatItemProps {
   icon: React.ReactNode;
@@ -12,58 +12,58 @@ interface StatItemProps {
   delay?: number;
 }
 
-const StatItem: React.FC<StatItemProps> = ({ 
-  icon, 
-  value, 
-  label, 
-  suffix = '', 
-  delay = 0 
+const StatItem: React.FC<StatItemProps> = ({
+  icon,
+  value,
+  label,
+  suffix = '',
+  delay = 0
 }) => {
   const [count, setCount] = useState(0);
   const { accentColor } = useTheme();
   const controls = useAnimation();
-  const [ref, inView] = useInView({ 
+  const [ref, inView] = useInView({
     triggerOnce: false,
     threshold: 0.2
   });
-  
+
   useEffect(() => {
     if (inView) {
       controls.start({
         opacity: 1,
         y: 0,
-        transition: { 
+        transition: {
           duration: 0.8,
           delay
         }
       });
-      
+
       // Animate counter
       let start = 0;
       const end = value;
       const duration = 2000; // 2 seconds
       const startTime = Date.now();
-      
+
       const timer = setInterval(() => {
         const now = Date.now();
         const elapsed = now - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        
+
         // Easing function for smoother animation
         const easeOutQuart = 1 - Math.pow(1 - progress, 4);
         const current = Math.floor(easeOutQuart * end);
-        
+
         setCount(current);
-        
+
         if (progress === 1) {
           clearInterval(timer);
         }
       }, 16);
-      
+
       return () => clearInterval(timer);
     }
   }, [inView, value, controls, delay]);
-  
+
   return (
     <motion.div
       ref={ref}
@@ -71,9 +71,9 @@ const StatItem: React.FC<StatItemProps> = ({
       initial={{ opacity: 0, y: 30 }}
       animate={controls}
     >
-      <div 
+      <div
         className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
-        style={{ 
+        style={{
           backgroundColor: `${accentColor}20`,
           color: accentColor
         }}
@@ -100,33 +100,35 @@ const SkillStats: React.FC = () => {
       >
         Experience Overview
       </motion.h3>
-      
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-        <StatItem 
-          icon={<FiCode size={28} />} 
-          value={50} 
-          label="Projects Completed"
-          delay={0}
-        />
-        <StatItem 
-          icon={<FiCoffee size={28} />} 
-          value={15000} 
-          label="Lines of Code"
+
+      <div className="flex flex-wrap justify-around gap-8 w-full">
+        <StatItem
+          icon={<FiCpu size={32} />}
+          value={6}
           suffix="+"
+          label="ML/AI Projects"
+          delay={0.1}
+        />
+        <StatItem
+          icon={<FiCode size={32} />}
+          value={8}
+          suffix="+"
+          label="Web Projects"
           delay={0.2}
         />
-        <StatItem 
-          icon={<FiAward size={28} />} 
-          value={25} 
-          label="Certifications"
-          delay={0.4}
+        <StatItem
+          icon={<FiAward size={32} />}
+          value={5}
+          suffix=""
+          label="Hackathons Won"
+          delay={0.3}
         />
-        <StatItem 
-          icon={<FiClock size={28} />} 
-          value={4} 
-          label="Years Experience"
+        <StatItem
+          icon={<FiTarget size={32} />}
+          value={2}
           suffix="+"
-          delay={0.6}
+          label="Years Experience"
+          delay={0.4}
         />
       </div>
     </div>

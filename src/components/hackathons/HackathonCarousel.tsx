@@ -9,10 +9,10 @@ interface HackathonCarouselProps {
   theme: string;
 }
 
-const HackathonCarousel: React.FC<HackathonCarouselProps> = ({ 
-  hackathons, 
-  accentColor, 
-  theme 
+const HackathonCarousel: React.FC<HackathonCarouselProps> = ({
+  hackathons,
+  accentColor,
+  theme
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(0);
@@ -38,7 +38,7 @@ const HackathonCarousel: React.FC<HackathonCarouselProps> = ({
     if (autoPlayRef.current) {
       clearTimeout(autoPlayRef.current);
     }
-    
+
     if (isAutoPlaying) {
       autoPlayRef.current = setTimeout(() => {
         handleNext();
@@ -58,7 +58,7 @@ const HackathonCarousel: React.FC<HackathonCarouselProps> = ({
         handleNext();
       }, 5000);
     }
-    
+
     return () => {
       if (autoPlayRef.current) {
         clearTimeout(autoPlayRef.current);
@@ -107,11 +107,11 @@ const HackathonCarousel: React.FC<HackathonCarouselProps> = ({
       }
     },
     left: {
-      x: -250,
-      y: 50,
-      opacity: 0.7,
-      scale: 0.8,
-      rotateY: -10,
+      x: -400,
+      y: 30,
+      opacity: 0.6,
+      scale: 0.75,
+      rotateY: -15,
       zIndex: 5,
       transition: {
         type: 'spring',
@@ -120,11 +120,11 @@ const HackathonCarousel: React.FC<HackathonCarouselProps> = ({
       }
     },
     farLeft: {
-      x: -350,
-      y: 100,
-      opacity: 0.5,
-      scale: 0.7,
-      rotateY: -20,
+      x: -650,
+      y: 60,
+      opacity: 0.3,
+      scale: 0.6,
+      rotateY: -25,
       zIndex: 1,
       transition: {
         type: 'spring',
@@ -133,11 +133,11 @@ const HackathonCarousel: React.FC<HackathonCarouselProps> = ({
       }
     },
     right: {
-      x: 250,
-      y: 50,
-      opacity: 0.7,
-      scale: 0.8,
-      rotateY: 10,
+      x: 400,
+      y: 30,
+      opacity: 0.6,
+      scale: 0.75,
+      rotateY: 15,
       zIndex: 5,
       transition: {
         type: 'spring',
@@ -146,11 +146,11 @@ const HackathonCarousel: React.FC<HackathonCarouselProps> = ({
       }
     },
     farRight: {
-      x: 350,
-      y: 100,
-      opacity: 0.5,
-      scale: 0.7,
-      rotateY: 20,
+      x: 650,
+      y: 60,
+      opacity: 0.3,
+      scale: 0.6,
+      rotateY: 25,
       zIndex: 1,
       transition: {
         type: 'spring',
@@ -191,7 +191,7 @@ const HackathonCarousel: React.FC<HackathonCarouselProps> = ({
   // Get the animation variant based on position relative to active card
   const getVariant = (index: number) => {
     const position = visibleIndices.indexOf(index);
-    
+
     switch (position) {
       case 0: return "farLeft";
       case 1: return "left";
@@ -201,11 +201,11 @@ const HackathonCarousel: React.FC<HackathonCarouselProps> = ({
       default: return "";
     }
   };
-  
+
   // Get blur amount based on distance from center
   const getBlurAmount = (index: number) => {
     const position = visibleIndices.indexOf(index);
-    
+
     switch (position) {
       case 0: return 'blur(4px)';
       case 1: return 'blur(2px)';
@@ -219,8 +219,8 @@ const HackathonCarousel: React.FC<HackathonCarouselProps> = ({
   return (
     <section className="w-full py-16 overflow-hidden">
       <div className="container mx-auto px-4">
-        <motion.div 
-          className="text-center mb-12"
+        <motion.div
+          className="text-center mb-16 relative z-20"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, margin: "-50px" }}
@@ -235,152 +235,152 @@ const HackathonCarousel: React.FC<HackathonCarouselProps> = ({
             Innovative solutions created during intense coding competitions
           </p>
         </motion.div>
-        
+
         <div className="relative w-full" ref={carouselRef}>
           {/* Main Carousel */}
-          <motion.div 
-            className="relative h-[700px] md:h-[650px] overflow-visible flex items-center justify-center perspective-1000"
+          <motion.div
+            className="mt-20 relative h-[700px] md:h-[650px] overflow-visible flex items-center justify-center perspective-1000"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: false, margin: "-100px" }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
             <AnimatePresence initial={false} custom={direction} mode="popLayout">
-          {hackathons.map((hackathon, index) => {
-            // Only render visible cards in the stack
-            if (!visibleIndices.includes(index)) return null;
-            
-            const isActive = index === activeIndex;
-            const variant = getVariant(index);
-            
-            return (
-              <motion.div
-                key={hackathon.id}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate={variant}
-                exit="exit"
-                className="absolute w-full max-w-md mx-auto cursor-pointer"
-                onClick={() => {
-                  const position = visibleIndices.indexOf(index);
-                  if (position < 2) handlePrev();
-                  if (position > 2) handleNext();
-                }}
-                style={{
-                  transformStyle: "preserve-3d",
-                  transformOrigin: "center center",
-                  filter: isActive ? "none" : `brightness(0.85) ${getBlurAmount(index)}`,
-                  pointerEvents: isActive ? 'auto' : 'none'
-                }}
-                whileHover={{
-                  scale: isActive ? 1.05 : 1.02,
-                  transition: { duration: 0.2 }
-                }}
-              >
-                <HackathonCard 
-                  hackathon={hackathon} 
-                  index={index} 
-                  accentColor={accentColor} 
-                  theme={theme}
-                  isActive={isActive}
-                />
-              </motion.div>
-            );
-          })}
+              {hackathons.map((hackathon, index) => {
+                // Only render visible cards in the stack
+                if (!visibleIndices.includes(index)) return null;
+
+                const isActive = index === activeIndex;
+                const variant = getVariant(index);
+
+                return (
+                  <motion.div
+                    key={hackathon.id}
+                    custom={direction}
+                    variants={slideVariants}
+                    initial="enter"
+                    animate={variant}
+                    exit="exit"
+                    className="absolute w-full max-w-md mx-auto cursor-pointer rounded-2xl overflow-hidden"
+                    onClick={() => {
+                      const position = visibleIndices.indexOf(index);
+                      if (position < 2) handlePrev();
+                      if (position > 2) handleNext();
+                    }}
+                    style={{
+                      transformStyle: "preserve-3d",
+                      transformOrigin: "center center",
+                      filter: isActive ? "none" : `brightness(0.85) ${getBlurAmount(index)}`,
+                      pointerEvents: isActive ? 'auto' : 'none'
+                    }}
+                    whileHover={{
+                      scale: isActive ? 1.05 : 1.02,
+                      transition: { duration: 0.2 }
+                    }}
+                  >
+                    <HackathonCard
+                      hackathon={hackathon}
+                      index={index}
+                      accentColor={accentColor}
+                      theme={theme}
+                      isActive={isActive}
+                    />
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </motion.div>
 
-      {/* Navigation Controls */}
-      <div className="absolute top-1/2 left-0 right-0 flex justify-between items-center px-4 md:px-10 -mt-6 z-20">
-        <motion.button
-          className="w-14 h-14 rounded-full flex items-center justify-center"
-          style={{ 
-            backgroundColor: theme === 'dark' ? 'rgba(20, 20, 30, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            boxShadow: `0 5px 15px rgba(0, 0, 0, 0.15), 0 0 10px ${accentColor}30`,
-            border: `1px solid ${accentColor}30`
-          }}
-          onClick={handlePrev}
-          whileHover={{ scale: 1.1, boxShadow: `0 8px 25px rgba(0, 0, 0, 0.2), 0 0 15px ${accentColor}40` }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <FiChevronLeft size={28} color={accentColor} />
-        </motion.button>
-        
-        <motion.button
-          className="w-14 h-14 rounded-full flex items-center justify-center"
-          style={{ 
-            backgroundColor: theme === 'dark' ? 'rgba(20, 20, 30, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            boxShadow: `0 5px 15px rgba(0, 0, 0, 0.15), 0 0 10px ${accentColor}30`,
-            border: `1px solid ${accentColor}30`
-          }}
-          onClick={handleNext}
-          whileHover={{ scale: 1.1, boxShadow: `0 8px 25px rgba(0, 0, 0, 0.2), 0 0 15px ${accentColor}40` }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <FiChevronRight size={28} color={accentColor} />
-        </motion.button>
-      </div>
-
-      {/* Pagination and Controls */}
-      <motion.div 
-        className="flex flex-col items-center mt-20 gap-4"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: false, margin: "-50px" }}
-        transition={{ duration: 0.6, delay: 0.5 }}
-      >
-        {/* Pagination Indicators */}
-        <div className="flex justify-center gap-3">
-          {hackathons.map((_, index) => (
+          {/* Navigation Controls */}
+          <div className="absolute top-1/2 left-0 right-0 flex justify-between items-center px-4 md:px-10 -mt-6 z-20">
             <motion.button
-              key={index}
-              className="w-3 h-3 rounded-full"
-              style={{ 
-                backgroundColor: index === activeIndex ? accentColor : `${accentColor}40`,
-                transform: index === activeIndex ? 'scale(1.3)' : 'scale(1)',
-                boxShadow: index === activeIndex ? `0 0 10px ${accentColor}80` : 'none'
+              className="w-14 h-14 rounded-full flex items-center justify-center"
+              style={{
+                backgroundColor: theme === 'dark' ? 'rgba(20, 20, 30, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                boxShadow: `0 5px 15px rgba(0, 0, 0, 0.15), 0 0 10px ${accentColor}30`,
+                border: `1px solid ${accentColor}30`
               }}
-              onClick={() => {
-                setDirection(index > activeIndex ? 1 : -1);
-                setActiveIndex(index);
-                resetAutoPlay();
-              }}
-              whileHover={{ scale: 1.5, boxShadow: `0 0 12px ${accentColor}` }}
-              transition={{ duration: 0.2 }}
-            />
-          ))}
-        </div>
+              onClick={handlePrev}
+              whileHover={{ scale: 1.1, boxShadow: `0 8px 25px rgba(0, 0, 0, 0.2), 0 0 15px ${accentColor}40` }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <FiChevronLeft size={28} color={accentColor} />
+            </motion.button>
 
-        {/* Auto Play Toggle */}
-        <motion.button
-          className="flex items-center gap-2 text-sm px-5 py-2 rounded-full mt-2"
-          style={{ 
-            backgroundColor: theme === 'dark' ? 'rgba(20, 20, 30, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-            color: accentColor,
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            boxShadow: `0 2px 10px rgba(0, 0, 0, 0.15), 0 0 5px ${accentColor}30`,
-            border: `1px solid ${accentColor}30`
-          }}
-          onClick={toggleAutoPlay}
-          whileHover={{ 
-            scale: 1.05, 
-            boxShadow: `0 4px 15px rgba(0, 0, 0, 0.2), 0 0 10px ${accentColor}40` 
-          }}
-          whileTap={{ scale: 0.95 }}
-        >
-          {isAutoPlaying ? <FiPause size={16} /> : <FiPlay size={16} />}
-          <span>{isAutoPlaying ? 'Pause Slideshow' : 'Play Slideshow'}</span>
-        </motion.button>
-      </motion.div>
+            <motion.button
+              className="w-14 h-14 rounded-full flex items-center justify-center"
+              style={{
+                backgroundColor: theme === 'dark' ? 'rgba(20, 20, 30, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                boxShadow: `0 5px 15px rgba(0, 0, 0, 0.15), 0 0 10px ${accentColor}30`,
+                border: `1px solid ${accentColor}30`
+              }}
+              onClick={handleNext}
+              whileHover={{ scale: 1.1, boxShadow: `0 8px 25px rgba(0, 0, 0, 0.2), 0 0 15px ${accentColor}40` }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <FiChevronRight size={28} color={accentColor} />
+            </motion.button>
+          </div>
+
+          {/* Pagination and Controls */}
+          <motion.div
+            className="flex flex-col items-center mt-20 gap-4"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, margin: "-50px" }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
+            {/* Pagination Indicators */}
+            <div className="flex justify-center gap-3">
+              {hackathons.map((_, index) => (
+                <motion.button
+                  key={index}
+                  className="w-3 h-3 rounded-full"
+                  style={{
+                    backgroundColor: index === activeIndex ? accentColor : `${accentColor}40`,
+                    transform: index === activeIndex ? 'scale(1.3)' : 'scale(1)',
+                    boxShadow: index === activeIndex ? `0 0 10px ${accentColor}80` : 'none'
+                  }}
+                  onClick={() => {
+                    setDirection(index > activeIndex ? 1 : -1);
+                    setActiveIndex(index);
+                    resetAutoPlay();
+                  }}
+                  whileHover={{ scale: 1.5, boxShadow: `0 0 12px ${accentColor}` }}
+                  transition={{ duration: 0.2 }}
+                />
+              ))}
+            </div>
+
+            {/* Auto Play Toggle */}
+            <motion.button
+              className="flex items-center gap-2 text-sm px-5 py-2 rounded-full mt-2"
+              style={{
+                backgroundColor: theme === 'dark' ? 'rgba(20, 20, 30, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+                color: accentColor,
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                boxShadow: `0 2px 10px rgba(0, 0, 0, 0.15), 0 0 5px ${accentColor}30`,
+                border: `1px solid ${accentColor}30`
+              }}
+              onClick={toggleAutoPlay}
+              whileHover={{
+                scale: 1.05,
+                boxShadow: `0 4px 15px rgba(0, 0, 0, 0.2), 0 0 10px ${accentColor}40`
+              }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {isAutoPlaying ? <FiPause size={16} /> : <FiPlay size={16} />}
+              <span>{isAutoPlaying ? 'Pause Slideshow' : 'Play Slideshow'}</span>
+            </motion.button>
+          </motion.div>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
   );
 };
 

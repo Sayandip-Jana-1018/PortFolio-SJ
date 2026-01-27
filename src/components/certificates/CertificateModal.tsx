@@ -12,49 +12,49 @@ interface CertificateModalProps {
   onDownload?: (imageUrl: string, title: string) => void;
 }
 
-const CertificateModal: React.FC<CertificateModalProps> = ({ 
-  certificate, 
-  isOpen, 
+const CertificateModal: React.FC<CertificateModalProps> = ({
+  certificate,
+  isOpen,
   onClose,
   accentColor,
   onDownload
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [showDetails, setShowDetails] = useState(false);
-  
+
   // Mouse parallax effect values
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  
+
   // Transform mouse movement to subtle movement
   const imageX = useTransform(mouseX, [-0.5, 0.5], [-15, 15]);
   const imageY = useTransform(mouseY, [-0.5, 0.5], [-15, 15]);
-  
+
   // Check if device is mobile
   const [isMobile, setIsMobile] = useState(false);
-  
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-  
+
   // Handle mouse move for parallax effect
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!modalRef.current || isMobile) return;
     const rect = modalRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
-    
+
     mouseX.set(x);
     mouseY.set(y);
   };
-  
+
   // Handle click outside to close modal
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -62,16 +62,16 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
         onClose();
       }
     };
-    
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-    
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen, onClose]);
-  
+
   // Handle escape key to close modal
   useEffect(() => {
     const handleEscKey = (e: KeyboardEvent) => {
@@ -79,11 +79,11 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
         onClose();
       }
     };
-    
+
     window.addEventListener('keydown', handleEscKey);
     return () => window.removeEventListener('keydown', handleEscKey);
   }, [onClose]);
-  
+
   // Show details after modal is visible and ensure modal is centered on mobile
   useEffect(() => {
     if (isOpen) {
@@ -91,22 +91,22 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
       const detailsTimer = setTimeout(() => {
         setShowDetails(true);
       }, 500);
-      
+
       // For mobile devices, ensure the modal is centered in the viewport
       if (isMobile && modalRef.current) {
         const scrollTimer = setTimeout(() => {
           modalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          
+
           // Add a class to prevent body scrolling when modal is open
           document.body.style.overflow = 'hidden';
         }, 300);
-        
+
         return () => {
           clearTimeout(detailsTimer);
           clearTimeout(scrollTimer);
         };
       }
-      
+
       return () => clearTimeout(detailsTimer);
     } else {
       setShowDetails(false);
@@ -114,56 +114,54 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
       document.body.style.overflow = '';
     }
   }, [isOpen, isMobile]);
-  
+
   // Animation variants
   const overlayVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
     exit: { opacity: 0 }
   };
-  
+
   const modalVariants = {
-    hidden: { opacity: 0, scale: 0.8, y: 100 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
-      y: 0,
-      transition: { 
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
         type: "spring",
         stiffness: 300,
         damping: 25
       }
     },
-    exit: { 
-      opacity: 0, 
-      scale: 0.8,
-      y: 100,
+    exit: {
+      opacity: 0,
+      scale: 0.9,
       transition: { duration: 0.3 }
     }
   };
-  
+
   const detailsVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { delay: 0.3, duration: 0.5 } },
     exit: { opacity: 0, y: 20, transition: { duration: 0.2 } }
   };
-  
+
   const buttonVariants = {
     hidden: { opacity: 0, scale: 0.8 },
-    visible: (i: number) => ({ 
-      opacity: 1, 
-      scale: 1, 
-      transition: { delay: 0.3 + (i * 0.1), duration: 0.3 } 
+    visible: (i: number) => ({
+      opacity: 1,
+      scale: 1,
+      transition: { delay: 0.3 + (i * 0.1), duration: 0.3 }
     }),
     exit: { opacity: 0, scale: 0.8, transition: { duration: 0.2 } }
   };
-  
+
   return (
     <AnimatePresence>
       {isOpen && certificate && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 overflow-y-auto"
-          style={{ 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8"
+          style={{
             backgroundColor: 'rgba(0, 0, 0, 0.85)',
             backdropFilter: 'blur(15px)'
           }}
@@ -183,10 +181,9 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
         >
           <motion.div
             ref={modalRef}
-            className="relative max-w-5xl w-full rounded-xl overflow-hidden my-auto"
+            className="relative max-w-5xl w-full rounded-xl overflow-hidden"
             style={{
-              maxHeight: isMobile ? '90vh' : 'none',
-              margin: isMobile ? '10px auto' : 'auto'
+              maxHeight: '90vh'
             }}
             variants={modalVariants}
             initial="hidden"
@@ -203,17 +200,17 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                   y: isMobile ? 0 : imageY,
                 }}
               >
-                <Image 
-                  src={certificate.image} 
-                  alt={certificate.title} 
-                  fill 
-                  className="object-contain" 
+                <Image
+                  src={certificate.image}
+                  alt={certificate.title}
+                  fill
+                  className="object-contain"
                   priority
                 />
               </motion.div>
-              
+
               {/* Animated gradient overlay */}
-              <motion.div 
+              <motion.div
                 className="absolute inset-0"
                 style={{
                   background: `linear-gradient(135deg, transparent, ${accentColor}20, transparent)`,
@@ -229,7 +226,7 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                   repeatType: 'reverse'
                 }}
               />
-              
+
               {/* Floating particles */}
               {Array.from({ length: 8 }).map((_, i) => (
                 <motion.div
@@ -257,12 +254,12 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                 />
               ))}
             </div>
-            
+
             {/* Action Buttons - more visible and accessible on mobile */}
             <div className="absolute top-4 right-4 flex gap-2 sm:gap-3 z-20">
               <motion.button
                 className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center"
-                style={{ 
+                style={{
                   backgroundColor: accentColor,
                   backdropFilter: 'blur(10px)',
                   boxShadow: `0 4px 20px rgba(0, 0, 0, 0.3), 0 0 15px ${accentColor}80`
@@ -272,8 +269,8 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                 animate="visible"
                 exit="exit"
                 custom={0}
-                whileHover={{ 
-                  scale: 1.1, 
+                whileHover={{
+                  scale: 1.1,
                   backgroundColor: 'rgba(255, 255, 255, 0.25)',
                   boxShadow: `0 5px 25px rgba(0, 0, 0, 0.3), 0 0 10px ${accentColor}40`
                 }}
@@ -294,11 +291,11 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
               >
                 <FiDownload color="#ffffff" size={20} style={{ filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))' }} />
               </motion.button>
-              
+
               {certificate.credentialUrl && (
                 <motion.button
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center"
-                  style={{ 
+                  style={{
                     backgroundColor: 'rgba(255, 255, 255, 0.15)',
                     backdropFilter: 'blur(10px)',
                     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)'
@@ -308,8 +305,8 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                   animate="visible"
                   exit="exit"
                   custom={1}
-                  whileHover={{ 
-                    scale: 1.1, 
+                  whileHover={{
+                    scale: 1.1,
                     backgroundColor: 'rgba(255, 255, 255, 0.25)',
                     boxShadow: `0 5px 25px rgba(0, 0, 0, 0.3), 0 0 10px ${accentColor}40`
                   }}
@@ -321,10 +318,10 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                   <FiExternalLink color="white" size={20} />
                 </motion.button>
               )}
-              
+
               <motion.button
                 className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center"
-                style={{ 
+                style={{
                   backgroundColor: accentColor,
                   backdropFilter: 'blur(10px)',
                   boxShadow: `0 4px 20px rgba(0, 0, 0, 0.3), 0 0 15px ${accentColor}80`
@@ -334,8 +331,8 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                 animate="visible"
                 exit="exit"
                 custom={2}
-                whileHover={{ 
-                  scale: 1.1, 
+                whileHover={{
+                  scale: 1.1,
                   backgroundColor: 'rgba(255, 255, 255, 0.25)',
                   boxShadow: `0 5px 25px rgba(0, 0, 0, 0.3), 0 0 10px ${accentColor}40`
                 }}
@@ -345,13 +342,13 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                 <FiX color="#ffffff" size={20} style={{ filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))' }} />
               </motion.button>
             </div>
-            
+
             {/* Certificate Details */}
             <AnimatePresence>
               {showDetails && (
-                <motion.div 
+                <motion.div
                   className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-8 text-white"
-                  style={{ 
+                  style={{
                     background: 'linear-gradient(to top, rgba(0,0,0,0.9) 20%, rgba(0,0,0,0.7) 60%, transparent)',
                     backdropFilter: 'blur(8px)'
                   }}
@@ -362,15 +359,15 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                 >
                   <div className="max-w-3xl mx-auto">
                     <div className="flex items-center gap-3 mb-3">
-                      <span 
+                      <span
                         className="px-3 py-1 text-xs rounded-full text-white flex items-center gap-1"
                         style={{ backgroundColor: accentColor }}
                       >
                         <FiCheck size={12} />
                         <span>Verified</span>
                       </span>
-                      
-                      <span 
+
+                      <span
                         className="px-3 py-1 text-xs rounded-full text-white flex items-center gap-1"
                         style={{ backgroundColor: `${accentColor}90` }}
                       >
@@ -378,22 +375,22 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                         <span>{certificate.category}</span>
                       </span>
                     </div>
-                    
+
                     <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-3">{certificate.title}</h2>
-                    
+
                     <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm opacity-90 mb-2 sm:mb-4">
                       <div className="flex items-center gap-2">
                         <FiUser size={16} style={{ color: accentColor }} />
                         <span>{certificate.issuer}</span>
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         <FiCalendar size={16} style={{ color: accentColor }} />
                         <span>{certificate.date}</span>
                       </div>
-                      
+
                       {certificate.credentialUrl && (
-                        <a 
+                        <a
                           href={certificate.credentialUrl}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -405,7 +402,7 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                         </a>
                       )}
                     </div>
-                    
+
                     <p className="text-sm sm:text-base opacity-90 leading-relaxed line-clamp-3 sm:line-clamp-none">{certificate.description}</p>
                   </div>
                 </motion.div>

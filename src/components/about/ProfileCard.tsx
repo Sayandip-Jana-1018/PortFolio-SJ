@@ -55,20 +55,20 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ accentColor, theme }) => {
 
           <div className="mb-6">
             <div className="text-xl md:text-2xl font-medium mb-4">
-              Full Stack Developer
+              Data Science Enthusiast | ML Developer
             </div>
 
             <p className="opacity-80 mb-6 text-base md:text-lg max-w-2xl leading-relaxed">
-              I'm a passionate developer and designer with a focus on creating beautiful, functional, and user-friendly applications. With expertise in both frontend and backend technologies, I strive to build seamless digital experiences.
+              I'm a 4th-year B.Tech Computer Science student at LPU with a CGPA of 9.27, passionate about Machine Learning, AI, and building intelligent applications. With strong foundations in data science and full-stack development, I love creating AI-powered solutions that solve real-world problems.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-6 max-w-xl">
             {[
-              { label: 'Web Development', value: '5+ years' },
-              { label: 'UI/UX Design', value: '4+ years' },
-              { label: 'Problem Solving', value: 'Advanced' },
-              { label: 'Collaboration', value: 'Team Player' }
+              { label: 'Machine Learning', value: 'Advanced' },
+              { label: 'Data Science', value: 'Enthusiast' },
+              { label: 'Full Stack Dev', value: 'Proficient' },
+              { label: 'Problem Solving', value: '250+ LeetCode' }
             ].map((item, index) => (
               <div key={item.label} className="flex flex-col">
                 <span className="text-sm opacity-70 mb-1">{item.label}</span>

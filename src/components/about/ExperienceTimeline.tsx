@@ -10,33 +10,33 @@ interface ExperienceTimelineProps {
 const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ accentColor, theme }) => {
   const timeline = [
     {
-      year: '2023',
-      title: 'Senior Developer',
-      company: 'Tech Innovators Inc.',
-      description: 'Leading development of cutting-edge web applications using Next.js and React.'
+      year: '2025',
+      title: 'TechForge \'25 - 2nd Runner Up',
+      company: 'National Level Hackathon',
+      description: 'Built HygieiaAI - Multi-Agent Health Platform with 94% disease prediction accuracy'
+    },
+    {
+      year: '2024',
+      title: 'ML Training - LPU',
+      company: 'Lovely Professional University',
+      description: 'Applied ML techniques to healthcare datasets, built multi-disease prediction system'
+    },
+    {
+      year: '2024',
+      title: 'Inter-University Hackathon Winner',
+      company: 'Multiple Hackathons',
+      description: 'Won multiple inter-university hackathons with AI/ML projects'
     },
     {
       year: '2021',
-      title: 'Full Stack Developer',
-      company: 'Digital Solutions Ltd.',
-      description: 'Developed robust full-stack applications with Node.js and React.'
-    },
-    {
-      year: '2019',
-      title: 'Frontend Developer',
-      company: 'Creative Web Agency',
-      description: 'Created responsive and interactive user interfaces using modern JavaScript frameworks.'
-    },
-    {
-      year: '2018',
-      title: 'Junior Developer',
-      company: 'StartUp Ventures',
-      description: 'Started professional journey building web applications with JavaScript and CSS.'
+      title: 'B.Tech CSE - Started',
+      company: 'Lovely Professional University',
+      description: 'Began journey in Computer Science with focus on Data Science & Machine Learning'
     }
   ];
 
   return (
-    <motion.div 
+    <motion.div
       className="mt-8 glassmorphic-card p-6 rounded-xl"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -44,17 +44,17 @@ const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ accentColor, th
     >
       <h4 className="text-xl font-semibold mb-6 flex items-center gap-2">
         <span style={{ color: accentColor }}><FiAward /></span>
-        Experience
+        Journey & Achievements
       </h4>
-      
+
       <div className="space-y-4">
         {timeline.map((item, index) => (
-          <motion.div 
-            key={item.year}
+          <motion.div
+            key={item.year + item.title}
             className="p-3 border-l-2"
             style={{ borderColor: accentColor }}
-            whileHover={{ 
-              x: 5, 
+            whileHover={{
+              x: 5,
               backgroundColor: `${accentColor}15`,
               boxShadow: `0 4px 12px ${accentColor}20`
             }}
@@ -64,9 +64,9 @@ const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ accentColor, th
           >
             <div className="flex justify-between items-center mb-1">
               <h5 className="font-bold">{item.title}</h5>
-              <div 
+              <div
                 className="px-2 py-1 text-xs rounded-full"
-                style={{ 
+                style={{
                   backgroundColor: `${accentColor}20`,
                   color: accentColor
                 }}

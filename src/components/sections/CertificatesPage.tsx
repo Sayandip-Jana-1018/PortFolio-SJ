@@ -22,7 +22,7 @@ const CertificatesPage: React.FC<CertificatesPageProps> = ({ sectionRef }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const certificatesPerPage = 6;
+  const certificatesPerPage = 9; // 3x3 grid
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Mouse parallax effect values
@@ -89,6 +89,8 @@ const CertificatesPage: React.FC<CertificatesPageProps> = ({ sectionRef }) => {
 
   return (
     <section
+      id="certificates"
+      ref={sectionRef}
       className="min-h-screen flex items-center justify-center relative section-container py-10 overflow-hidden"
       style={{
         background: theme === 'dark' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
@@ -148,7 +150,7 @@ const CertificatesPage: React.FC<CertificatesPageProps> = ({ sectionRef }) => {
               </div>
             </motion.div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="flex flex-wrap justify-center gap-8 max-w-6xl mx-auto">
               {currentCertificates.map((certificate, index) => (
                 <CertificateCard
                   key={certificate.id}

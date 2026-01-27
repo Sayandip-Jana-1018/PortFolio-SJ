@@ -170,7 +170,10 @@ export const CanvasRevealEffect = ({
     ctx.fill();
   };
 
-  // Animation function with fixed time step
+  // Animation function with fixed time step - throttled to 30fps for performance
+  const lastRenderTimeRef = useRef(0);
+  const targetFrameTime = 1000 / 30; // 30fps
+
   const animate = (timestamp = 0) => {
     // Skip animation if particles are disabled
     if (!cornerParticlesRef.current) {
@@ -188,6 +191,14 @@ export const CanvasRevealEffect = ({
 
       return;
     }
+
+    // Performance: Throttle to 30fps
+    const timeSinceLastRender = timestamp - lastRenderTimeRef.current;
+    if (timeSinceLastRender < targetFrameTime) {
+      animationFrameRef.current = requestAnimationFrame(animate);
+      return;
+    }
+    lastRenderTimeRef.current = timestamp - (timeSinceLastRender % targetFrameTime);
 
     // Calculate delta time for consistent animation speed
     const deltaTime = timestamp - lastTimeRef.current;

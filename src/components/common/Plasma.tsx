@@ -177,21 +177,31 @@ export const Plasma: React.FC<PlasmaProps> = ({
 
         let raf = 0;
         const t0 = performance.now();
+        let lastFrameTime = 0;
+        const targetFrameTime = 1000 / 30; // 30fps throttle
+
         const loop = (t: number) => {
-            let timeValue = (t - t0) * 0.001;
-            if (direction === 'pingpong') {
-                const pingpongDuration = 10;
-                const segmentTime = timeValue % pingpongDuration;
-                const isForward = Math.floor(timeValue / pingpongDuration) % 2 === 0;
-                const u = segmentTime / pingpongDuration;
-                const smooth = u * u * (3 - 2 * u);
-                const pingpongTime = isForward ? smooth * pingpongDuration : (1 - smooth) * pingpongDuration;
-                (program.uniforms.uDirection as any).value = 1.0;
-                (program.uniforms.iTime as any).value = pingpongTime;
-            } else {
-                (program.uniforms.iTime as any).value = timeValue;
+            const deltaTime = t - lastFrameTime;
+
+            // Only render if enough time has passed (30fps throttle)
+            if (deltaTime >= targetFrameTime) {
+                lastFrameTime = t - (deltaTime % targetFrameTime);
+
+                let timeValue = (t - t0) * 0.001;
+                if (direction === 'pingpong') {
+                    const pingpongDuration = 10;
+                    const segmentTime = timeValue % pingpongDuration;
+                    const isForward = Math.floor(timeValue / pingpongDuration) % 2 === 0;
+                    const u = segmentTime / pingpongDuration;
+                    const smooth = u * u * (3 - 2 * u);
+                    const pingpongTime = isForward ? smooth * pingpongDuration : (1 - smooth) * pingpongDuration;
+                    (program.uniforms.uDirection as any).value = 1.0;
+                    (program.uniforms.iTime as any).value = pingpongTime;
+                } else {
+                    (program.uniforms.iTime as any).value = timeValue;
+                }
+                renderer.render({ scene: mesh });
             }
-            renderer.render({ scene: mesh });
             raf = requestAnimationFrame(loop);
         };
         raf = requestAnimationFrame(loop);

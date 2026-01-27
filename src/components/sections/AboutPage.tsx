@@ -105,10 +105,10 @@ const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
             title="About Me"
             subtitlePrefix="I am a"
             subtitles={[
+              'Data Science Enthusiast',
+              'Machine Learning Developer',
               'Full Stack Developer',
-              'UI/UX Designer',
-              'Problem Solver',
-              'Tech Enthusiast'
+              'Problem Solver'
             ]}
           />
         </motion.div>

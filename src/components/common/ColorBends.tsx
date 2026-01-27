@@ -211,23 +211,34 @@ export default function ColorBends({
             (window as Window).addEventListener('resize', handleResize);
         }
 
-        const loop = () => {
-            const dt = clock.getDelta();
-            const elapsed = clock.elapsedTime;
-            material.uniforms.uTime.value = elapsed;
+        // Performance: Throttle to 30fps (skip every other frame)
+        let lastFrameTime = 0;
+        const targetFrameTime = 1000 / 30; // 30fps = ~33.3ms per frame
+        
+        const loop = (currentTime: number = 0) => {
+            const deltaTime = currentTime - lastFrameTime;
+            
+            // Only render if enough time has passed (30fps throttle)
+            if (deltaTime >= targetFrameTime) {
+                lastFrameTime = currentTime - (deltaTime % targetFrameTime);
+                
+                const dt = clock.getDelta();
+                const elapsed = clock.elapsedTime;
+                material.uniforms.uTime.value = elapsed;
 
-            const deg = (rotationRef.current % 360) + autoRotateRef.current * elapsed;
-            const rad = (deg * Math.PI) / 180;
-            const c = Math.cos(rad);
-            const s = Math.sin(rad);
-            (material.uniforms.uRot.value as THREE.Vector2).set(c, s);
+                const deg = (rotationRef.current % 360) + autoRotateRef.current * elapsed;
+                const rad = (deg * Math.PI) / 180;
+                const c = Math.cos(rad);
+                const s = Math.sin(rad);
+                (material.uniforms.uRot.value as THREE.Vector2).set(c, s);
 
-            const cur = pointerCurrentRef.current;
-            const tgt = pointerTargetRef.current;
-            const amt = Math.min(1, dt * pointerSmoothRef.current);
-            cur.lerp(tgt, amt);
-            (material.uniforms.uPointer.value as THREE.Vector2).copy(cur);
-            renderer.render(scene, camera);
+                const cur = pointerCurrentRef.current;
+                const tgt = pointerTargetRef.current;
+                const amt = Math.min(1, dt * pointerSmoothRef.current);
+                cur.lerp(tgt, amt);
+                (material.uniforms.uPointer.value as THREE.Vector2).copy(cur);
+                renderer.render(scene, camera);
+            }
             rafRef.current = requestAnimationFrame(loop);
         };
         rafRef.current = requestAnimationFrame(loop);

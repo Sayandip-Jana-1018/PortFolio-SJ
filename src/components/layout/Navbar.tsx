@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import { createPortal } from 'react-dom';
+import { useTheme, PREMIUM_ACCENTS } from '../../context/ThemeContext';
 import { useParticles } from '../../context/ParticlesContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -29,8 +30,10 @@ const Navbar: React.FC = () => {
   const [visible, setVisible] = useState(true);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [showDebugger, setShowDebugger] = useState(true); // Start with debugger visible
   const colorPickerRef = useRef<HTMLDivElement>(null);
+  const settingsButtonRef = useRef<HTMLDivElement>(null);
 
   // Predefined color options
   const colorOptions = [
@@ -38,30 +41,26 @@ const Navbar: React.FC = () => {
     '#D30FFF', // Vivid Purple
     '#39FF00', // Vivid Green
     '#FFE000', // Vivid Yellow
-];
+  ];
 
-  // Handle scroll events to show/hide navbar
+  // Handle scroll events for background styling only - navbar stays visible
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
-      // Show navbar when scrolling up, hide when scrolling down
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setVisible(false);
-      } else {
-        setVisible(true);
-      }
-      
+
+      // Navbar always stays visible (fixed at top)
+      setVisible(true);
+
       // Add background when scrolled
       if (currentScrollY > 50) {
         setScrolled(true);
       } else {
         setScrolled(false);
       }
-      
+
       setLastScrollY(currentScrollY);
     };
-    
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
@@ -71,33 +70,43 @@ const Navbar: React.FC = () => {
     const handleRouteChange = () => {
       setMobileMenuOpen(false);
     };
-    
+
     // Listen for route changes
     window.addEventListener('popstate', handleRouteChange);
-    
+
     return () => {
       window.removeEventListener('popstate', handleRouteChange);
     };
   }, []);
-  
-  // Close color picker when clicking outside
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Close color picker when clicking outside (exclude button clicks)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node)) {
-        setColorPickerOpen(false);
+      const target = event.target as Node;
+      // Don't close if clicking the settings button or inside the color picker
+      if (
+        (colorPickerRef.current && colorPickerRef.current.contains(target)) ||
+        (settingsButtonRef.current && settingsButtonRef.current.contains(target))
+      ) {
+        return;
       }
+      setColorPickerOpen(false);
     };
-    
+
     // Close color picker on scroll
     const handleScroll = () => {
       if (colorPickerOpen) {
         setColorPickerOpen(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       window.removeEventListener('scroll', handleScroll);
@@ -106,13 +115,12 @@ const Navbar: React.FC = () => {
 
   return (
     <motion.header
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled 
-          ? theme === 'dark' 
-            ? 'bg-black/90 backdrop-blur-md shadow-lg' 
-            : 'bg-white/90 backdrop-blur-md shadow-lg'
-          : theme === 'dark' ? 'bg-black/50 backdrop-blur-sm' : 'bg-white/50 backdrop-blur-sm'
-      }`}
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled
+        ? theme === 'dark'
+          ? 'bg-black/90 backdrop-blur-md shadow-lg'
+          : 'bg-white/90 backdrop-blur-md shadow-lg'
+        : theme === 'dark' ? 'bg-black/50 backdrop-blur-sm' : 'bg-white/50 backdrop-blur-sm'
+        }`}
       initial={{ y: -100 }}
       animate={{ y: visible ? 0 : -100 }}
       transition={{ duration: 0.3 }}
@@ -128,7 +136,7 @@ const Navbar: React.FC = () => {
         }
         .navbar-container {
           max-width: 100%;
-          overflow-x: hidden;
+          overflow-x: visible;
         }
         .mobile-menu {
           background: ${theme === 'dark' ? 'rgba(25, 25, 35, 0.1)' : 'rgba(245, 245, 250, 0.1)'} !important;
@@ -143,21 +151,30 @@ const Navbar: React.FC = () => {
           -webkit-transform: translateZ(0);
           will-change: transform, backdrop-filter, -webkit-backdrop-filter;
         }
+        /* Custom Color Picker Styles */
+        .react-colorful { width: 100% !important; height: 160px !important; }
+        @media (min-width: 768px) {
+          .react-colorful { height: 180px !important; }
+        }
+        .react-colorful__saturation { border-radius: 16px 16px 0 0 !important; }
+        .react-colorful__hue { height: 14px !important; border-radius: 0 0 16px 16px !important; margin-top: -1px !important; }
+        .react-colorful__last-control { border-radius: 0 0 16px 16px !important; }
+        .react-colorful__pointer { width: 18px !important; height: 18px !important; border-width: 2px !important; }
       `}</style>
       <div className="container mx-auto px-1 sm:px-2 md:px-4 py-2 flex justify-between items-center navbar-container">
         {/* Logo */}
-        <motion.div 
+        <motion.div
           className="flex items-center shrink-0"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
           <Link href="/" passHref>
-            <div 
+            <div
               className="relative font-medium cursor-pointer flex items-center gap-1"
               style={{ color: accentColor }}
             >
               <span className="text-base sm:text-lg md:text-xl font-bold">Portfolio</span>
-              <div 
+              <div
                 className="h-1.5 w-1.5 rounded-full animate-pulse"
                 style={{ backgroundColor: accentColor }}
               />
@@ -176,9 +193,9 @@ const Navbar: React.FC = () => {
             >
               <Link href={item.href} passHref>
                 <div className={`relative text-xs lg:text-sm font-medium group cursor-pointer flex items-center gap-1 lg:gap-2 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
-                  <div 
+                  <div
                     className="w-8 h-8 rounded-full flex items-center justify-center"
-                    style={{ 
+                    style={{
                       backgroundColor: `${accentColor}15`,
                       border: `1px solid ${accentColor}30`
                     }}
@@ -186,7 +203,7 @@ const Navbar: React.FC = () => {
                     <span className="text-xl" style={{ color: accentColor }}>{item.icon}</span>
                   </div>
                   <span className="hidden lg:inline">{item.name}</span>
-                  <span 
+                  <span
                     className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
                     style={{ backgroundColor: accentColor }}
                   />
@@ -197,7 +214,7 @@ const Navbar: React.FC = () => {
         </nav>
 
         {/* Control Buttons */}
-        <div className="flex items-center space-x-1.5 sm:space-x-2 md:space-x-3">
+        <div className="flex items-center space-x-3 sm:space-x-4 md:space-x-5">
           <div className="flex items-center gap-1 sm:gap-2">
             <div className="hidden md:block">
               <MusicPlayer />
@@ -207,7 +224,7 @@ const Navbar: React.FC = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="hidden md:flex items-center justify-center"
-              style={{ 
+              style={{
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
@@ -227,7 +244,7 @@ const Navbar: React.FC = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="hidden md:flex items-center justify-center"
-              style={{ 
+              style={{
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
@@ -237,29 +254,31 @@ const Navbar: React.FC = () => {
               }}
               aria-label={cornerParticlesEnabled ? "Turn off particles" : "Turn on particles"}
             >
-              <FaRocket 
+              <FaRocket
                 size={16}
-                style={{ 
+                style={{
                   color: cornerParticlesEnabled ? accentColor : '#888888',
                   transform: 'rotate(45deg)'
-                }} 
+                }}
               />
             </motion.button>
-            <div className="md:hidden">
-              <MusicPlayer/>
+            {/* Mobile: Hidden Music Player, Settings toggles panel, Menu toggles menu */}
+            <div className="hidden">
+              <MusicPlayer />
             </div>
-            <div className="relative" style={{ zIndex: 60 }}>
+            <div ref={settingsButtonRef} className="relative z-50">
+              {/* Desktop Gear */}
               <motion.button
                 onClick={() => setColorPickerOpen(!colorPickerOpen)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center justify-center md:flex hidden"
-                style={{ 
+                className="hidden md:flex items-center justify-center"
+                style={{
                   width: '36px',
                   height: '36px',
                   borderRadius: '50%',
-                  backgroundColor: colorPickerOpen 
-                    ? `${accentColor}20` 
+                  backgroundColor: colorPickerOpen
+                    ? `${accentColor}20`
                     : theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
                   border: `1px solid ${colorPickerOpen ? accentColor : `${accentColor}50`}`,
                   boxShadow: colorPickerOpen ? `0 0 8px ${accentColor}40` : `0 0 8px ${accentColor}30`
@@ -273,17 +292,19 @@ const Navbar: React.FC = () => {
                   <FiSettings style={{ color: accentColor }} size={16} />
                 </motion.div>
               </motion.button>
+
+              {/* Mobile Gear - Increased size/spacing */}
               <motion.button
                 onClick={() => setColorPickerOpen(!colorPickerOpen)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center justify-center md:hidden flex"
-                style={{ 
-                  width: '32px',
-                  height: '32px',
+                className="flex md:hidden items-center justify-center"
+                style={{
+                  width: '36px',
+                  height: '36px',
                   borderRadius: '50%',
-                  backgroundColor: colorPickerOpen 
-                    ? `${accentColor}20` 
+                  backgroundColor: colorPickerOpen
+                    ? `${accentColor}20`
                     : theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
                   border: `1px solid ${colorPickerOpen ? accentColor : `${accentColor}50`}`,
                   boxShadow: colorPickerOpen ? `0 0 8px ${accentColor}40` : `0 0 8px ${accentColor}30`
@@ -294,61 +315,14 @@ const Navbar: React.FC = () => {
                   animate={{ rotate: colorPickerOpen ? 180 : 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <FiSettings style={{ color: accentColor }} size={14} />
+                  <FiSettings style={{ color: accentColor }} size={16} />
                 </motion.div>
               </motion.button>
-              <AnimatePresence>
-                {colorPickerOpen && (
-                  <motion.div 
-                    ref={colorPickerRef}
-                    className="fixed p-4 rounded-lg shadow-xl z-[100]"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3 }}
-                    style={{ 
-                      backdropFilter: 'blur(10px)',
-                      backgroundColor: theme === 'dark' ? 'rgba(10, 10, 15, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-                      boxShadow: `0 10px 25px rgba(0,0,0,0.2), 0 0 10px ${accentColor}20`,
-                      border: `1px solid ${accentColor}30`,
-                      width: '220px',
-                      top: '60px',
-                      right: '10px'
-                    }}
-                  >
-                    <div className="mb-4">
-                      <HexColorPicker color={accentColor} onChange={setAccentColor} />
-                    </div>
-                    <div className="flex flex-wrap gap-2 justify-center">
-                      <p className="text-xs w-full text-center mb-1" style={{ color: theme === 'dark' ? 'white' : 'black' }}>
-                        Choose a color
-                      </p>
-                      {colorOptions.map((color) => (
-                        <motion.button
-                          key={color}
-                          className="w-8 h-8 rounded-full border-2"
-                          style={{ 
-                            backgroundColor: color,
-                            borderColor: color === accentColor ? 'white' : 'transparent',
-                            boxShadow: color === accentColor ? `0 0 10px ${color}` : 'none'
-                          }}
-                          onClick={() => {
-                            setAccentColor(color);
-                            setColorPickerOpen(false);
-                          }}
-                          whileHover={{ scale: 1.2, boxShadow: `0 0 15px ${color}` }}
-                          whileTap={{ scale: 0.9 }}
-                        />
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
             <motion.button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden flex items-center justify-center ml-1"
-              style={{ 
+              style={{
                 width: '36px',
                 height: '36px',
                 borderRadius: '8px',
@@ -367,9 +341,10 @@ const Navbar: React.FC = () => {
               )}
             </motion.button>
           </div>
+
         </div>
       </div>
-      
+
       {/* Mobile menu with glassmorphic design */}
       <AnimatePresence>
         {mobileMenuOpen && (
@@ -387,146 +362,257 @@ const Navbar: React.FC = () => {
           >
             <div className="absolute inset-0 overflow-y-auto">
               <div className="container mx-auto px-2 sm:px-4 py-3 relative" style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 py-3">
-                {navItems.map((item) => (
-                  <Link key={item.name} href={item.href} passHref>
-                    <motion.div 
-                      className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-200"
-                      style={{ 
-                        backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.25)',
-                        border: `1px solid ${accentColor}30`,
-                        boxShadow: `0 4px 6px rgba(0,0,0,0.1), 0 0 2px ${accentColor}30 inset`,
-                        backdropFilter: 'blur(10px)',
-                        WebkitBackdropFilter: 'blur(10px)'
-                      }}
-                      onClick={() => setMobileMenuOpen(false)}
-                      whileHover={{ 
-                        scale: 1.05, 
-                        backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.35)',
-                        boxShadow: `0 6px 8px rgba(0,0,0,0.15), 0 0 4px ${accentColor}40 inset`
-                      }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <span className="text-base mb-1" style={{ color: accentColor }}>{item.icon}</span>
-                      <span className="text-[9px] font-medium text-center" style={{ 
-                        color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)' 
-                      }}>
-                        {item.name}
-                      </span>
-                    </motion.div>
-                  </Link>
-                ))}
-                <motion.div 
-                  className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-200"
-                  style={{ 
-                    backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.25)',
-                    border: `1px solid ${accentColor}30`,
-                    boxShadow: `0 4px 6px rgba(0,0,0,0.1), 0 0 2px ${accentColor}30 inset`,
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)'
-                  }}
-                  onClick={toggleTheme}
-                  whileHover={{ 
-                    scale: 1.05, 
-                    backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.35)',
-                    boxShadow: `0 6px 8px rgba(0,0,0,0.15), 0 0 4px ${accentColor}40 inset`
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <span className="text-base mb-1" style={{ color: accentColor }}>
-                    {theme === 'dark' ? <FiSun /> : <FiMoon />}
-                  </span>
-                  <span className="text-[9px] font-medium text-center" style={{ 
-                    color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)' 
-                  }}>
-                    {theme === 'dark' ? 'Light' : 'Dark'}
-                  </span>
-                </motion.div>
-                <motion.div 
-                  className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-200"
-                  style={{ 
-                    backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.25)',
-                    border: `1px solid ${accentColor}30`,
-                    boxShadow: `0 4px 6px rgba(0,0,0,0.1), 0 0 2px ${accentColor}30 inset`,
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)'
-                  }}
-                  onClick={() => {}}
-                  whileHover={{ 
-                    scale: 1.05, 
-                    backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.35)',
-                    boxShadow: `0 6px 8px rgba(0,0,0,0.15), 0 0 4px ${accentColor}40 inset`
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <div className="text-base mb-1" style={{ color: accentColor }}>
-                    <MusicPlayer small={true} />
-                  </div>
-                  <span className="text-[9px] font-medium text-center" style={{ 
-                    color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)' 
-                  }}>
-                    Music
-                  </span>
-                </motion.div>
-                <motion.div 
-                  className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-200"
-                  style={{ 
-                    backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.25)',
-                    border: `1px solid ${accentColor}${cornerParticlesEnabled ? '60' : '30'}`,
-                    boxShadow: cornerParticlesEnabled ? `0 4px 8px ${accentColor}30, 0 0 4px ${accentColor}30 inset` : `0 4px 6px rgba(0,0,0,0.1), 0 0 2px ${accentColor}30 inset`,
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)'
-                  }}
-                  onClick={toggleCornerParticles}
-                  whileHover={{ 
-                    scale: 1.05, 
-                    backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.35)',
-                    boxShadow: `0 6px 8px rgba(0,0,0,0.15), 0 0 4px ${accentColor}40 inset`
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <span className="text-base mb-1" style={{ color: cornerParticlesEnabled ? accentColor : '#888888' }}>
-                    <FaRocket style={{ transform: 'rotate(45deg)' }} />
-                  </span>
-                  <span className="text-[9px] font-medium text-center" style={{ 
-                    color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)' 
-                  }}>
-                    Particles
-                  </span>
-                </motion.div>
-                <motion.div 
-                  className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-200"
-                  style={{ 
-                    backgroundColor: `${accentColor}20`,
-                    border: `1px solid ${accentColor}40`,
-                    boxShadow: `0 4px 6px rgba(0,0,0,0.1), 0 0 2px ${accentColor}30 inset`,
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)'
-                  }}
-                  onClick={() => setMobileMenuOpen(false)}
-                  whileHover={{ 
-                    scale: 1.05, 
-                    backgroundColor: `${accentColor}30`,
-                    boxShadow: `0 6px 8px rgba(0,0,0,0.15), 0 0 4px ${accentColor}40 inset`
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <span className="text-base mb-1" style={{ color: accentColor }}>
-                    <FiX />
-                  </span>
-                  <span className="text-[9px] font-medium text-center" style={{ 
-                    color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)' 
-                  }}>
-                    Close
-                  </span>
-                </motion.div>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 py-3">
+                  {navItems.map((item) => (
+                    <Link key={item.name} href={item.href} passHref>
+                      <motion.div
+                        className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-200"
+                        style={{
+                          backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.25)',
+                          border: `1px solid ${accentColor}30`,
+                          boxShadow: `0 4px 6px rgba(0,0,0,0.1), 0 0 2px ${accentColor}30 inset`,
+                          backdropFilter: 'blur(10px)',
+                          WebkitBackdropFilter: 'blur(10px)'
+                        }}
+                        onClick={() => setMobileMenuOpen(false)}
+                        whileHover={{
+                          scale: 1.05,
+                          backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.35)',
+                          boxShadow: `0 6px 8px rgba(0,0,0,0.15), 0 0 4px ${accentColor}40 inset`
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <span className="text-base mb-1" style={{ color: accentColor }}>{item.icon}</span>
+                        <span className="text-[9px] font-medium text-center" style={{
+                          color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'
+                        }}>
+                          {item.name}
+                        </span>
+                      </motion.div>
+                    </Link>
+                  ))}
+                  <motion.div
+                    className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-200"
+                    style={{
+                      backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.25)',
+                      border: `1px solid ${accentColor}30`,
+                      boxShadow: `0 4px 6px rgba(0,0,0,0.1), 0 0 2px ${accentColor}30 inset`,
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)'
+                    }}
+                    onClick={toggleTheme}
+                    whileHover={{
+                      scale: 1.05,
+                      backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.35)',
+                      boxShadow: `0 6px 8px rgba(0,0,0,0.15), 0 0 4px ${accentColor}40 inset`
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <span className="text-base mb-1" style={{ color: accentColor }}>
+                      {theme === 'dark' ? <FiSun /> : <FiMoon />}
+                    </span>
+                    <span className="text-[9px] font-medium text-center" style={{
+                      color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'
+                    }}>
+                      {theme === 'dark' ? 'Light' : 'Dark'}
+                    </span>
+                  </motion.div>
+                  <motion.div
+                    className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-200"
+                    style={{
+                      backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.25)',
+                      border: `1px solid ${accentColor}30`,
+                      boxShadow: `0 4px 6px rgba(0,0,0,0.1), 0 0 2px ${accentColor}30 inset`,
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)'
+                    }}
+                    onClick={() => { }}
+                    whileHover={{
+                      scale: 1.05,
+                      backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.35)',
+                      boxShadow: `0 6px 8px rgba(0,0,0,0.15), 0 0 4px ${accentColor}40 inset`
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <div className="text-base mb-1" style={{ color: accentColor }}>
+                      <MusicPlayer small={true} />
+                    </div>
+                    <span className="text-[9px] font-medium text-center" style={{
+                      color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'
+                    }}>
+                      Music
+                    </span>
+                  </motion.div>
+                  <motion.div
+                    className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-200"
+                    style={{
+                      backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.25)',
+                      border: `1px solid ${accentColor}${cornerParticlesEnabled ? '60' : '30'}`,
+                      boxShadow: cornerParticlesEnabled ? `0 4px 8px ${accentColor}30, 0 0 4px ${accentColor}30 inset` : `0 4px 6px rgba(0,0,0,0.1), 0 0 2px ${accentColor}30 inset`,
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)'
+                    }}
+                    onClick={toggleCornerParticles}
+                    whileHover={{
+                      scale: 1.05,
+                      backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.35)',
+                      boxShadow: `0 6px 8px rgba(0,0,0,0.15), 0 0 4px ${accentColor}40 inset`
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <span className="text-base mb-1" style={{ color: cornerParticlesEnabled ? accentColor : '#888888' }}>
+                      <FaRocket style={{ transform: 'rotate(45deg)' }} />
+                    </span>
+                    <span className="text-[9px] font-medium text-center" style={{
+                      color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'
+                    }}>
+                      Particles
+                    </span>
+                  </motion.div>
+                  <motion.div
+                    className="flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg cursor-pointer transition-all duration-200"
+                    style={{
+                      backgroundColor: `${accentColor}20`,
+                      border: `1px solid ${accentColor}40`,
+                      boxShadow: `0 4px 6px rgba(0,0,0,0.1), 0 0 2px ${accentColor}30 inset`,
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)'
+                    }}
+                    onClick={() => setMobileMenuOpen(false)}
+                    whileHover={{
+                      scale: 1.05,
+                      backgroundColor: `${accentColor}30`,
+                      boxShadow: `0 6px 8px rgba(0,0,0,0.15), 0 0 4px ${accentColor}40 inset`
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <span className="text-base mb-1" style={{ color: accentColor }}>
+                      <FiX />
+                    </span>
+                    <span className="text-[9px] font-medium text-center" style={{
+                      color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)'
+                    }}>
+                      Close
+                    </span>
+                  </motion.div>
+                </div>
               </div>
-            </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.header>
+      {/* Color Picker Modal - Rendered via Portal to ensure it is ALWAYS on top */}
+      {mounted && createPortal(
+        <AnimatePresence>
+          {colorPickerOpen && (
+            <>
+              {/* Backdrop for explicit click-outside handling */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[9990]"
+                onClick={() => setColorPickerOpen(false)}
+              />
+
+              <motion.div
+                ref={colorPickerRef}
+                className="fixed z-[9999] w-[240px] md:w-[300px] rounded-3xl" // Slightly smaller mobile width
+                initial={{ opacity: 0, scale: 0.9, y: 10 }} // Removed rotateX/perspective to fix rendering artifacts
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                style={{
+                  top: '64px',
+                  right: '16px', // Standardized spacing
+                }}
+              >
+                <div
+                  className="p-4 rounded-3xl relative overflow-hidden"
+                  style={{
+                    backdropFilter: 'blur(40px) saturate(180%)', // High blur + saturation for "glass"
+                    backgroundColor: theme === 'dark' ? 'rgba(30, 30, 35, 0.6)' : 'rgba(255, 255, 255, 0.65)', // More transparent
+                    boxShadow: `
+                      0 20px 50px -12px rgba(0,0,0,0.5),
+                      0 0 0 1px ${theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.6)'},
+                      inset 0 1px 0 0 ${theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.9)'}
+                    `, // "Shiny" top border highlight
+                    border: 'none', // Handled by box-shadow
+                  }}
+                >
+                  {/* Shiny Gradient Overlay */}
+                  <div
+                    className="absolute inset-0 pointer-events-none opacity-30"
+                    style={{
+                      background: `linear-gradient(135deg, ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.4)'} 0%, rgba(255,255,255,0) 100%)`
+                    }}
+                  />
+
+                  {/* Modal Header */}
+                  <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-200/5 relative z-10" style={{ borderColor: `${accentColor}20` }}>
+                    <h3 className="font-bold text-[10px] md:text-xs tracking-wider uppercase flex items-center gap-2" style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
+                      <FiSettings className="animate-spin-slow" style={{ color: accentColor }} size={14} />
+                      Theme Settings
+                    </h3>
+                    <button
+                      onClick={() => setColorPickerOpen(false)}
+                      className="p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                    >
+                      <FiX size={14} style={{ color: theme === 'dark' ? '#fff' : '#000' }} />
+                    </button>
+                  </div>
+
+                  {/* Color Picker with Seamless integration */}
+                  <div className="mb-4 flex justify-center relative z-10">
+                    <div
+                      className="w-full rounded-xl overflow-hidden shadow-lg"
+                      style={{
+                        border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)'}`
+                      }}
+                    >
+                      <HexColorPicker color={accentColor} onChange={setAccentColor} />
+                    </div>
+                  </div>
+
+                  {/* Premium Presets - Tighter Grid */}
+                  <div className="relative z-10">
+                    <div className="grid grid-cols-5 gap-2 md:gap-3 justify-items-center">
+                      {PREMIUM_ACCENTS.map((color) => (
+                        <motion.button
+                          key={color.value}
+                          onClick={() => setAccentColor(color.value)}
+                          whileHover={{ scale: 1.15, rotate: 180 }}
+                          whileTap={{ scale: 0.9 }}
+                          className="w-7 h-7 md:w-8 md:h-8 rounded-full focus:outline-none relative transition-shadow duration-300"
+                          style={{
+                            backgroundColor: color.value,
+                            boxShadow: accentColor === color.value
+                              ? `0 0 0 2px ${theme === 'dark' ? '#fff' : '#000'}, 0 0 15px ${color.value}80`
+                              : `0 4px 6px rgba(0,0,0,0.1)`
+                          }}
+                          title={color.name}
+                        >
+                          {accentColor === color.value && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="absolute inset-0 flex items-center justify-center text-white text-[10px]"
+                            >
+                              ✓
+                            </motion.div>
+                          )}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+    </motion.header >
   );
 };
 

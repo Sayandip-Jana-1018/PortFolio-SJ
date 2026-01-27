@@ -5,9 +5,21 @@ import { useParticles } from "../context/ParticlesContext";
 import Plasma from "../components/common/Plasma";
 import ColorBends from "../components/common/ColorBends";
 import Head from "next/head";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, memo, useMemo, useCallback } from "react";
 import CanvasRevealEffect from "../components/common/CanvasRevealEffect";
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from "framer-motion";
+
+// Performance: Throttle utility to limit scroll event frequency
+const throttle = <T extends (...args: any[]) => void>(fn: T, wait: number): T => {
+  let lastTime = 0;
+  return ((...args: Parameters<T>) => {
+    const now = Date.now();
+    if (now - lastTime >= wait) {
+      lastTime = now;
+      fn(...args);
+    }
+  }) as T;
+};
 import { FiAward, FiCode, FiUser, FiFileText, FiArrowDown } from "react-icons/fi";
 import { FaTrophy } from "react-icons/fa";
 import GlassmorphicProfile from "../components/home/GlassmorphicProfile";
@@ -18,13 +30,22 @@ import ScrollProgress from "../components/common/ScrollProgress";
 import SectionTransition from "../components/common/SectionTransition";
 // Performance: Removed heavy particle systems (FloatingElements, PremiumParticles, DynamicBackground, AnimatedBackground)
 // VoiceNavigator removed as requested
-import AboutPage from "../components/sections/AboutPage";
-import ProjectsPage from "../components/sections/ProjectsPage";
-import SkillsPage from "../components/sections/SkillsPage";
-import HackathonsPage from "../components/sections/HackathonsPage";
-import CertificatesPage from "../components/sections/CertificatesPage";
-import ContactPage from "../components/sections/ContactPage";
-import EducationPage from "../components/sections/EducationPage";
+// Performance: Memoize heavy section components to prevent re-renders during scroll
+import AboutPageBase from "../components/sections/AboutPage";
+import ProjectsPageBase from "../components/sections/ProjectsPage";
+import SkillsPageBase from "../components/sections/SkillsPage";
+import HackathonsPageBase from "../components/sections/HackathonsPage";
+import CertificatesPageBase from "../components/sections/CertificatesPage";
+import ContactPageBase from "../components/sections/ContactPage";
+import EducationPageBase from "../components/sections/EducationPage";
+
+const AboutPage = memo(AboutPageBase);
+const ProjectsPage = memo(ProjectsPageBase);
+const SkillsPage = memo(SkillsPageBase);
+const HackathonsPage = memo(HackathonsPageBase);
+const CertificatesPage = memo(CertificatesPageBase);
+const ContactPage = memo(ContactPageBase);
+const EducationPage = memo(EducationPageBase);
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -118,13 +139,14 @@ export default function Home() {
   const [isOnFirstPage, setIsOnFirstPage] = useState(true);
 
   // Track scroll position to determine if user is on first page
+  // Performance: Throttled to 100ms + passive listener for smooth scrolling
   useEffect(() => {
-    const handleScroll = () => {
+    const handleScroll = throttle(() => {
       // Consider user on first page if scrolled less than 100px
       setIsOnFirstPage(window.scrollY < 100);
-    };
+    }, 100);
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -201,7 +223,7 @@ export default function Home() {
         <title>Portfolio | Sayandip Jana</title>
         <meta name="description" content="Personal portfolio showcasing my projects, skills, and achievements" />
         <meta property="og:title" content="Sayandip Jana | Portfolio" />
-        <meta property="og:description" content="Explore the work of Sayandip Jana - Developer, Designer, Innovator" />
+        <meta property="og:description" content="Explore the work of Sayandip Jana - Data Science Enthusiast, ML Developer, Innovator" />
         <meta property="og:image" content="/profile_photo.jpg" />
         <meta name="theme-color" content="#000000" />
       </Head>
@@ -550,7 +572,7 @@ export default function Home() {
                 ref={welcomeTextRef}
                 className="text-xl mb-8"
                 style={{
-                  color: theme === 'dark' ? '#ffffff' : '#000000',
+                  color: '#ffffff',
                   textShadow: theme === 'dark' ? `0 0 15px ${accentColor}80, 0 0 10px rgba(255, 255, 255, 0.5)` : 'none',
                   fontWeight: 500
                 }}
@@ -571,10 +593,17 @@ export default function Home() {
                   { title: 'Skills', icon: <FiAward size={32} />, path: '/#skills' },
                   { title: 'About Me', icon: <FiUser size={32} />, path: '/#about' }
                 ].map((item, index) => (
-                  <motion.a
+                  <motion.div
                     key={item.title}
-                    href={item.path}
-                    className="glassmorphic-card p-8 flex flex-col items-center hover-3d text-white"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const sectionId = item.path.replace('/#', '');
+                      const element = document.getElementById(sectionId);
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                    className="glassmorphic-card p-8 flex flex-col items-center hover-3d text-white cursor-pointer"
                     style={{ boxShadow: `0 8px 32px rgba(0, 0, 0, 0.2), 0 0 10px ${accentColor}20` }}
                     initial="hidden"
                     animate={cardGridInView ? "visible" : "hidden"}
@@ -618,7 +647,7 @@ export default function Home() {
                     <h3 className="text-xl font-semibold mb-2 text-white">{item.title}</h3>
                     <div className="w-12 h-1 rounded-full mb-4" style={{ backgroundColor: `${accentColor}40` }} />
                     <p className="text-sm opacity-70 text-white">Explore my {item.title.toLowerCase()}</p>
-                  </motion.a>
+                  </motion.div>
                 ))}
               </div>
 
@@ -628,55 +657,51 @@ export default function Home() {
                   { title: 'Certificates', icon: <FiFileText size={28} />, path: '/#certificates' },
                   { title: 'Hackathons', icon: <FaTrophy size={24} />, path: '/#hackathons' }
                 ].map((item, index) => (
-                  <motion.a
+                  <motion.div
                     key={item.title}
-                    href={item.path}
-                    className="glassmorphic-card p-6 flex items-center gap-4 hover-3d text-white"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const sectionId = item.path.replace('/#', '');
+                      const element = document.getElementById(sectionId);
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                    className="glassmorphic-card p-6 flex items-center justify-between hover-3d text-white cursor-pointer"
                     style={{ boxShadow: `0 8px 32px rgba(0, 0, 0, 0.2), 0 0 10px ${accentColor}20` }}
                     initial="hidden"
                     animate={additionalCardsInView ? "visible" : "hidden"}
                     variants={{
-                      hidden: { opacity: 0, y: 60, scale: 0.95 },
+                      hidden: { opacity: 0, x: -20 },
                       visible: {
                         opacity: 1,
-                        y: 0,
-                        scale: 1,
+                        x: 0,
                         transition: {
-                          duration: 0.8,
-                          delay: 0.2 + index * 0.15,
-                          ease: [0.25, 0.1, 0.25, 1.0]
+                          duration: 0.5,
+                          delay: 0.5 + (index * 0.1)
                         }
                       }
                     }}
-                    whileHover={{
-                      y: -5,
-                      boxShadow: `0 15px 40px rgba(0, 0, 0, 0.3), 0 0 20px ${accentColor}40`
-                    }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.03, x: 5 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    <motion.div
-                      className="p-3 rounded-full relative"
-                      style={{
-                        color: accentColor,
-                        backgroundColor: `${accentColor}20`,
-                        boxShadow: `0 0 10px ${accentColor}30`
-                      }}
-                      whileHover={{ scale: 1.1, rotate: 10 }}
-                    >
-                      {/* Pulse effect */}
-                      <motion.div
-                        className="absolute inset-0 rounded-full -z-10"
-                        style={{ backgroundColor: `${accentColor}10` }}
-                        animate={{ scale: [1, 1.5, 1], opacity: [0.7, 0, 0.7] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                      />
-                      {item.icon}
-                    </motion.div>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
-                      <p className="text-sm opacity-70">View my {item.title.toLowerCase()}</p>
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="w-12 h-12 rounded-full flex items-center justify-center text-white"
+                        style={{
+                          background: `linear-gradient(135deg, ${accentColor}40, ${accentColor}10)`,
+                          boxShadow: `0 0 10px ${accentColor}30`
+                        }}
+                      >
+                        {item.icon}
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
+                        <p className="text-sm opacity-70">View my {item.title.toLowerCase()}</p>
+                      </div>
                     </div>
-                  </motion.a>
+                    <FiArrowDown className="text-white opacity-50 -rotate-90" />
+                  </motion.div>
                 ))}
               </div>
 
@@ -776,7 +801,7 @@ export default function Home() {
           {/* Contact Section */}
           <ContactPage sectionRef={contactSectionRef} />
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

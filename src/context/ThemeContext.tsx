@@ -60,89 +60,89 @@ const lightPalette: ColorPalette = {
 // Generate a color palette based on accent color with harmonizing colors
 const generatePalette = (baseTheme: ColorPalette, accentColor: string): ColorPalette => {
   // Convert hex to HSL for easier manipulation
-  const hexToHSL = (hex: string): {h: number, s: number, l: number} => {
+  const hexToHSL = (hex: string): { h: number, s: number, l: number } => {
     // Remove the # if present
     hex = hex.replace(/^#/, '');
-    
+
     // Parse the RGB values
     const r = parseInt(hex.substring(0, 2), 16) / 255;
     const g = parseInt(hex.substring(2, 4), 16) / 255;
     const b = parseInt(hex.substring(4, 6), 16) / 255;
-    
+
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
     let h = 0, s = 0;
     const l = (max + min) / 2;
-    
+
     if (max !== min) {
       const d = max - min;
       s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      
+
       switch (max) {
         case r: h = (g - b) / d + (g < b ? 6 : 0); break;
         case g: h = (b - r) / d + 2; break;
         case b: h = (r - g) / d + 4; break;
       }
-      
+
       h /= 6;
     }
-    
+
     return { h: h * 360, s: s * 100, l: l * 100 };
   };
-  
+
   // Convert HSL back to hex
   const hslToHex = (h: number, s: number, l: number): string => {
     h /= 360;
     s /= 100;
     l /= 100;
-    
+
     let r, g, b;
-    
+
     if (s === 0) {
       r = g = b = l;
     } else {
       const hue2rgb = (p: number, q: number, t: number) => {
         if (t < 0) t += 1;
         if (t > 1) t -= 1;
-        if (t < 1/6) return p + (q - p) * 6 * t;
-        if (t < 1/2) return q;
-        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 2) return q;
+        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
         return p;
       };
-      
+
       const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
       const p = 2 * l - q;
-      
-      r = hue2rgb(p, q, h + 1/3);
+
+      r = hue2rgb(p, q, h + 1 / 3);
       g = hue2rgb(p, q, h);
-      b = hue2rgb(p, q, h - 1/3);
+      b = hue2rgb(p, q, h - 1 / 3);
     }
-    
+
     const toHex = (x: number) => {
       const hex = Math.round(x * 255).toString(16);
       return hex.length === 1 ? '0' + hex : hex;
     };
-    
+
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   };
-  
+
   // Get HSL values of the accent color
   const accentHSL = hexToHSL(accentColor);
-  
+
   // Create complementary colors based on the accent
   const complementary = hslToHex((accentHSL.h + 180) % 360, accentHSL.s, accentHSL.l);
   const analogous1 = hslToHex((accentHSL.h + 30) % 360, accentHSL.s, accentHSL.l);
   const analogous2 = hslToHex((accentHSL.h - 30 + 360) % 360, accentHSL.s, accentHSL.l);
-  
+
   // Adjust error, success, warning colors to harmonize with the accent
   return {
     ...baseTheme,
     accent: accentColor,
     info: analogous1,
-    success: baseTheme === darkPalette ? 
+    success: baseTheme === darkPalette ?
       hslToHex((accentHSL.h + 90) % 360, Math.min(accentHSL.s + 10, 100), Math.min(accentHSL.l + 5, 100)) :
       hslToHex((accentHSL.h + 90) % 360, Math.min(accentHSL.s + 5, 100), Math.max(accentHSL.l - 10, 20)),
-    warning: baseTheme === darkPalette ? 
+    warning: baseTheme === darkPalette ?
       hslToHex((accentHSL.h + 150) % 360, Math.min(accentHSL.s, 100), Math.min(accentHSL.l + 10, 100)) :
       hslToHex((accentHSL.h + 150) % 360, Math.min(accentHSL.s, 100), Math.max(accentHSL.l - 5, 30)),
   };
@@ -154,8 +154,8 @@ const defaultContext: ThemeContextType = {
   theme: 'dark',
   colors: darkPalette,
   accentColor: defaultAccentColor,
-  toggleTheme: () => {},
-  setAccentColor: () => {},
+  toggleTheme: () => { },
+  setAccentColor: () => { },
   getThemeColor: () => '#000000',
 };
 
@@ -168,20 +168,21 @@ interface ThemeProviderProps {
 }
 
 // Enhanced predefined accent colors for better visual appeal
-export const accentColors = [
-  '#00d4ff', // Bright Cyan
-  '#3b82f6', // Vibrant Blue
-  '#6366f1', // Electric Indigo
-  '#a855f7', // Rich Purple
-  '#ec4899', // Vibrant Pink
-  '#ef4444', // Bright Red
-  '#f97316', // Vivid Orange
-  '#10b981', // Emerald Green
-  '#eab308', // Amber Yellow
-  '#14b8a6', // Teal
-  '#06b6d4', // Cyan
-  '#0ea5e9', // Sky Blue
+// Enhanced premium accent colors based on modern 2025 web trends
+export const PREMIUM_ACCENTS = [
+  { name: 'Twilio Red', value: '#F22F46' },      // Modern, accessible red
+  { name: 'Stripe Blurple', value: '#635BFF' },  // Deep tech blue-purple
+  { name: 'Cyber Neon', value: '#00D4FF' },      // High energy cyan
+  { name: 'Emerald', value: '#10B981' },         // Clean success green
+  { name: 'Sunset', value: '#F97316' },          // Warm orange
+  { name: 'Royal', value: '#A855F7' },           // Regal purple
+  { name: 'Electric Pink', value: '#EC4899' },   // Vibrant pink
+  { name: 'Amber Glow', value: '#EAB308' },      // Warm gold
+  { name: 'Teal Depth', value: '#14B8A6' },      // Sophisticated teal
+  { name: 'Sky High', value: '#0EA5E9' },        // Airy blue
 ];
+
+export const accentColors = PREMIUM_ACCENTS.map(c => c.value);
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>('dark');
@@ -209,35 +210,35 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const basePalette = theme === 'dark' ? darkPalette : lightPalette;
     const newColors = generatePalette(basePalette, accentColor);
     setColors(newColors);
-    
+
     // Apply theme to document body
     document.body.classList.toggle('dark-theme', theme === 'dark');
     document.body.classList.toggle('light-theme', theme === 'light');
-    
+
     // Set CSS variables for colors
     Object.entries(newColors).forEach(([key, value]) => {
       document.documentElement.style.setProperty(`--color-${key}`, value);
     });
-    
+
     // Set additional CSS variables for gradients and effects
-    document.documentElement.style.setProperty('--accent-gradient', 
+    document.documentElement.style.setProperty('--accent-gradient',
       `linear-gradient(135deg, ${newColors.accent}, ${newColors.info})`);
-    
-    document.documentElement.style.setProperty('--accent-glow', 
+
+    document.documentElement.style.setProperty('--accent-glow',
       `0 0 20px ${newColors.accent}80, 0 0 40px ${newColors.accent}40`);
-      
-    document.documentElement.style.setProperty('--surface-gradient', 
-      theme === 'dark' ? 
-        `linear-gradient(180deg, ${newColors.surface}, ${newColors.primary})` : 
+
+    document.documentElement.style.setProperty('--surface-gradient',
+      theme === 'dark' ?
+        `linear-gradient(180deg, ${newColors.surface}, ${newColors.primary})` :
         `linear-gradient(180deg, ${newColors.primary}, ${newColors.surface})`);
-        
+
     // Apply accent color to all elements with data-accent-color attribute
     document.querySelectorAll('[data-accent-color="true"]').forEach(element => {
       if (element instanceof HTMLElement) {
         element.style.backgroundColor = accentColor;
       }
     });
-    
+
     // Apply gradient backgrounds with accent color
     document.querySelectorAll('[data-accent-gradient="true"]').forEach(element => {
       if (element instanceof HTMLElement) {
@@ -250,7 +251,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
-    
+
     // Force immediate update of all theme-dependent elements
     const event = new CustomEvent('themechange', { detail: { theme: newTheme } });
     document.dispatchEvent(event);
@@ -259,12 +260,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const handleSetAccentColor = (color: string) => {
     setAccentColor(color);
     localStorage.setItem('accentColor', color);
-    
+
     // Force immediate update of all accent-color-dependent elements
     const event = new CustomEvent('accentcolorchange', { detail: { color } });
     document.dispatchEvent(event);
   };
-  
+
   const getThemeColor = (colorName: keyof ColorPalette): string => {
     return colors[colorName];
   };

@@ -2,14 +2,13 @@ import React, { Suspense, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 import {
-  SiHtml5, SiCss3, SiJavascript, SiTypescript, SiReact, SiRedux,
-  SiTailwindcss, SiNextdotjs, SiNodedotjs, SiExpress, SiMongodb,
-  SiFirebase, SiPostgresql, SiPython, SiDjango, SiGit,
-  SiDocker, SiFigma, SiAmazon, SiThreedotjs, SiVuedotjs,
-  SiAngular, SiSvelte, SiGraphql, SiMysql, SiFlutter,
-  SiKubernetes, SiJenkins, SiNginx, SiVercel, SiNetlify
+  SiPython, SiTensorflow, SiScikitlearn, SiPandas, SiNumpy, SiOpencv,
+  SiJavascript, SiTypescript, SiReact, SiNextdotjs, SiTailwindcss,
+  SiNodedotjs, SiExpress, SiMongodb, SiFlask, SiSupabase,
+  SiGit, SiDocker, SiVercel, SiPostgresql,
+  SiThreedotjs, SiOpenai, SiStreamlit
 } from "react-icons/si";
-import { FiCode, FiLayout, FiDatabase, FiServer, FiTool } from "react-icons/fi";
+import { FiCpu, FiLayout, FiServer, FiTool, FiDatabase } from "react-icons/fi";
 import SkillBalls from '../skills/SkillBalls';
 import SkillStats from '../skills/SkillStats';
 import SkillProficiency from '../skills/SkillProficiency';
@@ -54,20 +53,32 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
     }
   };
 
-  // Define skill categories with icons
+  // Define skill categories with icons - Updated for Data Science & ML focus
   const skillCategories = [
+    {
+      title: "Machine Learning & AI",
+      icon: <FiCpu size={24} />,
+      skills: [
+        { name: "Python", icon: <SiPython size={40} />, color: "#3776AB" },
+        { name: "TensorFlow", icon: <SiTensorflow size={40} />, color: "#FF6F00" },
+        { name: "Scikit-Learn", icon: <SiScikitlearn size={40} />, color: "#F7931E" },
+        { name: "Pandas", icon: <SiPandas size={40} />, color: "#150458" },
+        { name: "NumPy", icon: <SiNumpy size={40} />, color: "#013243" },
+        { name: "OpenCV", icon: <SiOpencv size={40} />, color: "#5C3EE8" },
+        { name: "OpenAI", icon: <SiOpenai size={40} />, color: "#412991" },
+        { name: "Streamlit", icon: <SiStreamlit size={40} />, color: "#FF4B4B" }
+      ]
+    },
     {
       title: "Frontend Development",
       icon: <FiLayout size={24} />,
       skills: [
-        { name: "HTML5", icon: <SiHtml5 size={40} />, color: "#E34F26" },
-        { name: "CSS3", icon: <SiCss3 size={40} />, color: "#1572B6" },
-        { name: "JavaScript", icon: <SiJavascript size={40} />, color: "#F7DF1E" },
-        { name: "TypeScript", icon: <SiTypescript size={40} />, color: "#3178C6" },
         { name: "React", icon: <SiReact size={40} />, color: "#61DAFB" },
-        { name: "Redux", icon: <SiRedux size={40} />, color: "#764ABC" },
+        { name: "Next.js", icon: <SiNextdotjs size={40} />, color: "#000000" },
+        { name: "TypeScript", icon: <SiTypescript size={40} />, color: "#3178C6" },
+        { name: "JavaScript", icon: <SiJavascript size={40} />, color: "#F7DF1E" },
         { name: "Tailwind CSS", icon: <SiTailwindcss size={40} />, color: "#06B6D4" },
-        { name: "Next.js", icon: <SiNextdotjs size={40} />, color: "#000000" }
+        { name: "Three.js", icon: <SiThreedotjs size={40} />, color: "#000000" }
       ]
     },
     {
@@ -76,34 +87,20 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
       skills: [
         { name: "Node.js", icon: <SiNodedotjs size={40} />, color: "#339933" },
         { name: "Express", icon: <SiExpress size={40} />, color: "#000000" },
+        { name: "Flask", icon: <SiFlask size={40} />, color: "#000000" },
+        { name: "FastAPI", icon: <SiPython size={40} />, color: "#009688" },
+        { name: "Supabase", icon: <SiSupabase size={40} />, color: "#3ECF8E" }
+      ]
+    },
+    {
+      title: "Databases & Tools",
+      icon: <FiDatabase size={24} />,
+      skills: [
         { name: "MongoDB", icon: <SiMongodb size={40} />, color: "#47A248" },
         { name: "PostgreSQL", icon: <SiPostgresql size={40} />, color: "#4169E1" },
-        { name: "Python", icon: <SiPython size={40} />, color: "#3776AB" },
-        { name: "Django", icon: <SiDjango size={40} />, color: "#092E20" },
-        { name: "GraphQL", icon: <SiGraphql size={40} />, color: "#E10098" }
-      ]
-    },
-    {
-      title: "DevOps & Tools",
-      icon: <FiTool size={24} />,
-      skills: [
         { name: "Git", icon: <SiGit size={40} />, color: "#F05032" },
         { name: "Docker", icon: <SiDocker size={40} />, color: "#2496ED" },
-        { name: "AWS", icon: <SiAmazon size={40} />, color: "#FF9900" },
-        { name: "Kubernetes", icon: <SiKubernetes size={40} />, color: "#326CE5" },
-        { name: "Vercel", icon: <SiVercel size={40} />, color: "#000000" },
-        { name: "Netlify", icon: <SiNetlify size={40} />, color: "#00C7B7" }
-      ]
-    },
-    {
-      title: "Frameworks & Libraries",
-      icon: <FiCode size={24} />,
-      skills: [
-        { name: "Vue.js", icon: <SiVuedotjs size={40} />, color: "#4FC08D" },
-        { name: "Angular", icon: <SiAngular size={40} />, color: "#DD0031" },
-        { name: "Svelte", icon: <SiSvelte size={40} />, color: "#FF3E00" },
-        { name: "Flutter", icon: <SiFlutter size={40} />, color: "#02569B" },
-        { name: "Three.js", icon: <SiThreedotjs size={40} />, color: "#000000" }
+        { name: "Vercel", icon: <SiVercel size={40} />, color: "#000000" }
       ]
     }
   ];
@@ -135,10 +132,10 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
             title="Skills & Expertise"
             subtitlePrefix="I specialize in"
             subtitles={[
-              'Web Development',
-              'Frontend Technologies',
-              'Backend Systems',
-              'Modern Frameworks'
+              'Machine Learning',
+              'Data Science',
+              'Full Stack Development',
+              'AI Applications'
             ]}
           />
         </motion.div>
@@ -150,7 +147,7 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
         >
-          A comprehensive overview of my technical skills and areas of expertise
+          A Data Science enthusiast with strong foundations in ML, AI, and Full Stack Development
         </motion.p>
 
         {/* 3D Skill Balls */}
@@ -190,7 +187,7 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
         >
           <h3 className="text-2xl font-bold mb-4">Want to work together?</h3>
           <p className="text-lg opacity-80 mb-6 max-w-2xl mx-auto">
-            I'm always open to discussing new projects, creative ideas or opportunities to be part of your vision.
+            I'm always open to discussing ML projects, data science collaborations, or opportunities to build innovative AI solutions.
           </p>
           <motion.a
             href="#contact"

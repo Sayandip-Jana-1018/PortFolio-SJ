@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 import SkillProgressBar from './SkillProgressBar';
-import { FiLayout, FiServer, FiTool } from 'react-icons/fi';
+import { FiCpu, FiLayout, FiServer, FiDatabase } from 'react-icons/fi';
 
 interface SkillGroup {
   title: string;
@@ -14,39 +14,45 @@ interface SkillGroup {
 
 const SkillProficiency: React.FC = () => {
   const { theme, accentColor } = useTheme();
-  
+
   const skillGroups: SkillGroup[] = [
     {
-      title: "Frontend Development",
+      title: "Machine Learning & AI",
       skills: [
-        { name: "HTML/CSS", level: 95 },
-        { name: "JavaScript", level: 90 },
-        { name: "TypeScript", level: 85 },
-        { name: "React", level: 92 },
-        { name: "Next.js", level: 88 },
+        { name: "Python", level: 95 },
+        { name: "TensorFlow", level: 85 },
+        { name: "Scikit-Learn", level: 90 },
+        { name: "Pandas/NumPy", level: 92 },
+        { name: "OpenCV", level: 78 },
+        { name: "XGBoost", level: 85 },
+      ]
+    },
+    {
+      title: "Web Development",
+      skills: [
+        { name: "React/Next.js", level: 88 },
+        { name: "TypeScript", level: 80 },
+        { name: "Node.js", level: 82 },
+        { name: "Flask/FastAPI", level: 85 },
         { name: "Tailwind CSS", level: 90 },
       ]
     },
     {
-      title: "Backend Development",
+      title: "Databases & Tools",
       skills: [
-        { name: "Node.js", level: 85 },
-        { name: "Express", level: 82 },
-        { name: "MongoDB", level: 80 },
-        { name: "PostgreSQL", level: 75 },
-        { name: "Python", level: 70 },
-      ]
-    },
-    {
-      title: "Tools & Others",
-      skills: [
+        { name: "MongoDB", level: 82 },
+        { name: "PostgreSQL", level: 78 },
+        { name: "Supabase", level: 80 },
         { name: "Git/GitHub", level: 90 },
         { name: "Docker", level: 70 },
-        { name: "CI/CD", level: 75 },
-        { name: "AWS", level: 65 },
-        { name: "Figma", level: 80 },
       ]
     }
+  ];
+
+  const icons = [
+    <FiCpu key="cpu" size={20} style={{ color: accentColor }} />,
+    <FiLayout key="layout" size={20} style={{ color: accentColor }} />,
+    <FiDatabase key="db" size={20} style={{ color: accentColor }} />
   ];
 
   return (
@@ -69,50 +75,46 @@ const SkillProficiency: React.FC = () => {
         </motion.h3>
         <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: accentColor }}></div>
         <p className="mt-4 text-lg opacity-80 max-w-2xl mx-auto">
-          A detailed breakdown of my technical expertise and proficiency levels
+          Technical expertise in Machine Learning, Data Science, and Full Stack Development
         </p>
       </motion.div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {skillGroups.map((group, groupIndex) => (
           <motion.div
             key={group.title}
-            className={`p-8 rounded-2xl ${
-              theme === 'dark' 
-                ? 'bg-gradient-to-br from-gray-900/70 to-gray-800/50 backdrop-blur-md' 
+            className={`p-8 rounded-2xl ${theme === 'dark'
+                ? 'bg-gradient-to-br from-gray-900/70 to-gray-800/50 backdrop-blur-md'
                 : 'bg-gradient-to-br from-white/90 to-gray-100/70 backdrop-blur-md'
-            } shadow-xl border border-opacity-20 ${
-              theme === 'dark' ? 'border-white/10' : 'border-black/10'
-            }`}
+              } shadow-xl border border-opacity-20 ${theme === 'dark' ? 'border-white/10' : 'border-black/10'
+              }`}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: groupIndex * 0.2 }}
             viewport={{ once: false, margin: "-100px" }}
-            whileHover={{ 
+            whileHover={{
               boxShadow: `0 20px 40px rgba(0,0,0,0.2), 0 0 15px ${accentColor}30`,
               transform: 'translateY(-5px)'
             }}
           >
             <div className="flex items-center mb-8">
-              <div 
+              <div
                 className="w-12 h-12 rounded-full flex items-center justify-center mr-4"
-                style={{ 
+                style={{
                   backgroundColor: `${accentColor}20`,
                   border: `2px solid ${accentColor}`
                 }}
               >
-                {groupIndex === 0 && <FiLayout size={20} style={{ color: accentColor }} />}
-                {groupIndex === 1 && <FiServer size={20} style={{ color: accentColor }} />}
-                {groupIndex === 2 && <FiTool size={20} style={{ color: accentColor }} />}
+                {icons[groupIndex]}
               </div>
-              <h4 
-                className="text-xl font-bold" 
+              <h4
+                className="text-xl font-bold"
                 style={{ color: accentColor }}
               >
                 {group.title}
               </h4>
             </div>
-            
+
             <div>
               {group.skills.map((skill, skillIndex) => (
                 <SkillProgressBar

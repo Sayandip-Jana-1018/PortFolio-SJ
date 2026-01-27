@@ -72,6 +72,8 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ sectionRef }) => {
 
   return (
     <section
+      id="projects"
+      ref={sectionRef}
       className="relative min-h-screen w-full overflow-hidden py-20 px-4 md:px-8"
       style={{
         background: theme === 'dark' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
@@ -124,7 +126,7 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ sectionRef }) => {
 
         {/* Project Grid */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="flex flex-wrap justify-center gap-8"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
