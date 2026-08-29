@@ -1,26 +1,19 @@
-import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "../components/layout/Navbar";
 import { useTheme } from "../context/ThemeContext";
 import { useParticles } from "../context/ParticlesContext";
-import Plasma from "../components/common/Plasma";
-import ColorBends from "../components/common/ColorBends";
 import Head from "next/head";
-import { useEffect, useRef, useState, memo, useMemo, useCallback } from "react";
-import CanvasRevealEffect from "../components/common/CanvasRevealEffect";
-import { motion, AnimatePresence, useScroll, useTransform, useInView } from "framer-motion";
+import { useEffect, useRef, useState, memo, useCallback } from "react";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import dynamic from "next/dynamic";
 
-// Performance: Throttle utility to limit scroll event frequency
-const throttle = <T extends (...args: any[]) => void>(fn: T, wait: number): T => {
-  let lastTime = 0;
-  return ((...args: Parameters<T>) => {
-    const now = Date.now();
-    if (now - lastTime >= wait) {
-      lastTime = now;
-      fn(...args);
-    }
-  }) as T;
-};
-import { FiAward, FiCode, FiUser, FiFileText, FiArrowDown } from "react-icons/fi";
+// Performance: Dynamic imports for heavy components
+const MoltenMetal = dynamic(() => import("../components/common/MoltenMetal"), { ssr: false });
+// Only fetched once the reader actually picks the scroll backdrop, so the
+// 13MB frame set costs nothing to anyone who stays on the shader.
+const ScrollFrames = dynamic(() => import("../components/common/ScrollFrames"), { ssr: false });
+const CanvasRevealEffect = dynamic(() => import("../components/common/CanvasRevealEffect"), { ssr: false });
+
+import { FiAward, FiCode, FiUser, FiFileText, FiArrowDown, FiArrowRight } from "react-icons/fi";
 import { FaTrophy } from "react-icons/fa";
 import GlassmorphicProfile from "../components/home/GlassmorphicProfile";
 import AnimatedText from "../components/home/AnimatedText";
@@ -28,9 +21,11 @@ import CustomCursor from "../components/common/CustomCursor";
 import ClickEffect from "../components/common/ClickEffect";
 import ScrollProgress from "../components/common/ScrollProgress";
 import SectionTransition from "../components/common/SectionTransition";
-// Performance: Removed heavy particle systems (FloatingElements, PremiumParticles, DynamicBackground, AnimatedBackground)
-// VoiceNavigator removed as requested
-// Performance: Memoize heavy section components to prevent re-renders during scroll
+import MaskedHeading from "../components/common/MaskedHeading";
+import TouchRipple from "../components/common/TouchRipple";
+import GlowCard from "../components/common/GlowCard";
+
+// Performance: Memoize heavy section components
 import AboutPageBase from "../components/sections/AboutPage";
 import ProjectsPageBase from "../components/sections/ProjectsPage";
 import SkillsPageBase from "../components/sections/SkillsPage";
@@ -47,124 +42,83 @@ const CertificatesPage = memo(CertificatesPageBase);
 const ContactPage = memo(ContactPageBase);
 const EducationPage = memo(EducationPageBase);
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
-// Performance: Removed heavy MobileParticlesEffect and DesktopOnlyEffects components
-// They were causing major lag with 5+ particle/animation systems running simultaneously
+// Throttle utility for scroll performance
+const throttle = <T extends (...args: any[]) => void>(fn: T, wait: number): T => {
+  let lastTime = 0;
+  return ((...args: Parameters<T>) => {
+    const now = Date.now();
+    if (now - lastTime >= wait) {
+      lastTime = now;
+      fn(...args);
+    }
+  }) as T;
+};
+
+// Theme-aware MoltenMetal colors
+const getMoltenColors = (accentColor: string, theme: string) => {
+  if (theme === 'dark') {
+    return {
+      color1: accentColor, // Use selected theme color
+      color2: accentColor, // Removed pink/violet, use theme color for base
+      color3: '#ffffff', // Pure white for caustic streaks
+      brightness: 1.3,
+      blackPoint: 0.05,
+      opacity: 1.0,
+      scale: 4,
+      glow: 1.6,
+    };
+  }
+  // Light mode -> "Aurora" style
+  return {
+    color1: accentColor,
+    color2: '#000000', // Changed to black based on user feedback
+    color3: '#000000', // Changed to black for dark streaks
+    brightness: 1.1, 
+    blackPoint: 0.02,
+    opacity: 0.9,
+    scale: 3.5,
+    glow: 1.3,
+  };
+};
 
 export default function Home() {
-  const { theme, accentColor } = useTheme();
+  const { theme, accentColor, backgroundMode } = useTheme();
   const { cornerParticlesEnabled, toggleCornerParticles } = useParticles();
   const [isClient, setIsClient] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
   const wallpaperSectionRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoLoaded, setVideoLoaded] = useState(false);
-  const [showWallpaper, setShowWallpaper] = useState(false);
 
-  // Refs for scroll-triggered animations in Welcome section
+  // Refs for scroll-triggered animations
   const welcomeTitleRef = useRef<HTMLDivElement>(null);
   const welcomeTextRef = useRef<HTMLDivElement>(null);
   const cardGridRef = useRef<HTMLDivElement>(null);
   const additionalCardsRef = useRef<HTMLDivElement>(null);
 
-  // Individual inView states for each section with different thresholds
   const welcomeTitleInView = useInView(welcomeTitleRef, { once: false, amount: 0.5 });
   const welcomeTextInView = useInView(welcomeTextRef, { once: false, amount: 0.4 });
   const cardGridInView = useInView(cardGridRef, { once: false, amount: 0.3 });
   const additionalCardsInView = useInView(additionalCardsRef, { once: false, amount: 0.2 });
 
-  // Get scroll progress for animations
+  // Scroll progress
   const { scrollYProgress } = useScroll({
     target: mainRef,
     offset: ['start start', 'end end']
   });
 
-  // Animation variant for fade-in effect
-  const fadeInUpVariant = {
-    hidden: { opacity: 0, y: 80, scale: 0.95 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        duration: 0.8,
-        ease: [0.25, 0.1, 0.25, 1.0]
-      }
-    }
-  };
-
-  // Transform scroll progress for various effects
   const scrollProgress = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
-  // ColorBends opacity: 0 at top, fades in quickly (0.05-0.15) to be ready for About section
-  const colorBendsOpacity = useTransform(
-    scrollYProgress,
-    [0, 0.05, 0.15],
-    [0, 0, 0.8]
-  );
-  const [scrollValue, setScrollValue] = useState(0);
 
-  // Update scroll value for components that can't use motion values directly
-  useEffect(() => {
-    const unsubscribe = scrollProgress.on("change", v => setScrollValue(v));
-    return () => unsubscribe();
-  }, [scrollProgress]);
+  const isScrollBg = backgroundMode === 'scroll';
+
+
 
   // Client-side initialization
   useEffect(() => {
     setIsClient(true);
-
-    // Add the glassmorphism CSS to the page
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = '/glassmorphism.css';
-    document.head.appendChild(link);
-
-    return () => {
-      if (document.head.contains(link)) {
-        document.head.removeChild(link);
-      }
-    };
   }, []);
 
-  // State to track if user is on the first page
-  const [isOnFirstPage, setIsOnFirstPage] = useState(true);
-
-  // Track scroll position to determine if user is on first page
-  // Performance: Throttled to 100ms + passive listener for smooth scrolling
-  useEffect(() => {
-    const handleScroll = throttle(() => {
-      // Consider user on first page if scrolled less than 100px
-      setIsOnFirstPage(window.scrollY < 100);
-    }, 100);
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Set wallpaper to always be visible
-  useEffect(() => {
-    setShowWallpaper(true);
-  }, []);
-
-  // Handle video loading and play
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(error => {
-        console.error('Video play error:', error);
-      });
-    }
-  }, [videoLoaded]);
-
-  // Section refs for scrolling
+  // Section refs
   const aboutSectionRef = useRef<HTMLDivElement>(null);
   const projectsSectionRef = useRef<HTMLDivElement>(null);
   const skillsSectionRef = useRef<HTMLDivElement>(null);
@@ -174,27 +128,9 @@ export default function Home() {
   const contactSectionRef = useRef<HTMLDivElement>(null);
 
   // Scroll to section function
-  const scrollToSection = (sectionRef: React.RefObject<HTMLDivElement>) => {
-    if (sectionRef.current) {
-      sectionRef.current.scrollIntoView({
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  // Scroll down function
-  const scrollToWallpaper = () => {
-    if (wallpaperSectionRef.current) {
-      wallpaperSectionRef.current.scrollIntoView({
-        behavior: 'smooth'
-      });
-    } else {
-      window.scrollTo({
-        top: window.innerHeight,
-        behavior: 'smooth'
-      });
-    }
-  };
+  const scrollToSection = useCallback((sectionRef: React.RefObject<HTMLDivElement | null>) => {
+    sectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
 
   // Handle navigation from navbar
   useEffect(() => {
@@ -207,24 +143,45 @@ export default function Home() {
       else if (hash === '#certificates') scrollToSection(certificatesSectionRef);
       else if (hash === '#contact') scrollToSection(contactSectionRef);
     };
-
-    // Run on initial load and when hash changes
     handleNavigation();
     window.addEventListener('hashchange', handleNavigation);
+    return () => window.removeEventListener('hashchange', handleNavigation);
+  }, [scrollToSection]);
 
-    return () => {
-      window.removeEventListener('hashchange', handleNavigation);
-    };
-  }, []);
+  // Get theme-aware molten metal colors
+  const moltenColors = getMoltenColors(accentColor, theme);
+
+  // Beautiful smooth 3D text shadow for depth and pop effect on Welcome heading
+  const welcomeTextShadow3D = `
+    1px 1px 1px rgba(0,0,0,0.9),
+    2px 2px 2px rgba(0,0,0,0.8),
+    3px 3px 2px rgba(0,0,0,0.7),
+    4px 4px 3px rgba(0,0,0,0.6),
+    5px 5px 3px rgba(0,0,0,0.5),
+    6px 6px 4px rgba(0,0,0,0.4),
+    8px 8px 15px rgba(0,0,0,0.9),
+    12px 12px 35px rgba(0,0,0,0.7),
+    0 0 40px ${accentColor}a0,
+    0 0 80px ${accentColor}60
+  `;
+
+  // Fade-in animation variant
+  const fadeInUpVariant = {
+    hidden: { opacity: 0, y: 80, scale: 0.95 },
+    visible: {
+      opacity: 1, y: 0, scale: 1,
+      transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1.0] }
+    }
+  };
 
   return (
-    <div className={`${geistSans.className} ${geistMono.className} font-[family-name:var(--font-geist-sans)]`}>
+    <div className="font-sans antialiased">
       <Head>
         <title>Portfolio | Sayandip Jana</title>
         <meta name="description" content="Personal portfolio showcasing my projects, skills, and achievements" />
         <meta property="og:title" content="Sayandip Jana | Portfolio" />
         <meta property="og:description" content="Explore the work of Sayandip Jana - Data Science Enthusiast, ML Developer, Innovator" />
-        <meta property="og:image" content="/profile_photo.jpg" />
+        <meta property="og:image" content="/images/profile_photo.jpg" />
         <meta name="theme-color" content="#000000" />
       </Head>
 
@@ -235,20 +192,45 @@ export default function Home() {
           <>
             <CustomCursor />
             <ClickEffect />
-            {/* Global Background Effect */}
-            {/* Global Background Effect - Fades in after Hero section */}
-            <motion.div
-              className="fixed inset-0 z-0 pointer-events-none"
-              style={{ opacity: colorBendsOpacity }}
-            >
-              <ColorBends
-                colors={[accentColor, theme === 'dark' ? '#333333' : '#f0f0f0', accentColor]}
-                speed={0.14}
-                scale={0.6}
-                autoRotate={5}
-                transparent={true}
-              />
-            </motion.div>
+            <TouchRipple />
+
+            {/* Global background — Theme-driven, no cursor interaction.
+                Two backdrops, one slot: the generative shader, or the film
+                scrubbed by scroll. Only one is mounted at a time so the other
+                is neither drawing nor holding decoded frames in memory. */}
+            <div className="fixed inset-0 z-0 pointer-events-none">
+              {isScrollBg ? (
+                <ScrollFrames
+                  theme={theme}
+                  accentColor={accentColor}
+                  handoffRef={contactSectionRef}
+                  tailSrc="/bg-frames/tail.webp"
+                />
+              ) : (
+                <MoltenMetal
+                  color1={moltenColors.color1}
+                  color2={moltenColors.color2}
+                  color3={moltenColors.color3}
+                  speed={0.35}
+                  scale={moltenColors.scale || 4}
+                  detail={3}
+                  glow={moltenColors.glow || 1.6}
+                  coreSize={0.1}
+                  swirl={1}
+                  fold={-0.2}
+                  blackPoint={moltenColors.blackPoint}
+                  brightness={moltenColors.brightness}
+                  colorMode={theme === 'dark' ? 'molten' : 'frost'}
+                  grain={true}
+                  grainIntensity={0.03}
+                  mouseInteraction={false}
+                  mouseStrength={0}
+                  opacity={moltenColors.opacity}
+                />
+              )}
+            </div>
+
+            {/* Corner Particles Overlay */}
             <CanvasRevealEffect
               cornerParticles={cornerParticlesEnabled}
               onToggleCornerParticles={toggleCornerParticles}
@@ -257,8 +239,6 @@ export default function Home() {
             />
           </>
         )}
-
-        {/* Performance: Removed heavy DesktopOnlyEffects and MobileParticlesEffect components */}
 
         {/* Scroll progress indicator */}
         <ScrollProgress />
@@ -270,304 +250,163 @@ export default function Home() {
           className={`main-content ${theme === 'dark' ? 'text-white' : 'text-black'}`}
           style={{ position: 'relative', background: 'transparent' }}
         >
-          {/* Hero section with parallax effects */}
-          <div className="h-screen relative overflow-hidden flex flex-col items-center justify-center px-4 py-8 sm:py-4 md:py-2 lg:py-0 section-container text-white">
-            {/* Premium visual elements */}
-            <div className="absolute inset-0 z-0 overflow-hidden">
-              {/* Plasma Background */}
-              <div
-                className="absolute bottom-0 left-0 w-full h-[90%] opacity-100 z-[-1]"
-                style={{ maskImage: 'linear-gradient(to top, black 30%, transparent 100%)' }}
-              >
-                <Plasma
-                  color={accentColor}
-                  speed={1.5}
-                  direction="forward"
-                  scale={2.0}
-                  opacity={1.0}
-                  mouseInteractive={false}
-                />
-              </div>
+          {/* ═══════════════════ HERO SECTION ═══════════════════ */}
+          <div className="h-screen relative overflow-hidden flex flex-col items-center justify-center px-4 section-container text-white">
+            {/* Glassmorphic frosted overlay for readability without hiding the background completely */}
+            <div className="absolute inset-0 z-[1]" style={{
+              background: theme === 'dark'
+                ? `radial-gradient(ellipse at 50% 30%, ${accentColor}08, rgba(0,0,0,0.4) 70%)`
+                : `radial-gradient(ellipse at 50% 30%, ${accentColor}05, rgba(255,255,255,0.2) 70%)`,
+            }} />
 
-              <motion.div
-                className="absolute top-0 left-0 w-full h-1 opacity-20"
-                style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }}
-              />
-              <motion.div
-                className="absolute bottom-0 left-0 w-full h-1 opacity-20"
-                style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }}
-              />
-              <motion.div
-                className="absolute top-0 left-0 w-1 h-full opacity-20"
-                style={{ background: `linear-gradient(180deg, transparent, ${accentColor}, transparent)` }}
-              />
-              <motion.div
-                className="absolute top-0 right-0 w-1 h-full opacity-20"
-                style={{ background: `linear-gradient(180deg, transparent, ${accentColor}, transparent)` }}
-              />
-            </div>
-            {/* Static decorative corner elements - no animation to avoid distraction */}
+            {/* Decorative corner elements */}
             <div
-              className="absolute top-[10%] left-[10%] w-24 h-24 opacity-15"
+              className="absolute top-[10%] left-[10%] w-24 h-24 opacity-15 z-[2]"
               style={{
-                borderWidth: '1px 0 0 1px',
-                borderStyle: 'solid',
-                borderColor: accentColor,
+                borderWidth: '1px 0 0 1px', borderStyle: 'solid', borderColor: accentColor,
                 borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%'
               }}
             />
             <div
-              className="absolute bottom-[10%] right-[10%] w-20 h-20 opacity-15"
+              className="absolute bottom-[10%] right-[10%] w-20 h-20 opacity-15 z-[2]"
               style={{
-                borderWidth: '0 1px 1px 0',
-                borderStyle: 'solid',
-                borderColor: accentColor,
+                borderWidth: '0 1px 1px 0', borderStyle: 'solid', borderColor: accentColor,
                 borderRadius: '40% 60% 70% 30% / 40% 70% 30% 60%'
               }}
             />
 
-            {/* Additional static decorative elements */}
-            <div
-              className="absolute top-[20%] right-[15%] w-16 h-16 opacity-10"
-              style={{
-                borderWidth: '1px',
-                borderStyle: 'solid',
-                borderColor: `${accentColor}70`,
-                borderRadius: '50%',
-                borderLeftWidth: '0px',
-                borderBottomWidth: '0px'
-              }}
-            />
-            <div
-              className="absolute bottom-[20%] left-[15%] w-12 h-12 opacity-10"
-              style={{
-                borderWidth: '1px',
-                borderStyle: 'solid',
-                borderColor: `${accentColor}70`,
-                borderRadius: '50%',
-                borderRightWidth: '0px',
-                borderTopWidth: '0px'
-              }}
-            />
-            {/* Animated text with parallax effect */}
-            <div className="mb-12 content-block">
-              <AnimatedText scrollProgress={scrollValue} />
-            </div>
-
-            {/* Glassmorphic profile with scroll animations */}
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="relative"
-              style={{
-                transform: 'perspective(1000px) rotateX(5deg)',
-                transformStyle: 'preserve-3d'
-              }}
-              whileHover={{
-                scale: 1.05,
-                rotateX: 0,
-                transition: { duration: 0.3 }
-              }}
-            >
-              {/* Subtle animated circle around the profile */}
-              <motion.div
-                className="absolute -inset-3 rounded-full opacity-30"
-                style={{
-                  borderWidth: '1px',
-                  borderStyle: 'dashed',
-                  borderColor: `${accentColor}80`
-                }}
-                animate={{ rotate: 360 }}
-                transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-              />
-
-              {/* Use the original profile component but make it bigger */}
-              <div style={{ transform: 'scale(1.15)' }}>
-                <GlassmorphicProfile scrollProgress={scrollValue} />
-              </div>
-            </motion.div>
-
-            {/* Scroll indicator with premium styling */}
-            <motion.div
-              className="absolute bottom-10 flex flex-col items-center"
-              animate={{ y: [0, 10, 0] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-              style={{ opacity: 1 - scrollValue * 2 }}
-            >
-              <p
-                className="text-sm mb-2 opacity-70"
-                style={{
-                  color: theme === 'dark' ? '#ffffff' : '#000000',
-                  fontWeight: 500
-                }}
+            {/* Animated text with parallax.
+                On the scroll backdrop the film already shows a face, so the
+                circular portrait below is dropped and the name takes the centre
+                of the frame instead. It then travels on its own depth plane —
+                rising and pushing in faster than the footage behind it — so the
+                figure in the plate reads as standing in front of the type
+                rather than behind a caption. The mask feathers the name's lower
+                edge into the plate, which is what sells the occlusion. */}
+            {isScrollBg ? (
+              // Dropped down to sit across the collar rather than over the face.
+              // The outer div does the static placement, the inner one does the
+              // scroll travel, so the two never fight over `transform`.
+              //
+              // There is NO mask here any more. Masking the type was an attempt
+              // to fake occlusion and it just sliced the letters in half — a
+              // single video frame carries no matte, so nothing can cut the name
+              // around a silhouette. Depth comes from the name travelling on its
+              // own plane instead: it rises and pushes in faster than the plate
+              // behind it, which is what parallax actually is.
+              <div
+                className="content-block relative z-[3]"
+                style={{ transform: 'translateY(clamp(150px, 21vh, 290px))' }}
               >
-                Scroll to explore
-              </p>
+                <AnimatedText scrollProgress={scrollProgress} variant="film" />
+              </div>
+            ) : (
+              <div className="mb-12 content-block relative z-[3]">
+                <AnimatedText scrollProgress={scrollProgress} />
+              </div>
+            )}
 
-              {/* Premium scroll indicator */}
+            {/* Glassmorphic profile — the film supplies the portrait in scroll mode */}
+            {!isScrollBg && (
               <motion.div
-                className="relative"
-                whileHover={{ scale: 1.2 }}
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="relative z-[3]"
+                style={{ transform: 'perspective(1000px) rotateX(5deg)', transformStyle: 'preserve-3d' }}
+                whileHover={{ scale: 1.05, rotateX: 0, transition: { duration: 0.3 } }}
               >
                 <motion.div
-                  className="absolute -inset-2 rounded-full opacity-40"
-                  style={{
-                    background: `radial-gradient(circle, ${accentColor}40 0%, transparent 70%)`,
-                  }}
-                  animate={{ opacity: [0.2, 0.4, 0.2] }}
-                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute -inset-3 rounded-full opacity-30"
+                  style={{ borderWidth: '1px', borderStyle: 'dashed', borderColor: `${accentColor}80` }}
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
                 />
+                <div style={{ transform: 'scale(1.15)' }}>
+                  <GlassmorphicProfile scrollProgress={scrollProgress} />
+                </div>
+              </motion.div>
+            )}
 
-                <svg
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="animate-bounce"
-                  style={{ filter: `drop-shadow(0 0 3px ${accentColor})` }}
-                >
-                  <path
-                    d="M12 5L12 19M12 19L19 12M12 19L5 12"
-                    stroke={accentColor}
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+            {/* Scroll indicator and Explore Button */}
+            <motion.div
+              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-[20]"
+            >
+              <motion.a
+                href="#explore"
+                className="btn-glassmorphic px-6 py-2 mb-4 rounded-full font-medium flex items-center justify-center gap-2 transition-all duration-300 text-white text-sm"
+                style={{ backgroundColor: accentColor, boxShadow: `0 0 15px ${accentColor}60` }}
+                whileHover={{ scale: 1.05, boxShadow: `0 10px 25px rgba(0,0,0,0.2), 0 0 20px ${accentColor}90` }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span>Explore Portfolio</span>
+              </motion.a>
+              
+              <motion.div
+                className="flex flex-col items-center cursor-pointer"
+                animate={{ y: [0, 10, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                onClick={() => document.getElementById('explore')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                <p className="text-xs uppercase tracking-widest mb-1 opacity-70" style={{
+                  color: theme === 'dark' ? '#ffffff' : '#000000', fontWeight: 500
+                }}>
+                  Scroll to explore
+                </p>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="animate-bounce opacity-70"
+                  style={{ filter: `drop-shadow(0 0 3px ${accentColor})` }}>
+                  <path d="M12 5L12 19M12 19L19 12M12 19L5 12" stroke={accentColor} strokeWidth="2"
+                    strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </motion.div>
             </motion.div>
           </div>
-          {/* Wallpaper section */}
+
+          {/* ═══════════════════ EXPLORE / WALLPAPER SECTION ═══════════════════ */}
           <div
             ref={wallpaperSectionRef}
             id="explore"
             className="min-h-screen flex items-center justify-center relative section-container"
             style={{ marginTop: '20px' }}
           >
-            {/* Video background */}
-            <AnimatePresence>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.8 }}
-                className="absolute inset-0 z-0"
+            {/* Video background with WebM */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }}
+              className="absolute inset-0 z-0">
+              <video
+                className="absolute inset-0 w-full h-full object-cover"
+                muted loop playsInline autoPlay
               >
-                <video
-                  ref={videoRef}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  src="/LiveWallpaper.mp4"
-                  muted
-                  loop
-                  playsInline
-                  autoPlay
-                  onLoadedData={() => {
-                    console.log('LiveWallpaper loaded successfully');
-                    setVideoLoaded(true);
-                  }}
-                />
-                <div
-                  className="absolute inset-0 z-10"
-                  style={{
-                    background: `linear-gradient(to bottom, 
-                        rgba(0,0,0,0.7) 0%, 
-                        rgba(0,0,0,0.4) 40%, 
-                        ${accentColor}10 60%, 
-                        rgba(0,0,0,0.7) 100%
-                      )`
-                  }}
-                />
-
-                {/* Animated particles overlay */}
-                <div className="absolute inset-0 z-5 opacity-30">
-                  {Array(20).fill(0).map((_, i) => (
-                    <motion.div
-                      key={`particle-${i}`}
-                      className="absolute rounded-full"
-                      style={{
-                        width: 2 + Math.random() * 6,
-                        height: 2 + Math.random() * 6,
-                        backgroundColor: i % 3 === 0 ? accentColor : '#ffffff',
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
-                        opacity: 0.3 + Math.random() * 0.4,
-                        boxShadow: i % 5 === 0 ? `0 0 10px ${accentColor}` : 'none'
-                      }}
-                      animate={{
-                        y: [0, -30, 0],
-                        x: [0, Math.random() * 20 - 10, 0],
-                        opacity: [0.3, 0.7, 0.3]
-                      }}
-                      transition={{
-                        duration: 3 + Math.random() * 5,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: Math.random() * 5
-                      }}
-                    />
-                  ))}
-                </div>
-              </motion.div>
-            </AnimatePresence>
+                {/* WebM only. The 8.4MB MP4 fallback existed for browsers that
+                    have supported WebM for a decade; it now lives in assets/
+                    and no longer ships. */}
+                <source src="/media/LiveWallpaper.webm" type="video/webm" />
+              </video>
+              <div className="absolute inset-0 z-10" style={{
+                background: `linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 40%, ${accentColor}10 60%, rgba(0,0,0,0.7) 100%)`
+              }} />
+            </motion.div>
 
             {/* Content */}
-            <motion.div
-              className="w-full max-w-4xl mx-auto px-4 text-center z-20 content-block"
-              style={{
-                opacity: 1, // Always visible
-                y: 0 // No transform based on scroll
-              }}
-            >
-              <motion.div className="relative inline-block" ref={welcomeTitleRef}>
-                {/* Enhanced decorative elements around the title */}
-                <motion.div
-                  className="absolute -top-8 -left-8 w-16 h-16 opacity-40"
-                  style={{
-                    borderWidth: '2px 0 0 2px',
-                    borderStyle: 'solid',
-                    borderColor: accentColor,
-                    borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
-                    boxShadow: `0 0 15px ${accentColor}40`
-                  }}
-                  animate={{ rotate: 360, scale: [1, 1.1, 1] }}
-                  transition={{
-                    rotate: { duration: 15, repeat: Infinity, ease: "linear" },
-                    scale: { duration: 3, repeat: Infinity, ease: "easeInOut" }
-                  }}
-                />
-                <motion.div
-                  className="absolute -bottom-8 -right-8 w-16 h-16 opacity-40"
-                  style={{
-                    borderWidth: '0 2px 2px 0',
-                    borderStyle: 'solid',
-                    borderColor: accentColor,
-                    borderRadius: '70% 30% 30% 70% / 70% 70% 30% 30%',
-                    boxShadow: `0 0 15px ${accentColor}40`
-                  }}
-                  animate={{ rotate: -360, scale: [1, 1.1, 1] }}
-                  transition={{
-                    rotate: { duration: 18, repeat: Infinity, ease: "linear" },
-                    scale: { duration: 4, repeat: Infinity, ease: "easeInOut" }
-                  }}
-                />
+            <motion.div className="w-full max-w-4xl mx-auto px-4 text-center z-20 content-block"
+              style={{ opacity: 1, y: 0 }}>
 
-                <motion.h2
-                  className="text-4xl md:text-6xl font-bold mb-6 relative"
-                  style={{
-                    color: '#ffffff',
-                    textShadow: `0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px ${accentColor}, 0 0 30px ${accentColor}80`,
-                    fontWeight: 800,
-                    letterSpacing: '0.5px'
-                  }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8 }}
-                >
-                  Welcome to My Portfolio
-                </motion.h2>
-              </motion.div>
+              {/* MaskedHeading for Welcome */}
+              <div ref={welcomeTitleRef} className="mb-8">
+                <MaskedHeading
+                  text="Welcome to My Portfolio"
+                  tag="h2"
+                  mediaType="video"
+                  src="/media/LiveWallpaper.webm"
+                  fillScale={1.3}
+                  parallax={20}
+                  reveal="rise"
+                  trigger="view"
+                  textScale={0.08}
+                  lineHeight={1.3}
+                  fontSize="clamp(2.5rem, 8vw, 4.5rem)"
+                />
+              </div>
+
               <motion.p
                 ref={welcomeTextRef}
                 className="text-xl mb-8"
@@ -583,195 +422,119 @@ export default function Home() {
                 Explore my work, skills, and journey through this interactive experience
               </motion.p>
 
-              {/* Spacing */}
-              <div className="mb-8"></div>
+              <div className="mb-8" />
 
-              {/* Glassmorphic cards for navigation */}
+              {/* Navigation GlowCards with glassmorphism */}
               <div ref={cardGridRef} className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
                 {[
                   { title: 'Projects', icon: <FiCode size={32} />, path: '/#projects' },
                   { title: 'Skills', icon: <FiAward size={32} />, path: '/#skills' },
                   { title: 'About Me', icon: <FiUser size={32} />, path: '/#about' }
                 ].map((item, index) => (
-                  <motion.div
-                    key={item.title}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const sectionId = item.path.replace('/#', '');
-                      const element = document.getElementById(sectionId);
-                      if (element) {
-                        element.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    }}
-                    className="glassmorphic-card p-8 flex flex-col items-center hover-3d text-white cursor-pointer"
-                    style={{ boxShadow: `0 8px 32px rgba(0, 0, 0, 0.2), 0 0 10px ${accentColor}20` }}
-                    initial="hidden"
-                    animate={cardGridInView ? "visible" : "hidden"}
-                    variants={{
-                      hidden: { opacity: 0, y: 80, scale: 0.95 },
-                      visible: {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        transition: {
-                          duration: 0.8,
-                          delay: index * 0.15,
-                          ease: [0.25, 0.1, 0.25, 1.0]
-                        }
-                      }
-                    }}
-                    whileHover={{
-                      y: -10,
-                      boxShadow: `0 15px 40px rgba(0, 0, 0, 0.3), 0 0 20px ${accentColor}40`
-                    }}
-                    whileTap={{ scale: 0.95 }}
-                  >
+                  <GlowCard key={item.title} glowColor={accentColor} className="rounded-2xl">
                     <motion.div
-                      className="text-4xl mb-4 p-4 rounded-full relative"
-                      style={{ color: accentColor }}
-                      animate={{ rotate: [0, 5, -5, 0] }}
-                      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                      onClick={() => {
+                        const el = document.getElementById(item.path.replace('/#', ''));
+                        el?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className={`glass-card glass-shine p-8 flex flex-col items-center cursor-pointer ${theme === 'dark' ? 'text-white' : 'text-black'}`}
+                      initial="hidden"
+                      animate={cardGridInView ? "visible" : "hidden"}
+                      variants={{
+                        hidden: { opacity: 0, y: 80, scale: 0.95 },
+                        visible: {
+                          opacity: 1, y: 0, scale: 1,
+                          transition: { duration: 0.8, delay: index * 0.15, ease: [0.25, 0.1, 0.25, 1.0] }
+                        }
+                      }}
+                      whileHover={{ y: -10, boxShadow: `0 15px 40px rgba(0, 0, 0, 0.3), 0 0 20px ${accentColor}40` }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      {/* Animated ring around icon */}
-                      <motion.div
-                        className="absolute inset-0 rounded-full -z-10"
-                        style={{
-                          border: `1px solid ${accentColor}40`,
-                          boxShadow: `inset 0 0 10px ${accentColor}20, 0 0 10px ${accentColor}20`
-                        }}
-                        animate={{ scale: [1, 1.1, 1] }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                      />
-                      {item.icon}
+                      <motion.div className="text-4xl mb-4 p-4 rounded-full relative" style={{ color: theme === 'dark' ? '#ffffff' : '#000000', textShadow: `0 0 15px ${accentColor}80` }}
+                        animate={{ rotate: [0, 5, -5, 0] }}
+                        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
+                        <motion.div className="absolute inset-0 rounded-full -z-10"
+                          style={{ border: `1px solid ${accentColor}60`, boxShadow: `inset 0 0 15px ${accentColor}30, 0 0 15px ${accentColor}30` }}
+                          animate={{ scale: [1, 1.1, 1] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
+                        {item.icon}
+                      </motion.div>
+                      <h3 className="text-2xl font-bold mb-2 z-10 relative" style={{ fontFamily: 'var(--font-title)' }}>{item.title}</h3>
+                      <div className="w-12 h-1 rounded-full mb-4 z-10 relative" style={{ backgroundColor: accentColor, boxShadow: `0 0 10px ${accentColor}` }} />
+                      <p className="text-sm opacity-80 z-10 relative">Explore my {item.title.toLowerCase()}</p>
                     </motion.div>
-                    <h3 className="text-xl font-semibold mb-2 text-white">{item.title}</h3>
-                    <div className="w-12 h-1 rounded-full mb-4" style={{ backgroundColor: `${accentColor}40` }} />
-                    <p className="text-sm opacity-70 text-white">Explore my {item.title.toLowerCase()}</p>
-                  </motion.div>
+                  </GlowCard>
                 ))}
               </div>
 
-              {/* Additional navigation cards */}
+              {/* Additional nav cards */}
               <div ref={additionalCardsRef} className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6 mt-8 sm:mt-10 md:mt-12 max-w-2xl mx-auto">
                 {[
                   { title: 'Certificates', icon: <FiFileText size={28} />, path: '/#certificates' },
                   { title: 'Hackathons', icon: <FaTrophy size={24} />, path: '/#hackathons' }
                 ].map((item, index) => (
-                  <motion.div
-                    key={item.title}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const sectionId = item.path.replace('/#', '');
-                      const element = document.getElementById(sectionId);
-                      if (element) {
-                        element.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    }}
-                    className="glassmorphic-card p-6 flex items-center justify-between hover-3d text-white cursor-pointer"
-                    style={{ boxShadow: `0 8px 32px rgba(0, 0, 0, 0.2), 0 0 10px ${accentColor}20` }}
-                    initial="hidden"
-                    animate={additionalCardsInView ? "visible" : "hidden"}
-                    variants={{
-                      hidden: { opacity: 0, x: -20 },
-                      visible: {
-                        opacity: 1,
-                        x: 0,
-                        transition: {
-                          duration: 0.5,
-                          delay: 0.5 + (index * 0.1)
-                        }
-                      }
-                    }}
-                    whileHover={{ scale: 1.03, x: 5 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className="w-12 h-12 rounded-full flex items-center justify-center text-white"
-                        style={{
-                          background: `linear-gradient(135deg, ${accentColor}40, ${accentColor}10)`,
-                          boxShadow: `0 0 10px ${accentColor}30`
-                        }}
-                      >
-                        {item.icon}
+                  <GlowCard key={item.title} glowColor={accentColor} className="rounded-2xl">
+                    <motion.div
+                      onClick={() => {
+                        const el = document.getElementById(item.path.replace('/#', ''));
+                        el?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className={`glass-card glass-shine p-6 flex items-center justify-between cursor-pointer ${theme === 'dark' ? 'text-white' : 'text-black'}`}
+                      initial="hidden"
+                      animate={additionalCardsInView ? "visible" : "hidden"}
+                      variants={{
+                        hidden: { opacity: 0, x: -20 },
+                        visible: { opacity: 1, x: 0, transition: { duration: 0.5, delay: 0.5 + (index * 0.1) } }
+                      }}
+                      whileHover={{ scale: 1.03, x: 5 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center text-white glass-thin"
+                          style={{ boxShadow: `0 0 10px ${accentColor}30` }}>
+                          <div className="text-3xl relative z-10" style={{ color: theme === 'dark' ? '#ffffff' : '#000000', textShadow: `0 0 10px ${accentColor}80` }}>{item.icon}</div>
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold z-10 relative" style={{ fontFamily: 'var(--font-title)' }}>{item.title}</h3>
+                          <p className="text-sm opacity-80 z-10 relative">View my {item.title.toLowerCase()}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
-                        <p className="text-sm opacity-70">View my {item.title.toLowerCase()}</p>
-                      </div>
-                    </div>
-                    <FiArrowDown className="text-white opacity-50 -rotate-90" />
-                  </motion.div>
+                      <FiArrowRight className="text-xl opacity-70 transition-transform group-hover:translate-x-2 z-10 relative" style={{ color: accentColor }} />
+                    </motion.div>
+                  </GlowCard>
                 ))}
               </div>
 
-              {/* Explore Portfolio button with ultra-premium design */}
+              {/* CTA Button */}
               <div className="mt-16 relative">
-                <motion.div
-                  className="absolute -inset-2 rounded-full opacity-60"
-                  style={{
-                    background: `radial-gradient(circle, ${accentColor}80 0%, transparent 70%)`,
-                    filter: 'blur(10px)'
-                  }}
-                  animate={{
-                    opacity: [0.4, 0.7, 0.4],
-                    scale: [1, 1.05, 1]
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
-
-                {/* Additional pulsing ring */}
-                <motion.div
-                  className="absolute -inset-4 rounded-full opacity-30"
-                  style={{
-                    border: `1px solid ${accentColor}70`,
-                  }}
-                  animate={{
-                    scale: [1, 1.1, 1],
-                    opacity: [0.2, 0.4, 0.2]
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
+                <motion.div className="absolute -inset-2 rounded-full opacity-60"
+                  style={{ background: `radial-gradient(circle, ${accentColor}80 0%, transparent 70%)`, filter: 'blur(10px)' }}
+                  animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.05, 1] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
+                <motion.div className="absolute -inset-4 rounded-full opacity-30"
+                  style={{ border: `1px solid ${accentColor}70` }}
+                  animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
                 <motion.a
                   href="#contact"
-                  className="inline-block px-10 py-4 rounded-full font-medium overflow-hidden"
+                  className="inline-block px-10 py-4 rounded-full font-medium overflow-hidden glass-btn"
                   style={{
                     background: `linear-gradient(135deg, ${accentColor}90, ${accentColor}70)`,
                     boxShadow: `0 10px 25px rgba(0,0,0,0.2), 0 0 10px ${accentColor}40`
                   }}
-                  whileHover={{
-                    scale: 1.05,
-                    boxShadow: `0 15px 30px rgba(0,0,0,0.3), 0 0 15px ${accentColor}60`
-                  }}
+                  whileHover={{ scale: 1.05, boxShadow: `0 15px 30px rgba(0,0,0,0.3), 0 0 15px ${accentColor}60` }}
                   whileTap={{ scale: 0.95 }}
                   initial={{ y: 50, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
                 >
-                  {/* Animated shine effect */}
-                  <motion.div
-                    className="absolute inset-0 w-full h-full"
-                    style={{
-                      background: `linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)`,
-                      transform: 'translateX(-100%)'
-                    }}
+                  <motion.div className="absolute inset-0 w-full h-full"
+                    style={{ background: `linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)`, transform: 'translateX(-100%)' }}
                     animate={{ x: ['0%', '200%'] }}
-                    transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }}
-                  />
+                    transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }} />
                   <span className="text-white text-lg font-medium flex items-center gap-2 relative z-10">
                     Get in Touch
-                    <motion.span
-                      animate={{ y: [0, 5, 0] }}
-                      transition={{ repeat: Infinity, duration: 1.5 }}
-                    >
+                    <motion.span animate={{ y: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
                       <FiArrowDown />
                     </motion.span>
                   </span>
@@ -779,6 +542,8 @@ export default function Home() {
               </div>
             </motion.div>
           </div>
+
+          {/* ═══════════════════ SECTION PAGES ═══════════════════ */}
 
           {/* About Section */}
           <AboutPage sectionRef={aboutSectionRef} />
@@ -801,7 +566,7 @@ export default function Home() {
           {/* Contact Section */}
           <ContactPage sectionRef={contactSectionRef} />
         </div>
-      </div >
-    </div >
+      </div>
+    </div>
   );
 }

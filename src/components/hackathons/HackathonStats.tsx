@@ -108,14 +108,9 @@ const HackathonStats: React.FC<HackathonStatsProps> = ({ accentColor, theme, sta
           <motion.div
             key={index}
             variants={itemVariants}
-            className="glassmorphic-card rounded-xl p-4 flex flex-col items-center text-center"
+            className="glassmorphic-card rounded-2xl p-6 flex flex-col items-center text-center relative overflow-hidden group border border-white/10 dark:border-white/5"
             style={{ 
-              background: theme === 'dark' 
-                ? `rgba(30, 30, 40, 0.7)` 
-                : `rgba(255, 255, 255, 0.7)`,
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              boxShadow: `0 5px 15px rgba(0, 0, 0, 0.1), 0 0 5px ${item.color}40`
+              boxShadow: `0 8px 32px rgba(0, 0, 0, 0.1)`
             }}
             whileHover={{ 
               y: -5, 
@@ -123,12 +118,14 @@ const HackathonStats: React.FC<HackathonStatsProps> = ({ accentColor, theme, sta
             }}
           >
             <div 
-              className="w-16 h-16 rounded-full flex items-center justify-center mb-3"
+              className="w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110"
               style={{ 
                 background: `radial-gradient(circle, ${item.color}20 0%, transparent 70%)` 
               }}
             >
-              {item.icon}
+              <div style={{ filter: `drop-shadow(0 0 8px ${item.color}80)` }}>
+                {item.icon}
+              </div>
             </div>
             
             <motion.span 

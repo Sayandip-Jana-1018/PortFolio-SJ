@@ -2,6 +2,20 @@ import React, { createContext, useState, useContext, useEffect, ReactNode } from
 
 type Theme = 'light' | 'dark';
 
+/**
+ * Which backdrop the whole site runs on.
+ *
+ * 'metal'  — the generative MoltenMetal shader. Costs nothing to load, reacts
+ *            live to the accent colour, animates on its own clock.
+ * 'scroll' — a pre-rendered frame sequence scrubbed by scroll position. Reads
+ *            as real footage and is locked to the reader's own movement, at the
+ *            cost of a one-time download.
+ *
+ * Deliberately NOT derived from `theme`: they are orthogonal choices, and both
+ * backdrops have a light and a dark treatment.
+ */
+export type BackgroundMode = 'metal' | 'scroll';
+
 interface ColorPalette {
   primary: string;
   secondary: string;
@@ -21,8 +35,10 @@ interface ThemeContextType {
   theme: Theme;
   colors: ColorPalette;
   accentColor: string;
+  backgroundMode: BackgroundMode;
   toggleTheme: () => void;
   setAccentColor: (color: string) => void;
+  setBackgroundMode: (mode: BackgroundMode) => void;
   getThemeColor: (colorName: keyof ColorPalette) => string;
 }
 
@@ -154,8 +170,10 @@ const defaultContext: ThemeContextType = {
   theme: 'dark',
   colors: darkPalette,
   accentColor: defaultAccentColor,
+  backgroundMode: 'metal',
   toggleTheme: () => { },
   setAccentColor: () => { },
+  setBackgroundMode: () => { },
   getThemeColor: () => '#000000',
 };
 
@@ -187,6 +205,9 @@ export const accentColors = PREMIUM_ACCENTS.map(c => c.value);
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>('dark');
   const [accentColor, setAccentColor] = useState<string>(defaultAccentColor);
+  // Defaults to the shader: it is free to start, so a first-time visitor never
+  // pays for a frame set they did not ask for.
+  const [backgroundMode, setBackgroundModeState] = useState<BackgroundMode>('metal');
   const [colors, setColors] = useState<ColorPalette>(
     generatePalette(theme === 'dark' ? darkPalette : lightPalette, accentColor)
   );
@@ -202,6 +223,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
     if (savedAccentColor) {
       setAccentColor(savedAccentColor);
+    }
+
+    const savedBackground = localStorage.getItem('backgroundMode');
+    if (savedBackground === 'metal' || savedBackground === 'scroll') {
+      setBackgroundModeState(savedBackground);
     }
   }, []);
 
@@ -266,6 +292,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     document.dispatchEvent(event);
   };
 
+  const handleSetBackgroundMode = (mode: BackgroundMode) => {
+    setBackgroundModeState(mode);
+    localStorage.setItem('backgroundMode', mode);
+  };
+
   const getThemeColor = (colorName: keyof ColorPalette): string => {
     return colors[colorName];
   };
@@ -276,8 +307,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         theme,
         colors,
         accentColor,
+        backgroundMode,
         toggleTheme,
         setAccentColor: handleSetAccentColor,
+        setBackgroundMode: handleSetBackgroundMode,
         getThemeColor,
       }}
     >

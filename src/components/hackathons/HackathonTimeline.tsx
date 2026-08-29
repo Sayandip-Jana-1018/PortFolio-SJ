@@ -159,8 +159,8 @@ const HackathonTimeline: React.FC<HackathonTimelineProps> = ({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: false, margin: "-50px" }}
             transition={{
-              duration: 0.8,
-              delay: 0.2 * index,
+              duration: 0.6,
+              delay: 0.1,
               type: "spring",
               stiffness: 100,
               damping: 15
@@ -175,8 +175,8 @@ const HackathonTimeline: React.FC<HackathonTimelineProps> = ({
               whileInView={{ scale: 1 }}
               viewport={{ once: false, margin: "-50px" }}
               transition={{
-                delay: 0.3 + (index * 0.2),
-                duration: 0.5,
+                delay: 0.2,
+                duration: 0.4,
                 type: "spring"
               }}
             >
@@ -206,11 +206,11 @@ const HackathonTimeline: React.FC<HackathonTimelineProps> = ({
 
             {/* Hackathon Image - On opposite side of card */}
             <motion.div
-              className={`hidden md:block absolute top-0 bottom-0 md:w-[40%] ${index % 2 === 0 ? 'md:right-0 md:pl-8' : 'md:left-0 md:pr-8'}`}
-              initial={{ opacity: 0, x: index % 2 === 0 ? 50 : -50 }}
+              className={`hidden md:block absolute top-0 bottom-0 md:w-[45%] ${index % 2 === 0 ? 'md:right-0' : 'md:left-0'}`}
+              initial={{ opacity: 0, x: index % 2 === 0 ? 30 : -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: false, margin: "-50px" }}
-              transition={{ delay: 0.5 + (index * 0.2), duration: 0.6 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
             >
               <div
                 className="rounded-xl overflow-hidden shadow-lg h-full"
@@ -234,11 +234,6 @@ const HackathonTimeline: React.FC<HackathonTimelineProps> = ({
               <motion.div
                 className="glassmorphic-card rounded-xl overflow-hidden"
                 style={{
-                  background: theme === 'dark'
-                    ? `rgba(20, 20, 30, 0.75)`
-                    : `rgba(255, 255, 255, 0.75)`,
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
                   boxShadow: `0 5px 20px rgba(0, 0, 0, 0.15), 0 0 10px ${accentColor}20`,
                   border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'}`
                 }}
@@ -253,8 +248,8 @@ const HackathonTimeline: React.FC<HackathonTimelineProps> = ({
                 }}
                 viewport={{ once: false, margin: "-50px" }}
                 transition={{
-                  delay: 0.5 + (index * 0.2),
-                  duration: 0.6,
+                  delay: 0.2,
+                  duration: 0.5,
                   type: "spring",
                   stiffness: 100,
                   damping: 15
@@ -288,26 +283,26 @@ const HackathonTimeline: React.FC<HackathonTimelineProps> = ({
 
                   <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-4">
                     <motion.div
-                      initial={{ y: 20, opacity: 0 }}
+                      initial={{ y: 15, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.7 + (index * 0.2), duration: 0.5 }}
+                      transition={{ delay: 0.3, duration: 0.4 }}
                       className="flex items-center justify-center mb-2"
                     >
                       {getTrophyIcon(hackathon.trophy, 28)}
                     </motion.div>
                     <motion.h3
                       className="text-xl font-bold mb-1"
-                      initial={{ y: 20, opacity: 0 }}
+                      initial={{ y: 15, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.8 + (index * 0.2), duration: 0.5 }}
+                      transition={{ delay: 0.4, duration: 0.4 }}
                     >
                       {hackathon.name}
                     </motion.h3>
                     <motion.div
                       className="inline-block px-3 py-1 rounded-full text-sm font-medium"
-                      initial={{ y: 20, opacity: 0 }}
+                      initial={{ y: 15, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.9 + (index * 0.2), duration: 0.5 }}
+                      transition={{ delay: 0.5, duration: 0.4 }}
                       style={{
                         backgroundColor: `${accentColor}30`,
                         color: theme === 'dark' ? 'white' : 'black',
@@ -327,27 +322,27 @@ const HackathonTimeline: React.FC<HackathonTimelineProps> = ({
                     style={{
                       backgroundImage: `linear-gradient(135deg, ${accentColor}, ${accentColor}80)`
                     }}
-                    initial={{ y: 20, opacity: 0 }}
+                    initial={{ y: 15, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 1.0 + (index * 0.2), duration: 0.5 }}
+                    transition={{ delay: 0.4, duration: 0.4 }}
                   >
                     {hackathon.project}
                   </motion.h4>
 
                   <motion.p
                     className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} mb-5 text-center`}
-                    initial={{ y: 20, opacity: 0 }}
+                    initial={{ y: 15, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 1.1 + (index * 0.2), duration: 0.5 }}
+                    transition={{ delay: 0.5, duration: 0.4 }}
                   >
                     {hackathon.description}
                   </motion.p>
 
                   <motion.div
                     className="grid grid-cols-2 gap-3 text-sm mb-5"
-                    initial={{ y: 20, opacity: 0 }}
+                    initial={{ y: 15, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 1.2 + (index * 0.2), duration: 0.5 }}
+                    transition={{ delay: 0.6, duration: 0.4 }}
                   >
                     <div className="flex items-center justify-center gap-2 p-2 rounded-md">
                       <div className="p-1.5 rounded-full" style={{ backgroundColor: `${accentColor}20` }}>

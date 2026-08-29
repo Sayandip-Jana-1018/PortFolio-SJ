@@ -1,44 +1,38 @@
 import React, { useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, MotionValue, useTransform } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 import { useMagneticEffect } from '../../hooks/useAnimations';
 
 interface GlassmorphicProfileProps {
-  scrollProgress: number;
+  scrollProgress: MotionValue<number>;
 }
 
 const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgress }) => {
   const { accentColor } = useTheme();
-  const photoRef = useRef<HTMLDivElement>(null);
   const magneticRef = useMagneticEffect();
-  const glowRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = React.useState(false);
 
-  // Handle the photo scaling and fading on scroll
   useEffect(() => {
-    if (photoRef.current) {
-      // Start with a circular frame and expand to fill screen
-      const scale = 1 + scrollProgress * 0.5; // Scale from 1 to 1.5
-      const opacity = 1 - scrollProgress * 0.8; // Fade from 1 to 0.2
+    setMounted(true);
+  }, []);
 
-      photoRef.current.style.transform = `scale(${scale})`;
-      photoRef.current.style.opacity = `${opacity}`;
-    }
+  const scale = useTransform(scrollProgress, [0, 1], [1, 1.5]);
+  const profileOpacity = useTransform(scrollProgress, [0, 1], [1, 0.2]);
 
-    // Animate the glow effect based on scroll
-    if (glowRef.current) {
-      const glowOpacity = 1 - scrollProgress;
-      const glowSize = 20 + scrollProgress * 30;
-      glowRef.current.style.boxShadow = `0 0 ${glowSize}px ${accentColor}${Math.floor(glowOpacity * 255).toString(16).padStart(2, '0')}`;
-    }
-  }, [scrollProgress, accentColor]);
+  const boxShadow = useTransform(scrollProgress, (p) => {
+    const glowOpacity = 1 - p;
+    const size = 20 + p * 30;
+    const alpha = Math.floor(glowOpacity * 255).toString(16).padStart(2, '0');
+    return `0 0 ${size}px ${accentColor}${alpha}`;
+  });
 
   return (
     <div className="relative flex items-center justify-center">
       {/* Enhanced 3D Breathing Wave Animations */}
       {/* First Wave - Outermost with 3D effect */}
       <motion.div
-        className="absolute w-[280px] h-[280px] sm:w-[490px] sm:h-[490px]"
+        className="absolute w-[220px] h-[220px] sm:w-[380px] sm:h-[380px]"
         style={{
           borderRadius: '50%',
           border: `2px solid ${accentColor}40`,
@@ -61,7 +55,7 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
 
       {/* Second Wave - Middle with 3D effect */}
       <motion.div
-        className="absolute w-[240px] h-[240px] sm:w-[420px] sm:h-[420px]"
+        className="absolute w-[180px] h-[180px] sm:w-[320px] sm:h-[320px]"
         style={{
           borderRadius: '50%',
           border: `1.5px solid ${accentColor}30`,
@@ -84,7 +78,7 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
 
       {/* Third Wave - Inner with 3D effect */}
       <motion.div
-        className="absolute w-[200px] h-[200px] sm:w-[350px] sm:h-[350px]"
+        className="absolute w-[150px] h-[150px] sm:w-[260px] sm:h-[260px]"
         style={{
           borderRadius: '50%',
           border: `1px solid ${accentColor}25`,
@@ -105,8 +99,8 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
         }}
       />
 
-      {/* Reduced accent particles - only 4 instead of 8 */}
-      {[0, 90, 180, 270].map((angle) => {
+      {/* Reduced accent particles - only 4 instead of 8, rendered only after mount to prevent hydration mismatch */}
+      {mounted && [0, 90, 180, 270].map((angle) => {
         const size = 2 + Math.random() * 2; // Smaller size
         const distance = 180 + Math.random() * 30;
 
@@ -140,7 +134,7 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
 
       {/* Fourth Wave - Outermost with enhanced 3D effect */}
       <motion.div
-        className="absolute w-[320px] h-[320px] sm:w-[530px] sm:h-[530px]"
+        className="absolute w-[250px] h-[250px] sm:w-[420px] sm:h-[420px]"
         style={{
           borderRadius: '50%',
           border: `1px solid ${accentColor}20`,
@@ -165,76 +159,41 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
 
       {/* Circular photo frame with glassmorphic effect */}
       <motion.div
-        ref={photoRef}
-        className="relative w-[240px] h-[240px] sm:w-[350px] sm:h-[350px] md:w-[400px] md:h-[400px] lg:w-[450px] lg:h-[450px] rounded-full overflow-hidden transition-all duration-300 ease-out z-10"
+        className="relative w-[170px] h-[170px] sm:w-[250px] sm:h-[250px] md:w-[290px] md:h-[290px] lg:w-[330px] lg:h-[330px] rounded-full overflow-hidden transition-all duration-300 ease-out z-10"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 1, ease: "easeOut" }}
       >
-        {/* Glassmorphic border */}
-        <div
-          ref={glowRef}
-          className="absolute inset-0 rounded-full"
-          style={{
-            boxShadow: `0 0 20px ${accentColor}80`,
-            zIndex: 1
-          }}
-        />
+        <motion.div className="w-full h-full relative" style={{ scale, opacity: profileOpacity }}>
+          {/* Glassmorphic border */}
+          <motion.div
+            className="absolute inset-0 rounded-full"
+            style={{
+              boxShadow,
+              zIndex: 1
+            }}
+          />
 
         {/* Glassmorphic overlay */}
         <div className="absolute inset-0 glassmorphic-dark rounded-full z-10 opacity-30" />
 
-        {/* Profile image */}
-        <div className="relative w-full h-full">
-          <Image
-            src="/profile_photo.jpg"
-            alt="Profile Picture"
-            fill
-            priority
-            sizes="450px"
-            className="object-cover"
-            style={{
-              objectPosition: 'center center'
-            }}
-          />
-        </div>
+          {/* Profile image */}
+          <div className="relative w-full h-full">
+            <Image
+              src="/images/profile_photo.jpg"
+              alt="Profile Picture"
+              fill
+              priority
+              sizes="450px"
+              className="object-cover"
+              style={{
+                objectPosition: 'center center'
+              }}
+            />
+          </div>
+        </motion.div>
       </motion.div>
 
-      {/* Magnetic effect button */}
-      <div ref={magneticRef} className="absolute bottom-0 z-20 transform translate-y-1/2">
-        <motion.a
-          href="#explore"
-          className="btn-glassmorphic px-8 py-4 mt-24 rounded-full font-medium flex items-center justify-center gap-2 transition-all duration-300 text-white text-sm"
-          data-accent-color="true"
-          style={{ backgroundColor: accentColor }}
-          whileHover={{
-            scale: 1.05,
-            boxShadow: `0 10px 25px rgba(0,0,0,0.2), 0 0 15px ${accentColor}80`
-          }}
-          whileTap={{ scale: 0.95 }}
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-        >
-          <span className="text-sm">Explore Portfolio</span>
-          <motion.svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            animate={{ x: [0, 5, 0] }}
-            transition={{ repeat: Infinity, duration: 1.5 }}
-          >
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
-          </motion.svg>
-        </motion.a>
-      </div>
     </div>
   );
 };

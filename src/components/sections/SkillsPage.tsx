@@ -56,50 +56,56 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
   // Define skill categories with icons - Updated for Data Science & ML focus
   const skillCategories = [
     {
-      title: "Machine Learning & AI",
+      title: "Generative AI",
       icon: <FiCpu size={24} />,
+      skills: [
+        { name: "LangChain", icon: <FiTool size={40} />, color: "#3776AB" },
+        { name: "LangGraph", icon: <FiServer size={40} />, color: "#F7931E" },
+        { name: "CrewAI", icon: <FiCpu size={40} />, color: "#FF6F00" },
+        { name: "OpenAI", icon: <SiOpenai size={40} />, color: "#412991" },
+        { name: "Gemini", icon: <FiLayout size={40} />, color: "#4169E1" },
+        { name: "Claude", icon: <FiTool size={40} />, color: "#D97757" },
+        { name: "Vector DBs", icon: <FiDatabase size={40} />, color: "#000000" }
+      ]
+    },
+    {
+      title: "Data Science & ML",
+      icon: <FiDatabase size={24} />,
       skills: [
         { name: "Python", icon: <SiPython size={40} />, color: "#3776AB" },
         { name: "TensorFlow", icon: <SiTensorflow size={40} />, color: "#FF6F00" },
         { name: "Scikit-Learn", icon: <SiScikitlearn size={40} />, color: "#F7931E" },
         { name: "Pandas", icon: <SiPandas size={40} />, color: "#150458" },
         { name: "NumPy", icon: <SiNumpy size={40} />, color: "#013243" },
-        { name: "OpenCV", icon: <SiOpencv size={40} />, color: "#5C3EE8" },
-        { name: "OpenAI", icon: <SiOpenai size={40} />, color: "#412991" },
+        { name: "PowerBI", icon: <FiLayout size={40} />, color: "#F2C811" },
         { name: "Streamlit", icon: <SiStreamlit size={40} />, color: "#FF4B4B" }
       ]
     },
     {
-      title: "Frontend Development",
+      title: "Full Stack & Databases",
       icon: <FiLayout size={24} />,
       skills: [
-        { name: "React", icon: <SiReact size={40} />, color: "#61DAFB" },
         { name: "Next.js", icon: <SiNextdotjs size={40} />, color: "#000000" },
+        { name: "React", icon: <SiReact size={40} />, color: "#61DAFB" },
         { name: "TypeScript", icon: <SiTypescript size={40} />, color: "#3178C6" },
-        { name: "JavaScript", icon: <SiJavascript size={40} />, color: "#F7DF1E" },
-        { name: "Tailwind CSS", icon: <SiTailwindcss size={40} />, color: "#06B6D4" },
-        { name: "Three.js", icon: <SiThreedotjs size={40} />, color: "#000000" }
-      ]
-    },
-    {
-      title: "Backend Development",
-      icon: <FiServer size={24} />,
-      skills: [
         { name: "Node.js", icon: <SiNodedotjs size={40} />, color: "#339933" },
-        { name: "Express", icon: <SiExpress size={40} />, color: "#000000" },
-        { name: "Flask", icon: <SiFlask size={40} />, color: "#000000" },
-        { name: "FastAPI", icon: <SiPython size={40} />, color: "#009688" },
+        { name: "FastAPI", icon: <FiServer size={40} />, color: "#009688" },
+        { name: "PostgreSQL", icon: <SiPostgresql size={40} />, color: "#4169E1" },
+        { name: "MongoDB", icon: <SiMongodb size={40} />, color: "#47A248" },
         { name: "Supabase", icon: <SiSupabase size={40} />, color: "#3ECF8E" }
       ]
     },
     {
-      title: "Databases & Tools",
-      icon: <FiDatabase size={24} />,
+      title: "DevOps & Cloud",
+      icon: <FiServer size={24} />,
       skills: [
-        { name: "MongoDB", icon: <SiMongodb size={40} />, color: "#47A248" },
-        { name: "PostgreSQL", icon: <SiPostgresql size={40} />, color: "#4169E1" },
-        { name: "Git", icon: <SiGit size={40} />, color: "#F05032" },
         { name: "Docker", icon: <SiDocker size={40} />, color: "#2496ED" },
+        { name: "Kubernetes", icon: <FiTool size={40} />, color: "#326CE5" },
+        { name: "Jenkins", icon: <FiTool size={40} />, color: "#D33833" },
+        { name: "AWS", icon: <FiServer size={40} />, color: "#FF9900" },
+        { name: "GitHub Actions", icon: <SiGit size={40} />, color: "#2088FF" },
+        { name: "Prometheus", icon: <FiDatabase size={40} />, color: "#E6522C" },
+        { name: "Grafana", icon: <FiLayout size={40} />, color: "#F46800" },
         { name: "Vercel", icon: <SiVercel size={40} />, color: "#000000" }
       ]
     }
@@ -111,9 +117,11 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
       ref={sectionRef}
       className="min-h-screen py-20 relative overflow-hidden"
       style={{
-        background: theme === 'dark' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)'
+        background: theme === 'dark' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',
+        backdropFilter: 'blur(5px) saturate(150%)',
+        WebkitBackdropFilter: 'blur(5px) saturate(150%)',
+        borderTop: `0.5px solid ${theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`,
+        borderBottom: `0.5px solid ${theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`,
       }}
     >
       {/* Dynamic background elements */}

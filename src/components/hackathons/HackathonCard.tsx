@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, useMotionTemplate, useMotionValue } from 'framer-motion';
+import { motion, useMotionTemplate, useMotionValue, useSpring } from 'framer-motion';
 import { FiCalendar, FiUsers, FiMapPin, FiLink, FiAward, FiCode } from 'react-icons/fi';
 import { FaTrophy, FaMedal, FaAward } from 'react-icons/fa';
 import Image from 'next/image';
@@ -35,14 +35,32 @@ const HackathonCard: React.FC<HackathonCardProps> = ({
   theme,
   isActive = false
 }) => {
-  const [mouseX, setMouseX] = useState(0);
-  const [mouseY, setMouseY] = useState(0);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const tiltX = useMotionValue(0);
+  const tiltY = useMotionValue(0);
+  const rotateX = useSpring(tiltX, { stiffness: 150, damping: 20 });
+  const rotateY = useSpring(tiltY, { stiffness: 150, damping: 20 });
+  const backgroundTemplate = useMotionTemplate`radial-gradient(circle at ${mouseX}px ${mouseY}px, ${accentColor}25 0%, transparent 50%)`;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isActive) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    setMouseX(e.clientX - rect.left);
-    setMouseY(e.clientY - rect.top);
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    mouseX.set(x);
+    mouseY.set(y);
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    tiltX.set(((y - centerY) / centerY) * -10); // Max 10 deg tilt
+    tiltY.set(((x - centerX) / centerX) * 10);
+  };
+
+  const handleMouseLeave = () => {
+    tiltX.set(0);
+    tiltY.set(0);
   };
 
   const getTrophyColor = (trophy: string) => {
@@ -76,24 +94,25 @@ const HackathonCard: React.FC<HackathonCardProps> = ({
         delay: index * 0.1
       }}
       onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       style={{
-        background: theme === 'dark'
-          ? `rgba(20, 20, 30, 0.75)`
-          : `rgba(255, 255, 255, 0.75)`,
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
         boxShadow: isActive
-          ? `0 10px 30px rgba(0, 0, 0, 0.25), 0 0 20px ${accentColor}40`
+          ? `0 35px 70px rgba(0, 0, 0, 0.5), 0 0 50px ${accentColor}80, inset 0 0 2px rgba(255,255,255,0.4)`
           : `0 5px 15px rgba(0, 0, 0, 0.1), 0 0 5px ${accentColor}20`,
-        border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'}`,
-        position: 'relative'
+        border: `1px solid ${theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}`,
+        position: 'relative',
+        rotateX: isActive ? rotateX : 0,
+        rotateY: isActive ? rotateY : 0,
+        transformStyle: 'preserve-3d',
+        transformPerspective: 1200,
+        zIndex: isActive ? 50 : 1
       }}
     >
       {isActive && (
         <motion.div
           className="absolute inset-0 opacity-80 pointer-events-none z-0"
           style={{
-            background: `radial-gradient(circle at ${mouseX}px ${mouseY}px, ${accentColor}20 0%, transparent 50%)`,
+            background: backgroundTemplate,
             mixBlendMode: 'plus-lighter'
           }}
         />

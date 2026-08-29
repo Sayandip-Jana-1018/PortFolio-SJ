@@ -14,7 +14,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ small = false }) => {
 
   useEffect(() => {
     // Create audio element
-    audioRef.current = new Audio('/water.mp3');
+    audioRef.current = new Audio('/media/water.mp3');
     audioRef.current.loop = true;
     
     // Clean up on component unmount

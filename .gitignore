@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local source media only. Nothing here is read at build or run time — the
+# background film is pre-rendered into public/bg-frames/ by scripts/prep-frames.js
+# and only that output ships. Keeping ~40MB of source plates and a 377MB master
+# out of the repo.
+/assets/

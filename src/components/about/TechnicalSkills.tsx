@@ -4,7 +4,7 @@ import { FiStar, FiPieChart } from 'react-icons/fi';
 import {
   SiPython, SiScikitlearn, SiPandas, SiNumpy,
   SiReact, SiNextdotjs, SiTypescript, SiJavascript,
-  SiNodedotjs, SiMongodb
+  SiNodedotjs, SiMongodb, SiTensorflow, SiDocker, SiOpenai
 } from 'react-icons/si';
 import { FaJava } from 'react-icons/fa';
 import SkillsCharts from './SkillsCharts';
@@ -16,14 +16,14 @@ interface TechnicalSkillsProps {
 
 const TechnicalSkills: React.FC<TechnicalSkillsProps> = ({ accentColor, theme }) => {
   const skills = [
+    { name: 'Java', icon: <FaJava />, proficiency: 95 },
+    { name: 'Data Science', icon: <SiPandas />, proficiency: 92 },
+    { name: 'Gen AI', icon: <SiOpenai />, proficiency: 90 },
+    { name: 'Machine Learning', icon: <SiTensorflow />, proficiency: 88 },
+    { name: 'Full Stack', icon: <SiNextdotjs />, proficiency: 85 },
     { name: 'Python', icon: <SiPython />, proficiency: 95 },
-    { name: 'Java', icon: <FaJava />, proficiency: 90 },
-    { name: 'Scikit-Learn', icon: <SiScikitlearn />, proficiency: 90 },
-    { name: 'Next.js', icon: <SiNextdotjs />, proficiency: 85 },
-    { name: 'React', icon: <SiReact />, proficiency: 88 },
-    { name: 'TypeScript', icon: <SiTypescript />, proficiency: 80 },
-    { name: 'Node.js', icon: <SiNodedotjs />, proficiency: 85 },
-    { name: 'PowerBI', icon: <FiPieChart />, proficiency: 80 }
+    { name: 'Docker / DevOps', icon: <SiDocker />, proficiency: 88 },
+    { name: 'Scikit-Learn', icon: <SiScikitlearn />, proficiency: 85 }
   ];
 
   return (
@@ -34,7 +34,7 @@ const TechnicalSkills: React.FC<TechnicalSkillsProps> = ({ accentColor, theme })
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <h4 className="text-xl font-semibold mb-6 flex items-center gap-2">
+        <h4 className="text-xl font-semibold mb-6 flex items-center justify-center gap-2">
           <span style={{ color: accentColor }}><FiStar /></span>
           Core Technical Skills
         </h4>

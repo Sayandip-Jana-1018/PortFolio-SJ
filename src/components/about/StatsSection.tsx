@@ -12,7 +12,7 @@ const StatsSection: React.FC<StatsSectionProps> = ({ accentColor, theme }) => {
   const stats = [
     { value: '2+', label: 'Years Experience', icon: <FiAward /> },
     { value: '10+', label: 'Projects Completed', icon: <FiLayers /> },
-    { value: '6+', label: 'Happy Clients', icon: <FiHeart /> },
+    { value: '600+', label: 'Leetcode Problems', icon: <FiHeart /> },
     { value: '90%', label: 'Success Rate', icon: <FiTarget /> }
   ];
 

@@ -49,21 +49,21 @@ export const certificates: Certificate[] = [
   },
   {
     id: 5,
-    title: 'Machine Learning',
+    title: 'Machine Learning Made Easy',
     issuer: 'LPU',
-    date: '2024',
+    date: 'July 2025',
     image: '/certificates/ML_merit.jpeg',
     category: 'Merit',
-    description: 'Merit certificate for Machine Learning course completion.'
+    description: 'Applied feature engineering, model evaluation, and supervised-learning techniques.'
   },
   {
     id: 6,
-    title: 'NPTEL',
-    issuer: 'NPTEL',
-    date: '2024',
+    title: 'Machine Learning and Deep Learning',
+    issuer: 'NPTEL IIT Guwahati',
+    date: 'Sep 2025',
     image: '/certificates/NPTEL_merit.jpeg',
     category: 'Merit',
-    description: 'NPTEL course merit certificate.'
+    description: 'NPTEL course on Machine Learning and Deep Learning.'
   },
   {
     id: 7,
@@ -96,8 +96,8 @@ export const certificates: Certificate[] = [
   {
     id: 10,
     title: 'Data Structures & Algorithms (Java)',
-    issuer: 'Coding Blocks',
-    date: '2024',
+    issuer: 'Apna College',
+    date: 'Jun 2024',
     image: '/certificates/DSA (Java).jpeg',
     category: 'Programming',
     description: 'Advanced DSA concepts with Java implementation.'

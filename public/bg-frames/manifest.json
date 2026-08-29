@@ -1,0 +1,17 @@
+{
+  "aspect": 1.79944,
+  "tiers": {
+    "desktop": {
+      "count": 200,
+      "width": 1600,
+      "height": 890,
+      "decodedMb": 1139
+    },
+    "mobile": {
+      "count": 100,
+      "width": 960,
+      "height": 534,
+      "decodedMb": 205
+    }
+  }
+}
