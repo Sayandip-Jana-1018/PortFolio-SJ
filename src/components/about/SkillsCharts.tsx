@@ -54,11 +54,11 @@ const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
 
   // Skill categories data for pie chart
   const skillCategories = {
-    labels: ['Machine Learning', 'Data Science', 'Full Stack', 'DevOps'],
+    labels: ['Java', 'Data Science', 'Gen AI', 'Machine Learning', 'Full Stack'],
     datasets: [
       {
-        data: [35, 30, 25, 10],
-        backgroundColor: generateColorGradient(accentColor, 4),
+        data: [35, 25, 15, 15, 10],
+        backgroundColor: generateColorGradient(accentColor, 5),
         borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
         borderWidth: 1,
       },
@@ -67,11 +67,11 @@ const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
 
   // Skill proficiency data for horizontal bar chart (Experience in Months)
   const skillProficiency = {
-    labels: ['Machine Learning', 'Data Science', 'Web Development'],
+    labels: ['Java', 'Data Science', 'Gen AI', 'Machine Learning', 'Full Stack'],
     datasets: [
       {
         label: 'Months Experience',
-        data: [30, 24, 36], // Converted to months
+        data: [36, 30, 24, 20, 12],
         backgroundColor: adjustColorOpacity(accentColor, 0.7),
         borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
         borderWidth: 1,
@@ -112,14 +112,12 @@ const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
     scales: {
       x: {
         beginAtZero: true,
-        max: 40, // Max 40 months
         grid: {
           color: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
         },
         ticks: {
-          color: theme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)',
-          stepSize: 6,
-          callback: function (value: any) {
+          color: theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+          callback: function(value: any) {
             return value + ' Mos';
           }
         },
@@ -129,7 +127,10 @@ const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
           display: false,
         },
         ticks: {
-          color: theme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)',
+          color: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)',
+          font: {
+            size: 12,
+          }
         },
       },
     },
@@ -144,8 +145,8 @@ const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
         borderColor: adjustColorOpacity(accentColor, 0.5),
         borderWidth: 1,
         callbacks: {
-          label: function (context: any) {
-            return `Experience: ${context.raw} Months`;
+          label: function(context: any) {
+            return `${context.parsed.x} Months Experience`;
           }
         }
       },
@@ -165,7 +166,7 @@ const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
           boxShadow: `0 10px 20px rgba(0, 0, 0, 0.1), 0 0 10px ${accentColor}30`
         }}
       >
-        <h4 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        <h4 className="text-xl font-semibold mb-4 flex items-center justify-center gap-2">
           <span style={{ color: accentColor }}><FiPieChart /></span>
           Skill Categories
         </h4>
@@ -185,7 +186,7 @@ const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
           boxShadow: `0 10px 20px rgba(0, 0, 0, 0.1), 0 0 10px ${accentColor}30`
         }}
       >
-        <h4 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        <h4 className="text-xl font-semibold mb-4 flex items-center justify-center gap-2">
           <span style={{ color: accentColor }}><FiBarChart2 /></span>
           Skill Growth & Experience
         </h4>

@@ -76,9 +76,11 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ sectionRef }) => {
       ref={sectionRef}
       className="relative min-h-screen w-full overflow-hidden py-20 px-4 md:px-8"
       style={{
-        background: theme === 'dark' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
+        background: theme === 'dark' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',
+        backdropFilter: 'blur(5px) saturate(150%)',
+        WebkitBackdropFilter: 'blur(5px) saturate(150%)',
+        borderTop: `0.5px solid ${theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`,
+        borderBottom: `0.5px solid ${theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`,
         color: theme === 'dark' ? '#ffffff' : '#000000'
       }}
     >

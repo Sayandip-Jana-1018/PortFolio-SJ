@@ -80,13 +80,9 @@ const CertificateCard: React.FC<CertificateCardProps> = ({
       style={{ perspective: 1000 }}
     >
       <motion.div
+        layoutId={`cert-card-${certificate.title}`}
         className="rounded-xl overflow-hidden h-full glassmorphic-card"
         style={{
-          background: theme === 'dark'
-            ? 'rgba(20, 20, 30, 0.75)'
-            : 'rgba(255, 255, 255, 0.75)',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
           boxShadow: isHovered
             ? `0 20px 40px rgba(0, 0, 0, 0.2), 0 0 20px ${accentColor}40`
             : `0 10px 30px rgba(0, 0, 0, 0.15), 0 0 10px ${accentColor}20`,

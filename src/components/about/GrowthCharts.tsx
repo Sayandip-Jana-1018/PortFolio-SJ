@@ -72,8 +72,8 @@ const GrowthCharts: React.FC<GrowthChartsProps> = ({ accentColor, theme }) => {
     labels: years,
     datasets: [
       {
-        label: 'Frontend',
-        data: [60, 65, 75, 80, 90, 95],
+        label: 'Java',
+        data: [60, 70, 75, 85, 90, 95], // Highest overall proficiency
         borderColor: adjustColorOpacity(accentColor, 0.9),
         backgroundColor: adjustColorOpacity(accentColor, 0.9),
         tension: 0.3,
@@ -82,8 +82,8 @@ const GrowthCharts: React.FC<GrowthChartsProps> = ({ accentColor, theme }) => {
         pointBorderWidth: 2,
       },
       {
-        label: 'Backend',
-        data: [50, 60, 70, 75, 80, 85],
+        label: 'Data Science & ML',
+        data: [40, 50, 60, 75, 85, 90], // Strong growth
         borderColor: adjustColorOpacity(accentColor, 0.6),
         backgroundColor: adjustColorOpacity(accentColor, 0.6),
         tension: 0.3,
@@ -92,8 +92,8 @@ const GrowthCharts: React.FC<GrowthChartsProps> = ({ accentColor, theme }) => {
         pointBorderWidth: 2,
       },
       {
-        label: 'DevOps',
-        data: [30, 40, 50, 60, 65, 70],
+        label: 'Generative AI',
+        data: [0, 0, 10, 30, 60, 85], // Recent exponential growth
         borderColor: adjustColorOpacity(accentColor, 0.3),
         backgroundColor: adjustColorOpacity(accentColor, 0.3),
         tension: 0.3,
@@ -213,7 +213,7 @@ const GrowthCharts: React.FC<GrowthChartsProps> = ({ accentColor, theme }) => {
           boxShadow: `0 10px 20px rgba(0, 0, 0, 0.1), 0 0 10px ${accentColor}30` 
         }}
       >
-        <h4 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        <h4 className="text-xl font-semibold mb-4 flex items-center justify-center gap-2">
           <span style={{ color: accentColor }}><FiTrendingUp /></span>
           Projects Growth
         </h4>
@@ -233,7 +233,7 @@ const GrowthCharts: React.FC<GrowthChartsProps> = ({ accentColor, theme }) => {
           boxShadow: `0 10px 20px rgba(0, 0, 0, 0.1), 0 0 10px ${accentColor}30` 
         }}
       >
-        <h4 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        <h4 className="text-xl font-semibold mb-4 flex items-center justify-center gap-2">
           <span style={{ color: accentColor }}><FiActivity /></span>
           Skills Growth
         </h4>

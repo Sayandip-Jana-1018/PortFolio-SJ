@@ -19,74 +19,38 @@ const SocialLinks: React.FC<SocialLinksProps> = ({ accentColor, theme }) => {
   const socialLinks: SocialLink[] = [
     { 
       name: 'Email', 
-      icon: <FiMail size={20} />, 
-      url: 'mailto:contact@example.com',
+      icon: <FiMail size={24} />, 
+      url: 'mailto:sayandip.jana24@gmail.com',
       color: accentColor
     },
     { 
       name: 'GitHub', 
-      icon: <FiGithub size={20} />, 
-      url: 'https://github.com/yourusername',
+      icon: <FiGithub size={24} />, 
+      url: 'https://github.com/Sayandip-Jana-1018',
       color: accentColor
     },
     { 
       name: 'LinkedIn', 
-      icon: <FiLinkedin size={20} />, 
-      url: 'https://linkedin.com/in/yourusername',
+      icon: <FiLinkedin size={24} />, 
+      url: 'https://www.linkedin.com/in/jsayandip2003/',
       color: accentColor
     },
     { 
       name: 'Twitter', 
-      icon: <FiTwitter size={20} />, 
-      url: 'https://twitter.com/yourusername',
+      icon: <FiTwitter size={24} />, 
+      url: 'https://x.com/51Sayandip',
       color: accentColor
     },
     { 
       name: 'Instagram', 
-      icon: <FiInstagram size={20} />, 
-      url: 'https://instagram.com/yourusername',
-      color: accentColor
-    },
-    { 
-      name: 'CodePen', 
-      icon: <FiCodepen size={20} />, 
-      url: 'https://codepen.io/yourusername',
-      color: accentColor
-    },
-    { 
-      name: 'YouTube', 
-      icon: <FiYoutube size={20} />, 
-      url: 'https://youtube.com/c/yourusername',
-      color: accentColor
-    },
-    { 
-      name: 'Dribbble', 
-      icon: <FiDribbble size={20} />, 
-      url: 'https://dribbble.com/yourusername',
-      color: accentColor
-    },
-    { 
-      name: 'Discord', 
-      icon: <FaDiscord size={20} />, 
-      url: 'https://discord.com/users/yourusername',
-      color: accentColor
-    },
-    { 
-      name: 'Medium', 
-      icon: <FaMedium size={20} />, 
-      url: 'https://medium.com/@yourusername',
-      color: accentColor
-    },
-    { 
-      name: 'Stack OF', 
-      icon: <FaStackOverflow size={20} />, 
-      url: 'https://stackoverflow.com/users/yourusername',
+      icon: <FiInstagram size={24} />, 
+      url: 'https://www.instagram.com/lostsoulfm2003/?hl=en',
       color: accentColor
     },
     { 
       name: 'Portfolio', 
-      icon: <FiBriefcase size={20} />, 
-      url: 'https://yourportfolio.com',
+      icon: <FiBriefcase size={24} />, 
+      url: 'https://sayandipjana.vercel.app',
       color: accentColor
     }
   ];
@@ -109,125 +73,52 @@ const SocialLinks: React.FC<SocialLinksProps> = ({ accentColor, theme }) => {
 
   return (
     <div className="h-full flex flex-col items-center">
-      <h3 className="text-2xl font-bold mb-6 text-center">Connect With Me</h3>
+      <h3 className="text-3xl font-black mb-8 text-center tracking-wide" style={{ color: theme === 'dark' ? '#fff' : '#111', textShadow: theme === 'dark' ? `0 0 15px ${accentColor}60` : `0 2px 10px ${accentColor}30` }}>Socials</h3>
       
       <div className="w-full max-w-md mx-auto">
         <motion.div 
-          className="grid grid-cols-4 gap-2 sm:gap-3"
+          className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          {socialLinks.slice(0, 4).map((link, index) => (
+          {socialLinks.map((link, index) => (
             <motion.a
               key={link.name}
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-300"
+              className="relative flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-300 overflow-hidden group"
               style={{ 
-                backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)',
+                backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.01)',
                 border: `1px solid ${accentColor}20`
               }}
               variants={itemVariants}
               whileHover={{ 
-                y: -3, 
-                backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)',
-                boxShadow: `0 8px 20px -5px ${link.color}40`,
-                border: `1px solid ${link.color}40`
+                y: -5, 
+                borderColor: `${link.color}50`,
+                boxShadow: `0 15px 35px -10px ${link.color}50`
               }}
               whileTap={{ scale: 0.95 }}
             >
+              {/* Radial gradient hover background */}
               <div 
-                className="w-10 h-10 rounded-full flex items-center justify-center"
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" 
+                style={{ background: `radial-gradient(circle at 50% 50%, ${link.color}15, transparent 70%)` }} 
+              />
+              
+              <div 
+                className="w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-all duration-300 relative z-10 border group-hover:scale-110"
                 style={{ 
-                  backgroundColor: `${link.color}20`,
-                  color: link.color
+                  backgroundColor: `${link.color}10`,
+                  borderColor: `${link.color}30`,
+                  color: link.color,
+                  boxShadow: `0 0 15px ${link.color}20 inset`
                 }}
               >
                 {link.icon}
               </div>
-              <span className="text-xs font-medium mt-1">{link.name}</span>
-            </motion.a>
-          ))}
-        </motion.div>
-        
-        <motion.div 
-          className="grid grid-cols-4 gap-2 sm:gap-3 mt-2 sm:mt-3"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {socialLinks.slice(4, 8).map((link, index) => (
-            <motion.a
-              key={link.name}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-300"
-              style={{ 
-                backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)',
-                border: `1px solid ${accentColor}20`
-              }}
-              variants={itemVariants}
-              whileHover={{ 
-                y: -3, 
-                backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)',
-                boxShadow: `0 8px 20px -5px ${link.color}40`,
-                border: `1px solid ${link.color}40`
-              }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <div 
-                className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ 
-                  backgroundColor: `${link.color}20`,
-                  color: link.color
-                }}
-              >
-                {link.icon}
-              </div>
-              <span className="text-xs font-medium mt-1">{link.name}</span>
-            </motion.a>
-          ))}
-        </motion.div>
-        
-        <motion.div 
-          className="grid grid-cols-4 gap-2 sm:gap-3 mt-2 sm:mt-3"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {socialLinks.slice(8, 12).map((link, index) => (
-            <motion.a
-              key={link.name}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-300"
-              style={{ 
-                backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)',
-                border: `1px solid ${accentColor}20`
-              }}
-              variants={itemVariants}
-              whileHover={{ 
-                y: -3, 
-                backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)',
-                boxShadow: `0 8px 20px -5px ${link.color}40`,
-                border: `1px solid ${link.color}40`
-              }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <div 
-                className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ 
-                  backgroundColor: `${link.color}20`,
-                  color: link.color
-                }}
-              >
-                {link.icon}
-              </div>
-              <span className="text-xs font-medium mt-1">{link.name}</span>
+              <span className="text-sm font-bold tracking-wide relative z-10 opacity-90 group-hover:opacity-100 transition-opacity">{link.name}</span>
             </motion.a>
           ))}
         </motion.div>

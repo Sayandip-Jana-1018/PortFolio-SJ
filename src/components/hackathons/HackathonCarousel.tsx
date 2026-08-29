@@ -95,7 +95,7 @@ const HackathonCarousel: React.FC<HackathonCarouselProps> = ({
       x: 0,
       y: 0,
       opacity: 1,
-      scale: 1,
+      scale: 1.05,
       rotateY: 0,
       zIndex: 10,
       transition: {

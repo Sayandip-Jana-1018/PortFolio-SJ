@@ -38,13 +38,13 @@ function Model({ url, mousePosition }: ModelProps) {
       const t = clock.getElapsedTime();
       const breathingIntensity = 0.03; // Reduced intensity
       
-      // Convert mouse position to model rotation with damping
-      const targetRotationY = (mousePosition.x - 0.5) * 0.3; // Reduced range
-      const targetRotationX = (mousePosition.y - 0.5) * 0.2; // Reduced range
+      // Convert mouse position to model rotation with higher sensitivity
+      const targetRotationY = (mousePosition.x - 0.5) * 1.5; // Increased range for high sensitivity
+      const targetRotationX = (mousePosition.y - 0.5) * 1.0; // Increased range for high sensitivity
       
-      // Smoothly interpolate with stronger damping for stability
-      lastRotationY.current = lastRotationY.current + (targetRotationY - lastRotationY.current) * 0.03;
-      lastRotationX.current = lastRotationX.current + (targetRotationX - lastRotationX.current) * 0.03;
+      // Smoothly interpolate with less damping for faster reaction
+      lastRotationY.current = lastRotationY.current + (targetRotationY - lastRotationY.current) * 0.15;
+      lastRotationX.current = lastRotationX.current + (targetRotationX - lastRotationX.current) * 0.15;
       
       modelRef.current.rotation.y = lastRotationY.current;
       modelRef.current.rotation.x = lastRotationX.current;

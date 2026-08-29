@@ -76,9 +76,11 @@ const AboutPage: React.FC<AboutPageProps> = ({ sectionRef }) => {
       ref={sectionRef}
       className="min-h-screen flex items-center justify-center relative section-container py-10 overflow-hidden"
       style={{
-        background: theme === 'dark' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)'
+        background: theme === 'dark' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',
+        backdropFilter: 'blur(5px) saturate(150%)',
+        WebkitBackdropFilter: 'blur(5px) saturate(150%)',
+        borderTop: `0.5px solid ${theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`,
+        borderBottom: `0.5px solid ${theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`,
       }}
     >
       {/* Dynamic background elements */}

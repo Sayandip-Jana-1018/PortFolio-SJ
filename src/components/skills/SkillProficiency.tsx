@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 import SkillProgressBar from './SkillProgressBar';
-import { FiCpu, FiLayout, FiServer, FiDatabase } from 'react-icons/fi';
+import { FiCpu, FiLayout, FiServer, FiDatabase, FiCode, FiActivity } from 'react-icons/fi';
 
 interface SkillGroup {
   title: string;
@@ -17,42 +17,63 @@ const SkillProficiency: React.FC = () => {
 
   const skillGroups: SkillGroup[] = [
     {
-      title: "Machine Learning & AI",
+      title: "Java & Core",
       skills: [
-        { name: "Python", level: 95 },
-        { name: "TensorFlow", level: 85 },
+        { name: "Java", level: 95 },
+        { name: "Python", level: 92 },
+        { name: "TypeScript / JS", level: 90 },
+        { name: "C/C++", level: 85 },
+        { name: "SQL", level: 88 }
+      ]
+    },
+    {
+      title: "Data Science",
+      skills: [
+        { name: "Pandas", level: 92 },
+        { name: "NumPy", level: 90 },
+        { name: "Matplotlib", level: 85 },
+        { name: "Time Series", level: 88 },
+        { name: "Data Viz", level: 90 }
+      ]
+    },
+    {
+      title: "Generative AI",
+      skills: [
+        { name: "OpenAI / Gemini", level: 90 },
+        { name: "LangChain / RAG", level: 85 },
+        { name: "Prompt Eng.", level: 92 },
+        { name: "CrewAI", level: 80 },
+        { name: "Vector DBs", level: 85 }
+      ]
+    },
+    {
+      title: "Machine Learning",
+      skills: [
         { name: "Scikit-Learn", level: 90 },
-        { name: "Pandas/NumPy", level: 92 },
+        { name: "TensorFlow", level: 85 },
+        { name: "Predictive Models", level: 92 },
         { name: "OpenCV", level: 78 },
-        { name: "XGBoost", level: 85 },
+        { name: "NLP", level: 85 }
       ]
     },
     {
-      title: "Web Development",
+      title: "Full Stack & DevOps",
       skills: [
-        { name: "React/Next.js", level: 88 },
-        { name: "TypeScript", level: 80 },
-        { name: "Node.js", level: 82 },
-        { name: "Flask/FastAPI", level: 85 },
-        { name: "Tailwind CSS", level: 90 },
-      ]
-    },
-    {
-      title: "Databases & Tools",
-      skills: [
-        { name: "MongoDB", level: 82 },
-        { name: "PostgreSQL", level: 78 },
-        { name: "Supabase", level: 80 },
-        { name: "Git/GitHub", level: 90 },
-        { name: "Docker", level: 70 },
+        { name: "React / Next.js", level: 88 },
+        { name: "Node.js / FastAPI", level: 85 },
+        { name: "Supabase / SQL", level: 88 },
+        { name: "Docker / K8s", level: 80 },
+        { name: "Git / CI/CD", level: 90 }
       ]
     }
   ];
 
   const icons = [
-    <FiCpu key="cpu" size={20} style={{ color: accentColor }} />,
-    <FiLayout key="layout" size={20} style={{ color: accentColor }} />,
-    <FiDatabase key="db" size={20} style={{ color: accentColor }} />
+    <FiCode key="code" size={20} style={{ color: accentColor }} />,
+    <FiDatabase key="db" size={20} style={{ color: accentColor }} />,
+    <FiCpu key="genai" size={20} style={{ color: accentColor }} />,
+    <FiActivity key="ml" size={20} style={{ color: accentColor }} />,
+    <FiLayout key="layout" size={20} style={{ color: accentColor }} />
   ];
 
   return (
@@ -79,15 +100,11 @@ const SkillProficiency: React.FC = () => {
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {skillGroups.map((group, groupIndex) => (
           <motion.div
             key={group.title}
-            className={`p-8 rounded-2xl ${theme === 'dark'
-                ? 'bg-gradient-to-br from-gray-900/70 to-gray-800/50 backdrop-blur-md'
-                : 'bg-gradient-to-br from-white/90 to-gray-100/70 backdrop-blur-md'
-              } shadow-xl border border-opacity-20 ${theme === 'dark' ? 'border-white/10' : 'border-black/10'
-              }`}
+            className="p-6 rounded-2xl glassmorphic-card relative overflow-hidden"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: groupIndex * 0.2 }}

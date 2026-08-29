@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme, PREMIUM_ACCENTS } from '../../context/ThemeContext';
 import { useParticles } from '../../context/ParticlesContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import Link from 'next/link';
 import { HexColorPicker } from 'react-colorful';
 import { FiHome, FiUser, FiCode, FiAward, FiFileText, FiMail, FiMenu, FiX, FiSun, FiMoon, FiSettings, FiBookOpen } from 'react-icons/fi';
@@ -23,11 +23,9 @@ const navItems = [
 ];
 
 const Navbar: React.FC = () => {
-  const { theme, toggleTheme, accentColor, setAccentColor } = useTheme();
+  const { theme, toggleTheme, accentColor, setAccentColor, backgroundMode, setBackgroundMode } = useTheme();
   const { cornerParticlesEnabled, toggleCornerParticles } = useParticles();
   const [scrolled, setScrolled] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const [visible, setVisible] = useState(true);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -43,27 +41,15 @@ const Navbar: React.FC = () => {
     '#FFE000', // Vivid Yellow
   ];
 
-  // Handle scroll events for background styling only - navbar stays visible
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+  const { scrollY } = useScroll();
 
-      // Navbar always stays visible (fixed at top)
-      setVisible(true);
-
-      // Add background when scrolled
-      if (currentScrollY > 50) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    // Only update React state when we cross the 50px threshold
+    const isScrolled = latest > 50;
+    if (isScrolled !== scrolled) {
+      setScrolled(isScrolled);
+    }
+  });
 
   // Close mobile menu when changing routes
   useEffect(() => {
@@ -115,21 +101,28 @@ const Navbar: React.FC = () => {
 
   return (
     <motion.header
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled
+      className={`fixed left-0 right-0 z-50 mx-auto w-full transition-all duration-300 ${scrolled
         ? theme === 'dark'
-          ? 'bg-black/90 backdrop-blur-md shadow-lg'
-          : 'bg-white/90 backdrop-blur-md shadow-lg'
-        : theme === 'dark' ? 'bg-black/50 backdrop-blur-sm' : 'bg-white/50 backdrop-blur-sm'
+          ? 'bg-black/60 backdrop-blur-xl shadow-2xl shadow-black/50 top-0'
+          : 'bg-white/70 backdrop-blur-xl shadow-xl shadow-black/5 top-0'
+        : theme === 'dark' ? 'bg-black/10 backdrop-blur-sm top-0' : 'bg-white/30 backdrop-blur-sm top-0'
         }`}
       initial={{ y: -100 }}
-      animate={{ y: visible ? 0 : -100 }}
-      transition={{ duration: 0.3 }}
-      style={{ borderBottom: `1px solid ${accentColor}30` }}
+      animate={{ y: 0 }}
+      transition={{ 
+        y: { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
+      }}
+      style={{ 
+        borderBottom: scrolled ? `1px solid ${accentColor}30` : `1px solid ${accentColor}20`
+      }}
     >
       <style jsx global>{`
         .no-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
         }
         .no-scrollbar::-webkit-scrollbar {
           display: none;
@@ -161,7 +154,7 @@ const Navbar: React.FC = () => {
         .react-colorful__last-control { border-radius: 0 0 16px 16px !important; }
         .react-colorful__pointer { width: 18px !important; height: 18px !important; border-width: 2px !important; }
       `}</style>
-      <div className="container mx-auto px-1 sm:px-2 md:px-4 py-2 flex justify-between items-center navbar-container">
+      <div className={`px-4 sm:px-6 navbar-container w-full h-full flex items-center justify-between gap-4 md:gap-8 transition-all duration-300 ${scrolled ? 'py-2.5 sm:py-3' : 'py-3 sm:py-4'}`}>
         {/* Logo */}
         <motion.div
           className="flex items-center shrink-0"
@@ -170,51 +163,56 @@ const Navbar: React.FC = () => {
         >
           <Link href="/" passHref>
             <div
-              className="relative font-medium cursor-pointer flex items-center gap-1"
+              className="relative font-medium cursor-pointer flex items-center gap-1.5"
               style={{ color: accentColor }}
             >
-              <span className="text-base sm:text-lg md:text-xl font-bold">Portfolio</span>
+              <span className="text-lg sm:text-xl md:text-2xl font-black tracking-tight" style={{ textShadow: `0 2px 10px ${accentColor}40` }}>Portfolio</span>
               <div
-                className="h-1.5 w-1.5 rounded-full animate-pulse"
-                style={{ backgroundColor: accentColor }}
+                className="h-2 w-2 rounded-full animate-pulse shadow-lg"
+                style={{ backgroundColor: accentColor, boxShadow: `0 0 10px ${accentColor}` }}
               />
             </div>
           </Link>
         </motion.div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-3 lg:space-x-6 overflow-x-auto no-scrollbar">
+        <nav className="hidden md:flex items-center overflow-x-auto no-scrollbar gap-2 lg:gap-4">
           {navItems.map((item) => (
             <motion.div
               key={item.name}
+              layout
               whileHover={{ y: -2 }}
-              transition={{ type: 'spring', stiffness: 300 }}
+              whileTap={{ scale: 0.95 }}
               className="shrink-0"
             >
               <Link href={item.href} passHref>
-                <div className={`relative text-xs lg:text-sm font-medium group cursor-pointer flex items-center gap-1 lg:gap-2 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
+                <motion.div 
+                  layout
+                  className={`relative rounded-full text-xs lg:text-sm font-medium group cursor-pointer flex items-center transition-colors duration-300 ${scrolled ? 'px-1.5 py-1.5' : 'px-3 py-2'} ${theme === 'dark' ? 'text-white/70 hover:text-white hover:bg-white/10' : 'text-black/60 hover:text-black hover:bg-black/5'}`}
+                >
                   <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center"
+                    className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110"
                     style={{
                       backgroundColor: `${accentColor}15`,
-                      border: `1px solid ${accentColor}30`
+                      color: accentColor,
+                      boxShadow: `inset 0 0 0 1px ${accentColor}30`
                     }}
                   >
-                    <span className="text-xl" style={{ color: accentColor }}>{item.icon}</span>
+                    <span className="text-sm">{item.icon}</span>
                   </div>
-                  <span className="hidden lg:inline">{item.name}</span>
-                  <span
-                    className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
-                    style={{ backgroundColor: accentColor }}
-                  />
-                </div>
+                  <span 
+                    className="hidden lg:block tracking-wide overflow-hidden whitespace-nowrap min-w-0 ml-2.5 opacity-90 group-hover:opacity-100 transition-opacity"
+                  >
+                    {item.name}
+                  </span>
+                </motion.div>
               </Link>
             </motion.div>
           ))}
         </nav>
 
         {/* Control Buttons */}
-        <div className="flex items-center space-x-3 sm:space-x-4 md:space-x-5">
+        <div className="flex items-center shrink-0 gap-3 sm:gap-4 md:gap-5">
           <div className="flex items-center gap-1 sm:gap-2">
             <div className="hidden md:block">
               <MusicPlayer />
@@ -560,6 +558,51 @@ const Navbar: React.FC = () => {
                     >
                       <FiX size={14} style={{ color: theme === 'dark' ? '#fff' : '#000' }} />
                     </button>
+                  </div>
+
+                  {/* Backdrop switch — a sliding segmented control. The pill is
+                      one shared layoutId, so Framer tweens it between the two
+                      halves instead of cross-fading two separate pills. */}
+                  <div className="mb-4 relative z-10">
+                    <div
+                      className="relative grid grid-cols-2 rounded-full p-1"
+                      style={{
+                        backgroundColor: theme === 'dark' ? 'rgba(0,0,0,0.28)' : 'rgba(0,0,0,0.06)',
+                        boxShadow: `inset 0 1px 2px rgba(0,0,0,${theme === 'dark' ? 0.5 : 0.12})`,
+                      }}
+                    >
+                      {(['metal', 'scroll'] as const).map((mode) => {
+                        const active = backgroundMode === mode;
+                        return (
+                          <button
+                            key={mode}
+                            onClick={() => setBackgroundMode(mode)}
+                            aria-pressed={active}
+                            className="relative py-2 rounded-full text-[10px] md:text-[11px] font-semibold tracking-[0.14em] uppercase focus:outline-none transition-colors duration-300"
+                            style={{
+                              color: active
+                                ? (theme === 'dark' ? '#fff' : '#fff')
+                                : (theme === 'dark' ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.5)'),
+                            }}
+                          >
+                            {active && (
+                              <motion.span
+                                layoutId="bg-mode-pill"
+                                className="absolute inset-0 rounded-full"
+                                transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                                style={{
+                                  background: `linear-gradient(135deg, ${accentColor}, ${accentColor}bb)`,
+                                  boxShadow: `0 4px 14px -4px ${accentColor}cc, inset 0 1px 0 0 rgba(255,255,255,0.35)`,
+                                }}
+                              />
+                            )}
+                            <span className="relative z-10">
+                              {mode === 'metal' ? 'Metal' : 'Scroll'}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Color Picker with Seamless integration */}

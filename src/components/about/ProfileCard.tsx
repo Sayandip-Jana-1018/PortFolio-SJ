@@ -24,7 +24,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ accentColor, theme }) => {
             transition={{ type: 'spring', stiffness: 300 }}
           >
             <Image
-              src="/second.jpeg"
+              src="/images/second.jpeg"
               alt="Sayandip Jana"
               fill
               sizes="(max-width: 768px) 100vw, 288px"
@@ -47,7 +47,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ accentColor, theme }) => {
         {/* Content on right - Spacious layout */}
         <div className="w-full md:w-3/5 p-8 text-center md:text-left">
           <motion.h3
-            className="text-3xl md:text-4xl font-bold mb-4"
+            className="text-2xl md:text-3xl font-bold mb-4"
             style={{ color: accentColor }}
           >
             Sayandip Jana
@@ -55,24 +55,32 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ accentColor, theme }) => {
 
           <div className="mb-6">
             <div className="text-xl md:text-2xl font-medium mb-4">
-              Data Science Enthusiast | ML Developer
+              Java Backend Developer | AI & ML Engineer
             </div>
 
-            <p className="opacity-80 mb-6 text-base md:text-lg max-w-2xl leading-relaxed">
-              I'm a 4th-year B.Tech Computer Science student at LPU with a CGPA of 9.27, passionate about Machine Learning, AI, and building intelligent applications. With strong foundations in data science and full-stack development, I love creating AI-powered solutions that solve real-world problems.
+            <p className="opacity-90 mb-6 text-lg md:text-xl max-w-2xl leading-relaxed">
+              I'm a B.Tech Computer Science student at LPU with a CGPA of 9.11, passionate about Generative AI, Machine Learning, and building scalable cloud-native backend systems. With strong foundations in Java, Data Science, and DevOps, I love creating intelligent, AI-powered platforms that solve complex real-world problems.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-6 max-w-xl">
+          <div className="grid grid-cols-2 gap-4 max-w-xl">
             {[
-              { label: 'Machine Learning', value: 'Advanced' },
-              { label: 'Data Science', value: 'Enthusiast' },
-              { label: 'Full Stack Dev', value: 'Proficient' },
-              { label: 'Problem Solving', value: '250+ LeetCode' }
+              { label: 'Java & Backend', value: 'Advanced' },
+              { label: 'Data Science & ML', value: 'Proficient' },
+              { label: 'Generative AI', value: 'Advanced' },
+              { label: 'Problem Solving', value: '600+ LeetCode' }
             ].map((item, index) => (
-              <div key={item.label} className="flex flex-col">
-                <span className="text-sm opacity-70 mb-1">{item.label}</span>
-                <span className="font-medium text-lg" style={{ color: accentColor }}>{item.value}</span>
+              <div 
+                key={item.label} 
+                className="flex flex-col p-4 rounded-lg border transition-all duration-300 hover:scale-105"
+                style={{ 
+                  borderColor: `${accentColor}30`, 
+                  backgroundColor: `${accentColor}05`,
+                  boxShadow: `0 4px 15px rgba(0,0,0,0.05)`
+                }}
+              >
+                <span className="text-sm opacity-80 mb-1">{item.label}</span>
+                <span className="font-bold text-xl" style={{ color: accentColor }}>{item.value}</span>
               </div>
             ))}
           </div>

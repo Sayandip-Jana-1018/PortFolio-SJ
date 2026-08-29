@@ -9,11 +9,11 @@ import BackgroundElements from '../about/BackgroundElements';
 // Education data
 const educationData = [
   {
-    image: '/lpu.png',
+    image: '/images/lpu.png',
     title: "Bachelor of Technology",
     institution: "Lovely Professional University",
     period: "2023 - 2027",
-    cgpa: "CGPA - 9.3",
+    cgpa: "CGPA - 9.11",
     description: "Pursuing Engineering with a focus on comprehensive technical skills and innovation.",
     achievements: [
       "Consistent academic excellence",
@@ -23,11 +23,11 @@ const educationData = [
     color: "#4b7bff"
   },
   {
-    image: '/cps1.jpg',
+    image: '/images/cps1.jpg',
     title: "Secondary Education (10th)",
     institution: "Contai Public School",
     period: "Completed",
-    cgpa: "Score: 96%",
+    cgpa: "Score: 96.2%",
     description: "Built a strong foundation in Science and Mathematics.",
     achievements: [
       "School Topper",
@@ -37,11 +37,11 @@ const educationData = [
     color: "#4CAF50"
   },
   {
-    image: '/cps2.jpg',
+    image: '/images/cps2.jpg',
     title: "Higher Secondary (12th)",
     institution: "Contai Public School",
     period: "Completed",
-    cgpa: "Score: 94.74%",
+    cgpa: "Score: 94.75%",
     description: "Specialized in Science stream with focus on Computer Science.",
     achievements: [
       "Distinction in Physics & Chemistry",
@@ -157,6 +157,7 @@ const Education3DCircle: React.FC<{ imageSrc: string; accentColor: string }> = (
           src={imageSrc}
           alt="Education Logo"
           fill
+          sizes="(max-width: 768px) 150px, 180px"
           className="object-cover"
         />
         <div className="absolute inset-0 bg-white/10 mix-blend-overlay pointer-events-none" />
@@ -176,9 +177,11 @@ const EducationPage: React.FC<{ sectionRef: React.RefObject<HTMLDivElement> }> =
       className="min-h-screen relative overflow-hidden py-20"
       id="education"
       style={{
-        background: theme === 'dark' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)'
+        background: theme === 'dark' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',
+        backdropFilter: 'blur(5px) saturate(150%)',
+        WebkitBackdropFilter: 'blur(5px) saturate(150%)',
+        borderTop: `0.5px solid ${theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`,
+        borderBottom: `0.5px solid ${theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`,
       }}
     >
       <BackgroundElements accentColor={accentColor} theme={theme} />

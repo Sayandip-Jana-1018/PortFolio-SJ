@@ -123,20 +123,14 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
   };
 
   const modalVariants = {
-    hidden: { opacity: 0, scale: 0.9 },
+    hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 25
-      }
+      transition: { duration: 0.3 }
     },
     exit: {
       opacity: 0,
-      scale: 0.9,
-      transition: { duration: 0.3 }
+      transition: { duration: 0.2 }
     }
   };
 
@@ -180,31 +174,29 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
           transition={{ duration: 0.3 }}
         >
           <motion.div
+            layoutId={`cert-card-${certificate.title}`}
             ref={modalRef}
-            className="relative max-w-5xl w-full rounded-xl overflow-hidden"
+            className="relative w-[95vw] max-w-5xl h-[85vh] md:h-[90vh] rounded-2xl overflow-hidden glassmorphic-card shadow-2xl"
             style={{
-              maxHeight: '90vh'
+              background: 'rgba(20, 20, 30, 0.6)',
+              border: `1px solid ${accentColor}40`,
+              margin: 'auto'
             }}
-            variants={modalVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
             onMouseMove={handleMouseMove}
           >
-            {/* Certificate Image with Parallax Effect */}
-            <div className="relative aspect-[4/3] w-full overflow-hidden">
+            {/* Certificate Image */}
+            <div className="absolute inset-0 p-4 md:p-8 pb-[35vh] md:pb-40 pointer-events-none">
               <motion.div
-                className="absolute inset-0"
-                style={{
-                  x: isMobile ? 0 : imageX,
-                  y: isMobile ? 0 : imageY,
-                }}
+                className="relative w-full h-full flex items-center justify-center pointer-events-auto"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.15, duration: 0.4, type: "spring", damping: 20 }}
               >
                 <Image
                   src={certificate.image}
                   alt={certificate.title}
                   fill
-                  className="object-contain"
+                  className="object-contain drop-shadow-2xl"
                   priority
                 />
               </motion.div>
@@ -357,10 +349,10 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                   animate="visible"
                   exit="exit"
                 >
-                  <div className="max-w-3xl mx-auto">
-                    <div className="flex items-center gap-3 mb-3">
+                  <div className="max-w-3xl mx-auto flex flex-col items-center text-center">
+                    <div className="flex items-center justify-center gap-3 mb-3">
                       <span
-                        className="px-3 py-1 text-xs rounded-full text-white flex items-center gap-1"
+                        className="px-3 py-1 text-xs rounded-full text-white flex items-center justify-center gap-1 shadow-lg"
                         style={{ backgroundColor: accentColor }}
                       >
                         <FiCheck size={12} />
@@ -368,7 +360,7 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                       </span>
 
                       <span
-                        className="px-3 py-1 text-xs rounded-full text-white flex items-center gap-1"
+                        className="px-3 py-1 text-xs rounded-full text-white flex items-center justify-center gap-1 shadow-lg"
                         style={{ backgroundColor: `${accentColor}90` }}
                       >
                         <FiAward size={12} />
@@ -376,15 +368,15 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                       </span>
                     </div>
 
-                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-3">{certificate.title}</h2>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 drop-shadow-md">{certificate.title}</h2>
 
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm opacity-90 mb-2 sm:mb-4">
-                      <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm opacity-90 mb-4">
+                      <div className="flex items-center justify-center gap-2 bg-black/20 px-3 py-1.5 rounded-full">
                         <FiUser size={16} style={{ color: accentColor }} />
                         <span>{certificate.issuer}</span>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center gap-2 bg-black/20 px-3 py-1.5 rounded-full">
                         <FiCalendar size={16} style={{ color: accentColor }} />
                         <span>{certificate.date}</span>
                       </div>
@@ -394,7 +386,7 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                           href={certificate.credentialUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-2 hover:underline"
+                          className="flex items-center justify-center gap-2 hover:underline bg-black/20 px-3 py-1.5 rounded-full transition-all hover:bg-white/10"
                           style={{ color: accentColor }}
                         >
                           <FiExternalLink size={16} />
@@ -402,8 +394,12 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                         </a>
                       )}
                     </div>
-
-                    <p className="text-sm sm:text-base opacity-90 leading-relaxed line-clamp-3 sm:line-clamp-none">{certificate.description}</p>
+                    
+                    {certificate.description && (
+                      <p className="text-sm md:text-base opacity-80 mt-2 max-w-2xl text-center leading-relaxed">
+                        {certificate.description}
+                      </p>
+                    )}
                   </div>
                 </motion.div>
               )}

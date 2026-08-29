@@ -7,6 +7,7 @@ import ContactForm from '../contact/ContactForm';
 import SocialLinks from '../contact/SocialLinks';
 import ContactInfo from '../contact/ContactInfo';
 import FloatingParticles from '../contact/FloatingParticles';
+import MaskedHeading from '../common/MaskedHeading';
 
 interface ContactPageProps {
   sectionRef: React.RefObject<HTMLDivElement>;
@@ -84,9 +85,11 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
       ref={sectionRef}
       className="min-h-screen flex items-center justify-center relative section-container py-20 overflow-hidden"
       style={{
-        background: theme === 'dark' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)'
+        background: theme === 'dark' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',
+        backdropFilter: 'blur(5px) saturate(150%)',
+        WebkitBackdropFilter: 'blur(5px) saturate(150%)',
+        borderTop: `0.5px solid ${theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`,
+        borderBottom: `0.5px solid ${theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'}`,
       }}
     >
       {/* Background Elements */}
@@ -125,18 +128,25 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
           variants={fadeInUpVariant}
           className="mb-10 text-center"
         >
-          <motion.h2
-            className="text-4xl md:text-6xl font-bold mb-4 text-center"
-            style={{
-              backgroundImage: `linear-gradient(135deg, #fff 0%, ${accentColor} 50%, #fff 100%)`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              textShadow: `0 0 5px rgba(255, 255, 255, 0.1), 0 0 10px ${accentColor}40`
-            }}
-          >
-            Get In Touch
-          </motion.h2>
+          <div className="flex justify-center w-full mb-4">
+            <MaskedHeading
+              text="Get In Touch"
+              tag="h2"
+              mediaType="video"
+              src="/media/LiveWallpaper.webm"
+              fillScale={1.2}
+              parallax={15}
+              drift={5}
+              reveal="rise"
+              trigger="view"
+              textScale={0.1}
+              weight={900}
+              tracking={-0.02}
+              lineHeight={1.1}
+              fontSize="clamp(3rem, 8vw, 5rem)"
+              className="mx-auto"
+            />
+          </div>
 
           <motion.p
             className="text-center max-w-2xl mx-auto opacity-80 text-lg"
@@ -195,12 +205,28 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
 
                 {/* Caption for the 3D model */}
                 <motion.div
-                  className="absolute bottom-4 left-4 right-4 bg-black/40 backdrop-blur-md p-3 rounded-lg text-center border border-white/10"
+                  className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-xl p-4 rounded-xl text-center border overflow-hidden"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 1.5, duration: 0.5 }}
+                  style={{
+                    boxShadow: `0 10px 30px -10px ${accentColor}50`,
+                    borderColor: `${accentColor}40`
+                  }}
                 >
-                  <p className="text-sm text-white/90">Interactive 3D Virtual Assistant</p>
+                  <div className="absolute inset-0 opacity-20" style={{ background: `linear-gradient(135deg, ${accentColor}, transparent)` }} />
+                  
+                  <h4 className="text-xl font-black uppercase tracking-wider mb-1 relative z-10" style={{ color: '#fff', textShadow: `0 0 10px ${accentColor}80` }}>
+                    Sayandip Jana
+                  </h4>
+                  <div className="flex flex-col items-center justify-center relative z-10 space-y-1 mt-2">
+                    <span className="text-[11px] uppercase tracking-[0.2em] font-bold" style={{ color: accentColor }}>
+                      Ready to Contribute
+                    </span>
+                    <span className="text-[10px] text-white/70 uppercase tracking-wider">
+                      • Open to Work •
+                    </span>
+                  </div>
                 </motion.div>
               </div>
             </motion.div>

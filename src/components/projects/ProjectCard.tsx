@@ -36,7 +36,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, accentColor, theme, 
         {true && (
           <motion.div
             ref={cardRef}
-            className="relative glassmorphic-card rounded-xl overflow-hidden h-full"
+            className="relative glassmorphic-card rounded-xl overflow-hidden h-full flex flex-col"
             style={{
               boxShadow: `0 10px 30px rgba(0, 0, 0, 0.15), 0 0 10px ${accentColor}20`,
               willChange: 'transform', // Optimize for animations
@@ -56,7 +56,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, accentColor, theme, 
             }}
           >
             {/* Project Image with Overlay */}
-            <div className="relative h-56 overflow-hidden">
+            <div className="relative h-56 overflow-hidden flex-shrink-0">
               <Image
                 src={project.image}
                 alt={project.title}
@@ -89,29 +89,15 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, accentColor, theme, 
               >
                 {project.category}
               </div>
-
-              {/* Project title */}
-              <div className="absolute bottom-4 left-4 right-4">
-                <h3 className="text-xl font-bold text-white mb-1 drop-shadow-md">{project.title}</h3>
-              </div>
             </div>
 
             {/* Project Info */}
-            <div className="p-6">
+            <div className="p-6 flex flex-col items-center text-center flex-grow">
+              <h3 className="text-xl font-bold mb-3">{project.title}</h3>
               <p className="mb-4 opacity-90 text-sm line-clamp-3">{project.description}</p>
 
-              {/* Key Features */}
-              <div className="mb-4">
-                <h4 className="text-xs uppercase tracking-wider opacity-70 mb-2">Key Features</h4>
-                <ul className="text-xs space-y-1 ml-4 list-disc opacity-80">
-                  {project.features.map((feature, i) => (
-                    <li key={i}>{feature}</li>
-                  ))}
-                </ul>
-              </div>
-
               {/* Technologies */}
-              <div className="flex flex-wrap gap-2 mb-6">
+              <div className="flex flex-wrap justify-center gap-2 mb-6">
                 {project.technologies.map(tech => (
                   <span
                     key={tech}
@@ -128,7 +114,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, accentColor, theme, 
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-between items-center">
+              <div className="flex justify-center items-center gap-4 mt-auto w-full pt-4">
                 <div className="flex space-x-3">
                   <motion.a
                     href={project.github}
@@ -204,38 +190,43 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, accentColor, theme, 
                 </motion.button>
               </div>
             </div>
+
+            {/* Terminal View - In-Card Modal */}
+            <AnimatePresence>
+              {showTerminal && (
+                <motion.div 
+                  className="absolute inset-0 z-50 rounded-xl overflow-hidden shadow-2xl"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <TerminalCodePreview 
+                    code={project.codeSnippet}
+                    language={project.codeLanguage}
+                    accentColor={accentColor}
+                    isVisible={showTerminal}
+                    onClose={() => setShowTerminal(false)}
+                    theme={theme}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Terminal View */}
-      <AnimatePresence>
-        {showTerminal && (
-          <motion.div
-            className="absolute top-0 left-0 w-full h-full glassmorphic-card rounded-xl overflow-hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{ zIndex: 10 }}
-          >
-            <div className="absolute top-0 right-0 z-50 m-2">
-              <button
-                className="bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center"
-                onClick={() => setShowTerminal(false)}
-              >
-                ×
-              </button>
-            </div>
-            <TerminalCodePreview
-              code={project.codeSnippet}
-              language={project.codeLanguage}
-              accentColor={accentColor}
-              isVisible={showTerminal}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Invisible overlay to catch clicks outside the card */}
+      {showTerminal && (
+        <div 
+          className="fixed inset-0 z-40"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowTerminal(false);
+          }}
+        />
+      )}
+
     </div>
   );
 };

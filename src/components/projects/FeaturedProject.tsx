@@ -42,14 +42,14 @@ const FeaturedProject: React.FC<FeaturedProjectProps> = ({ project, accentColor,
   }, [project.screenshots, showTerminal]);
   
   return (
-    <div className="relative col-span-1 md:col-span-2 lg:col-span-2 h-full" onClick={() => showTerminal && setShowTerminal(false)}>
+    <div className="relative col-span-1 md:col-span-2 lg:col-span-2 h-full max-w-5xl mx-auto w-full min-h-[480px]" onClick={() => showTerminal && setShowTerminal(false)}>
       {/* Normal Card View */}
       {/* Always render the card, but conditionally show/hide the terminal */}
       <AnimatePresence mode="wait" initial={false}>
         {true && (
           <motion.div 
             ref={cardRef}
-            className="relative glassmorphic-card rounded-xl overflow-hidden h-full"
+            className="relative glassmorphic-card rounded-xl overflow-hidden h-full flex flex-col"
             style={{ 
               boxShadow: `0 10px 30px rgba(0, 0, 0, 0.15), 0 0 10px ${accentColor}20`,
               willChange: 'transform', // Optimize for animations
@@ -68,9 +68,9 @@ const FeaturedProject: React.FC<FeaturedProjectProps> = ({ project, accentColor,
               transition: { duration: 0.3, ease: "easeOut" }
             }}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 h-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 h-full flex-grow">
               {/* Left side - Image carousel or Project Image */}
-              <div className="relative h-64 md:h-full overflow-hidden">
+              <div className="relative h-72 md:h-full min-h-[300px] overflow-hidden">
                 {project.screenshots && project.screenshots.length > 0 ? (
                   <>
                     {project.screenshots.map((screenshot, index) => (
@@ -161,22 +161,12 @@ const FeaturedProject: React.FC<FeaturedProjectProps> = ({ project, accentColor,
               </div>
               
               {/* Right side - Project info */}
-              <div className="p-6 flex flex-col">
-                <h2 className="text-2xl md:text-3xl font-bold mb-2">{project.title}</h2>
-                <p className="mb-4 opacity-90 text-sm md:text-base">{project.description}</p>
-                
-                {/* Key Features */}
-                <div className="mb-4">
-                  <h3 className="text-sm uppercase tracking-wider opacity-70 mb-2">Key Features</h3>
-                  <ul className="text-sm space-y-1 ml-4 list-disc opacity-80">
-                    {project.features.map((feature, i) => (
-                      <li key={i}>{feature}</li>
-                    ))}
-                  </ul>
-                </div>
+              <div className="p-6 flex flex-col h-full justify-center">
+                <h2 className="text-2xl md:text-3xl font-bold mb-3">{project.title}</h2>
+                <p className="mb-6 opacity-90 text-sm md:text-base leading-relaxed">{project.description}</p>
                 
                 {/* Technologies */}
-                <div className="flex flex-wrap gap-2 mb-6">
+                <div className="flex flex-wrap gap-2 mb-8">
                   {project.technologies.map(tech => (
                     <span 
                       key={tech}
@@ -193,8 +183,8 @@ const FeaturedProject: React.FC<FeaturedProjectProps> = ({ project, accentColor,
                 </div>
                 
                 {/* Action Buttons */}
-                <div className="flex justify-between items-center mt-auto">
-                  <div className="flex space-x-3">
+                <div className="flex justify-between items-center mt-auto pt-4 border-t border-white/5">
+                  <div className="flex space-x-4">
                     <motion.a 
                       href={project.github} 
                       target="_blank" 
@@ -247,17 +237,18 @@ const FeaturedProject: React.FC<FeaturedProjectProps> = ({ project, accentColor,
                   </div>
                   
                   <motion.button
-                    className="text-sm flex items-center gap-1 px-4 py-2 rounded-full relative z-20"
+                    className="text-sm flex items-center gap-2 px-5 py-2.5 rounded-full relative z-20 font-medium"
                     style={{ 
                       border: `1px solid ${accentColor}40`,
                       color: accentColor,
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      backgroundColor: `${accentColor}10`
                     }}
                     whileHover={{ 
                       backgroundColor: accentColor,
                       color: 'white',
                       scale: 1.05,
-                      boxShadow: `0 0 10px ${accentColor}60`
+                      boxShadow: `0 0 15px ${accentColor}60`
                     }}
                     transition={{ duration: 0.2 }}
                     onClick={(e) => {
@@ -265,43 +256,48 @@ const FeaturedProject: React.FC<FeaturedProjectProps> = ({ project, accentColor,
                       setShowTerminal(true);
                     }}
                   >
-                    <FiCode size={16} /> View Code
+                    <FiCode size={18} /> View Code
                   </motion.button>
                 </div>
               </div>
             </div>
+
+            {/* Terminal View - In-Card Modal */}
+            <AnimatePresence>
+              {showTerminal && (
+                <motion.div 
+                  className="absolute inset-0 z-50 rounded-xl overflow-hidden shadow-2xl"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <TerminalCodePreview 
+                    code={project.codeSnippet}
+                    language={project.codeLanguage}
+                    accentColor={accentColor}
+                    isVisible={showTerminal}
+                    onClose={() => setShowTerminal(false)}
+                    theme={theme}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
       
-      {/* Terminal View - Always render but conditionally show */}
-      <AnimatePresence>
-        {showTerminal && (
-          <motion.div 
-            className="absolute top-0 left-0 w-full h-full glassmorphic-card rounded-xl overflow-hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{ zIndex: 50 }}
-          >
-            <div className="absolute top-0 right-0 z-50 m-2">
-              <button 
-                className="bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center"
-                onClick={() => setShowTerminal(false)}
-              >
-                ×
-              </button>
-            </div>
-            <TerminalCodePreview 
-              code={project.codeSnippet}
-              language={project.codeLanguage}
-              accentColor={accentColor}
-              isVisible={showTerminal}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Invisible overlay to catch clicks outside the card */}
+      {showTerminal && (
+        <div 
+          className="fixed inset-0 z-40"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowTerminal(false);
+          }}
+        />
+      )}
+
     </div>
   );
 };
