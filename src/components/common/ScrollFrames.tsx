@@ -4,26 +4,28 @@ import React, { useEffect, useRef, useState } from 'react';
  * ScrollFrames — a pre-rendered film scrubbed by page scroll.
  *
  * The whole design problem here is that a frame sequence is fast to DRAW and
- * slow to DECODE. drawImage on an image the browser has not decoded yet blocks
- * the main thread for as long as the decode takes, so a naive implementation
- * runs at 60fps until you scroll somewhere new and then drops a 40ms frame.
+ * expensive to keep DECODED. Every frame costs width * height * 4 bytes once
+ * decoded, which is over 1GB for the desktop set. Left to the browser's image
+ * cache, frames get evicted and then re-decoded on the main thread by drawImage,
+ * which is what drops a frame right when you scroll somewhere new.
  *
- * So decoding is treated as the real work:
+ * So decoding is managed here instead:
  *
- *  - Frames are decoded ahead of time via img.decode(), never implicitly by
- *    drawImage, with bounded concurrency so the decoder queue cannot monopolise
- *    the thread the site's own animations run on.
+ *  - Frames are decoded with createImageBitmap, which works off the main thread
+ *    and hands back a bitmap that stays decoded until it is closed. Drawing one
+ *    can never stall.
  *
- *  - They arrive in STRIDED order — every 16th frame, then every 8th, and so on.
- *    A coarse scrub is available almost immediately and refines in place, rather
- *    than the first quarter of the page working and the rest being blank.
+ *  - Only some frames stay decoded: an evenly spaced set of anchors across the
+ *    whole film, plus a window around the reader that leans the way they are
+ *    moving. That caps memory at about 250MB on desktop.
  *
  *  - Any frame that is not ready yet falls back to the nearest one that is, so
- *    the backdrop is never empty and never stalls waiting for an exact index.
+ *    the backdrop is never empty and a fast scroll always has an anchor close by.
  *
- * The scroll loop itself does no allocation and no layout reads beyond a single
- * cached scrollY, and it skips the draw entirely when the resolved frame has not
- * changed — which, at 200 frames over a page this tall, is most frames.
+ * The loop does no layout reads and no allocation. It stops completely once the
+ * film has caught up with the scroll position, and it skips the draw when the
+ * resolved frame has not changed — which, at 200 frames over a page this tall,
+ * is most frames.
  */
 
 type Tier = { count: number; width: number; height: number };
@@ -58,8 +60,14 @@ const MANIFEST_URL = '/bg-frames/manifest.json';
 const frameUrl = (tier: string, i: number) =>
   `/bg-frames/${tier}/${String(i + 1).padStart(4, '0')}.webp`;
 
-/** Decodes running at once. Enough to fill fast, few enough to stay polite. */
-const DECODE_CONCURRENCY = 5;
+/** Decodes running at once. They are off-thread, but still use CPU. */
+const DECODE_CONCURRENCY = 3;
+const FETCH_CONCURRENCY = 5;
+/** Every 8th frame stays decoded, so a fast scroll is never far from a real frame. */
+const ANCHOR_STRIDE = 8;
+/** Extra frames kept decoded around the reader, in the direction of travel and behind. */
+const WINDOW_AHEAD = 12;
+const WINDOW_BEHIND = 6;
 
 const ScrollFrames: React.FC<ScrollFramesProps> = ({
   theme = 'dark',
@@ -89,14 +97,32 @@ const ScrollFrames: React.FC<ScrollFramesProps> = ({
     if (!ctx) return;
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const abort = new AbortController();
 
     let disposed = false;
-    let frames: (HTMLImageElement | null)[] = [];
-    let decoded: boolean[] = [];
     let tierName = 'desktop';
+    let tierWidth = 1;
+    let tierHeight = 1;
     let count = 0;
+
+    // Compressed frames stay in memory, so any frame can be decoded on demand
+    // without another network request. Decoded bitmaps are the expensive part
+    // and only the ones near the reader are kept.
+    let blobs: (Blob | null)[] = [];
+    let bitmaps: (ImageBitmap | null)[] = [];
+    const fetching = new Set<number>();
+    const decoding = new Set<number>();
+    const failed = new Set<number>();
+    // Bumped whenever decoded frames are thrown away, so a decode that was already
+    // running at the old size does not get stored.
+    let decodeGeneration = 0;
+    // Share of the frame's natural size to decode at. Below 1 when the canvas is
+    // smaller than the frame, since those extra pixels would never be seen.
+    let decodeScale = 1;
+
     let raf = 0;
-    let running = true;
+    let firstFrameShown = false;
+    let loadedCount = 0;
 
     // Last frame actually painted. Guards the redundant-draw check.
     let painted = -1;
@@ -106,11 +132,16 @@ const ScrollFrames: React.FC<ScrollFramesProps> = ({
     let paintedTail = -1;
     let smooth = 0;
     let targetIdx = 0;
+    // Which way the reader is moving: 1 down the page, -1 back up.
+    let direction = 1;
 
-    let tailImg: HTMLImageElement | null = null;
-    let tailReady = false;
+    let tailImg: ImageBitmap | null = null;
     // Scroll fraction where the film has fully given way to the still.
     let handoff = 1;
+
+    // Layout values, read when layout changes and not on every frame.
+    let scrollTop = window.scrollY;
+    let scrollTotal = 0;
 
     /* ── sizing ───────────────────────────────────────────────────────── */
     // Capped at 2: beyond that the backdrop is spending fill rate on detail
@@ -124,15 +155,25 @@ const ScrollFrames: React.FC<ScrollFramesProps> = ({
      * heights change with viewport width and with content, and a hardcoded
      * fraction would drift away from the section it is supposed to land on.
      */
-    const measureHandoff = () => {
+    const measureLayout = () => {
       const el = handoffElRef.current?.current;
       const doc = document.documentElement;
-      const total = doc.scrollHeight - window.innerHeight;
-      if (!el || total <= 0) { handoff = 1; return; }
-      const top = el.getBoundingClientRect().top + window.scrollY;
+      scrollTotal = doc.scrollHeight - window.innerHeight;
+      scrollTop = window.scrollY;
+      if (!el || scrollTotal <= 0) { handoff = 1; return; }
+      const top = el.getBoundingClientRect().top + scrollTop;
       // Complete the dissolve as the section's top reaches mid-viewport, so the
       // still is already in place by the time anyone reads over it.
-      handoff = Math.min(1, Math.max(0.2, (top - window.innerHeight * 0.5) / total));
+      handoff = Math.min(1, Math.max(0.2, (top - window.innerHeight * 0.5) / scrollTotal));
+    };
+
+    const scrollFraction = () =>
+      scrollTotal > 0 ? Math.min(1, Math.max(0, scrollTop / scrollTotal)) : 0;
+
+    /** The film is mapped to END at the handoff rather than at the bottom of the document. */
+    const frameAt = (fraction: number) => {
+      const filmT = handoff > 0 ? Math.min(1, fraction / handoff) : 1;
+      return Math.min(count - 1, Math.max(0, Math.round(filmT * (count - 1))));
     };
 
     const resize = () => {
@@ -144,14 +185,32 @@ const ScrollFrames: React.FC<ScrollFramesProps> = ({
         canvas.width = cw;
         canvas.height = chh;
       }
-      measureHandoff();
+      measureLayout();
       painted = -1; // force a repaint at the new size
       paintedTail = -1;
+
+      if (count > 0) {
+        // Decoded frames that are now too small have to be redone at the new size.
+        const needed = Math.min(1, Math.max(cw / tierWidth, chh / tierHeight));
+        if (needed > decodeScale * 1.05) {
+          decodeScale = needed;
+          decodeGeneration++;
+          bitmaps.forEach((bitmap, i) => {
+            if (bitmap) {
+              bitmap.close();
+              bitmaps[i] = null;
+            }
+          });
+          decoding.clear();
+          pumpDecode();
+        }
+      }
+      wake();
     };
 
     /** Cover-fit: fill the viewport, crop the overflow, never letterbox. */
-    const draw = (img: HTMLImageElement, zoom = 1) => {
-      const ir = img.naturalWidth / img.naturalHeight;
+    const draw = (img: ImageBitmap, zoom = 1) => {
+      const ir = img.width / img.height;
       const cr = cw / chh;
       let w, h, x, y;
       if (cr > ir) { w = cw; h = cw / ir; x = 0; y = (chh - h) / 2; }
@@ -165,37 +224,35 @@ const ScrollFrames: React.FC<ScrollFramesProps> = ({
 
     /** Nearest decoded frame to `i`, searching outward. Never returns a stall. */
     const nearestReady = (i: number): number => {
-      if (decoded[i]) return i;
+      if (bitmaps[i]) return i;
       for (let r = 1; r < count; r++) {
-        if (i - r >= 0 && decoded[i - r]) return i - r;
-        if (i + r < count && decoded[i + r]) return i + r;
+        if (i - r >= 0 && bitmaps[i - r]) return i - r;
+        if (i + r < count && bitmaps[i + r]) return i + r;
       }
       return -1;
     };
 
     /* ── scroll ───────────────────────────────────────────────────────── */
-    const readScroll = () => {
-      const doc = document.documentElement;
-      const total = doc.scrollHeight - window.innerHeight;
-      if (total <= 0) return 0;
-      return Math.min(1, Math.max(0, window.scrollY / total));
-    };
-
     const tick = () => {
-      if (!running) return;
-      const p = readScroll();
+      raf = 0;
+      const p = scrollFraction();
       // Light inertia. The backdrop trails the reader very slightly, which is
       // what stops a frame sequence feeling like a flipbook.
       smooth += (p - smooth) * (reduce ? 1 : 0.16);
       if (Math.abs(p - smooth) < 0.0004) smooth = p;
 
-      // The film is mapped to END at the handoff rather than at the bottom of
-      // the document, so the whole move plays out over the sections it belongs
-      // to instead of being cut off partway.
-      const filmT = handoff > 0 ? Math.min(1, smooth / handoff) : 1;
-      targetIdx = Math.min(count - 1, Math.max(0, Math.round(filmT * (count - 1))));
+      if (count > 0) {
+        const nextTarget = frameAt(smooth);
+        if (nextTarget !== targetIdx) {
+          direction = nextTarget > targetIdx ? 1 : -1;
+          targetIdx = nextTarget;
+          evictFarFrames();
+          pumpDecode();
+          pumpFetch();
+        }
+      }
 
-      const tail = tailReady
+      const tail = tailImg
         ? smoothstep(handoff - HANDOFF_BAND, handoff, smooth)
         : 0;
 
@@ -207,7 +264,8 @@ const ScrollFrames: React.FC<ScrollFramesProps> = ({
         // The film keeps playing underneath the dissolve rather than freezing
         // on its last frame — a static plate fading into another static plate
         // is exactly what makes a cut visible.
-        if (use >= 0 && frames[use]) draw(frames[use]!);
+        const frame = use >= 0 ? bitmaps[use] : null;
+        if (frame) draw(frame);
         if (tail > 0.001 && tailImg) {
           // Drifts from a slight push-in to rest, so the still arrives already
           // in motion and inherits the film's momentum instead of snapping to a
@@ -223,72 +281,152 @@ const ScrollFrames: React.FC<ScrollFramesProps> = ({
         // plate is a finished composition and only needs a fraction of that.
         host.style.setProperty('--tail', tail.toFixed(3));
       }
-      raf = requestAnimationFrame(tick);
+
+      // Nothing to do until the reader scrolls or a better frame arrives.
+      if (smooth !== p) raf = requestAnimationFrame(tick);
+    };
+
+    function wake() {
+      if (!raf && !disposed) raf = requestAnimationFrame(tick);
+    }
+
+    const onScroll = () => {
+      scrollTop = window.scrollY;
+      wake();
+    };
+
+    /* ── which frames stay decoded ────────────────────────────────────── */
+    const isAnchor = (i: number) => i % ANCHOR_STRIDE === 0;
+
+    /** Frames worth decoding now: the anchors, and a window biased the way the reader is moving. */
+    const isWanted = (i: number) => {
+      if (isAnchor(i)) return true;
+      const offset = (i - targetIdx) * direction;
+      return offset >= -WINDOW_BEHIND && offset <= WINDOW_AHEAD;
+    };
+
+    /** Wider than the wanted window, so reversing direction does not throw away work. */
+    const isWorthKeeping = (i: number) => isAnchor(i) || Math.abs(i - targetIdx) <= WINDOW_AHEAD;
+
+    const evictFarFrames = () => {
+      for (let i = 0; i < count; i++) {
+        const bitmap = bitmaps[i];
+        if (bitmap && !isWorthKeeping(i)) {
+          bitmap.close();
+          bitmaps[i] = null;
+        }
+      }
     };
 
     /* ── decode queue ─────────────────────────────────────────────────── */
-    let loadedCount = 0;
-
-    const loadOne = (i: number) =>
-      new Promise<void>((resolve) => {
-        if (disposed || frames[i]) return resolve();
-        const img = new Image();
-        img.decoding = 'async';
-        img.src = frameUrl(tierName, i);
-        frames[i] = img;
-        img
-          .decode()
-          .then(() => {
-            if (disposed) return;
-            decoded[i] = true;
-            loadedCount++;
-            progressRef.current?.(loadedCount / count);
-            // First frame on screen ends the fade-in — do not wait for the set.
-            if (!ready && loadedCount === 1) setReady(true);
-            // A newly arrived frame may be a better match than what is painted.
-            if (Math.abs(i - targetIdx) <= Math.abs(painted - targetIdx)) painted = -1;
+    const decodeOne = (i: number, blob: Blob) => {
+      const generation = decodeGeneration;
+      decoding.add(i);
+      // createImageBitmap decodes off the main thread, and the bitmap it returns
+      // stays decoded until it is closed. drawImage can never stall on it.
+      const decoded = decodeScale < 1
+        ? createImageBitmap(blob, {
+            resizeWidth: Math.max(1, Math.round(tierWidth * decodeScale)),
+            resizeHeight: Math.max(1, Math.round(tierHeight * decodeScale)),
+            resizeQuality: 'high',
           })
-          .catch(() => { frames[i] = null; })
-          .finally(resolve);
-      });
+        : createImageBitmap(blob);
 
-    /**
-     * Strided fill. Pass 1 takes every 16th frame so the entire page length is
-     * scrubbable within a second or so; each later pass halves the gap. Loading
-     * 0,1,2,3… instead would leave the bottom of the page blank until the very
-     * end of the download.
-     */
-    const buildOrder = (n: number) => {
-      const order: number[] = [];
-      const seen = new Set<number>();
-      for (let stride = 16; stride >= 1; stride = Math.floor(stride / 2)) {
-        for (let i = 0; i < n; i += stride) {
-          if (!seen.has(i)) { seen.add(i); order.push(i); }
+      decoded
+        .then((bitmap) => {
+          if (disposed || generation !== decodeGeneration || !isWorthKeeping(i)) {
+            bitmap.close();
+            return;
+          }
+          bitmaps[i]?.close();
+          bitmaps[i] = bitmap;
+          // First frame on screen ends the fade-in — do not wait for the set.
+          if (!firstFrameShown) {
+            firstFrameShown = true;
+            setReady(true);
+          }
+          // A newly arrived frame may be a better match than what is painted.
+          if (Math.abs(i - targetIdx) < Math.abs(painted - targetIdx)) {
+            painted = -1;
+            wake();
+          }
+        })
+        .catch(() => { failed.add(i); })
+        .finally(() => {
+          if (generation === decodeGeneration) decoding.delete(i);
+          if (!disposed) pumpDecode();
+        });
+    };
+
+    function pumpDecode() {
+      while (decoding.size < DECODE_CONCURRENCY) {
+        // Closest wanted frame first, with frames ahead of the reader winning ties.
+        let best = -1;
+        let bestCost = Infinity;
+        for (let i = 0; i < count; i++) {
+          if (bitmaps[i] || !blobs[i] || decoding.has(i) || failed.has(i) || !isWanted(i)) continue;
+          const offset = (i - targetIdx) * direction;
+          const cost = Math.abs(offset) * 2 + (offset < 0 ? 1 : 0);
+          if (cost < bestCost) { bestCost = cost; best = i; }
         }
-        if (stride === 1) break;
+        if (best < 0) return;
+        decodeOne(best, blobs[best]!);
       }
-      for (let i = 0; i < n; i++) if (!seen.has(i)) { seen.add(i); order.push(i); }
-      return order;
+    }
+
+    /* ── download queue ───────────────────────────────────────────────── */
+    /**
+     * The frame under the reader first, so something is on screen right away.
+     * Then the anchors, so the entire page length is scrubbable within a second
+     * or so. Then the rest, nearest first, so the area being read fills in before
+     * the far end of the page does.
+     */
+    const nextToFetch = () => {
+      let best = -1;
+      let bestCost = Infinity;
+      for (let i = 0; i < count; i++) {
+        if (blobs[i] || fetching.has(i) || failed.has(i)) continue;
+        const distance = Math.abs(i - targetIdx);
+        const cost = i === targetIdx ? -1 : isAnchor(i) ? distance : count + distance;
+        if (cost < bestCost) { bestCost = cost; best = i; }
+      }
+      return best;
     };
 
-    const pump = async (order: number[]) => {
-      let cursor = 0;
-      const worker = async () => {
-        while (!disposed && cursor < order.length) {
-          const i = order[cursor++];
-          await loadOne(i);
-        }
-      };
-      await Promise.all(
-        Array.from({ length: DECODE_CONCURRENCY }, worker)
-      );
+    const fetchOne = (i: number) => {
+      fetching.add(i);
+      fetch(frameUrl(tierName, i), { signal: abort.signal })
+        .then((res) => {
+          if (!res.ok) throw new Error(`frame ${i}: ${res.status}`);
+          return res.blob();
+        })
+        .then((blob) => {
+          if (disposed) return;
+          blobs[i] = blob;
+          loadedCount++;
+          progressRef.current?.(loadedCount / count);
+          pumpDecode();
+        })
+        .catch(() => { failed.add(i); })
+        .finally(() => {
+          fetching.delete(i);
+          if (!disposed) pumpFetch();
+        });
     };
+
+    function pumpFetch() {
+      while (fetching.size < FETCH_CONCURRENCY) {
+        const next = nextToFetch();
+        if (next < 0) return;
+        fetchOne(next);
+      }
+    }
 
     /* ── boot ─────────────────────────────────────────────────────────── */
     (async () => {
       let manifest: Manifest;
       try {
-        const res = await fetch(MANIFEST_URL);
+        const res = await fetch(MANIFEST_URL, { signal: abort.signal });
         manifest = await res.json();
       } catch {
         return; // no frames built yet — host stays transparent, site still works
@@ -300,28 +438,32 @@ const ScrollFrames: React.FC<ScrollFramesProps> = ({
       tierName = window.innerWidth < 820 ? 'mobile' : 'desktop';
       const tier = manifest.tiers[tierName] ?? manifest.tiers.desktop;
       count = tier.count;
-      frames = new Array(count).fill(null);
-      decoded = new Array(count).fill(false);
+      tierWidth = tier.width;
+      tierHeight = tier.height;
+      blobs = new Array(count).fill(null);
+      bitmaps = new Array(count).fill(null);
+
+      resize();
+      decodeScale = Math.min(1, Math.max(cw / tierWidth, chh / tierHeight));
+      smooth = scrollFraction();
+      // The frame under the reader right now matters more than frame 0.
+      targetIdx = frameAt(smooth);
+      pumpFetch();
 
       // The still is one image and it is what the page ends on, so it is worth
       // starting immediately rather than queueing behind 200 frames.
       if (tailSrc) {
-        const t = new Image();
-        t.decoding = 'async';
-        t.src = tailSrc;
-        tailImg = t;
-        t.decode().then(() => { if (!disposed) { tailReady = true; paintedTail = -1; } })
-          .catch(() => { tailImg = null; });
+        fetch(tailSrc, { signal: abort.signal })
+          .then((res) => res.blob())
+          .then((blob) => createImageBitmap(blob))
+          .then((bitmap) => {
+            if (disposed) { bitmap.close(); return; }
+            tailImg = bitmap;
+            paintedTail = -1;
+            wake();
+          })
+          .catch(() => { });
       }
-
-      resize();
-      // The frame under the reader right now matters more than frame 0.
-      const first = Math.round(readScroll() * (count - 1));
-      await loadOne(first);
-      if (disposed) return;
-
-      raf = requestAnimationFrame(tick);
-      pump(buildOrder(count));
     })();
 
     /* ── lifecycle ────────────────────────────────────────────────────── */
@@ -330,24 +472,21 @@ const ScrollFrames: React.FC<ScrollFramesProps> = ({
     // Sections grow and shrink as their own content animates in, which moves
     // the handoff element. Watching the body keeps the cut pinned to it.
     ro.observe(document.body);
-
-    const onVis = () => {
-      if (document.hidden) { running = false; cancelAnimationFrame(raf); }
-      else if (!running) { running = true; raf = requestAnimationFrame(tick); }
-    };
-    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('scroll', onScroll, { passive: true });
 
     return () => {
       disposed = true;
-      running = false;
+      abort.abort();
       cancelAnimationFrame(raf);
       ro.disconnect();
-      document.removeEventListener('visibilitychange', onVis);
-      // Drop the decoded bitmaps rather than waiting for GC — this component
-      // unmounts when the reader flips back to the shader backdrop.
-      for (const img of frames) if (img) img.src = '';
-      frames = [];
-      if (tailImg) { tailImg.src = ''; tailImg = null; }
+      window.removeEventListener('scroll', onScroll);
+      // Free the decoded frames right away rather than waiting for GC — this
+      // component unmounts when the reader flips back to the shader backdrop.
+      bitmaps.forEach((bitmap) => bitmap?.close());
+      bitmaps = [];
+      blobs = [];
+      tailImg?.close();
+      tailImg = null;
     };
     // Intentionally mount-once: theme and accent drive the CSS overlays below,
     // which must never tear down and rebuild the decode cache.

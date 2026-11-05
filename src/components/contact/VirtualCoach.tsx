@@ -1,9 +1,9 @@
-import { useState, useEffect, Suspense, useRef } from 'react';
+import { Component, useState, useEffect, Suspense, useRef } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useGLTF, OrbitControls, Environment, PerspectiveCamera, useEnvironment } from '@react-three/drei';
-import { HiExclamation, HiOutlineRefresh, HiCheck, HiX } from 'react-icons/hi';
-import { motion } from 'framer-motion';
-import type { Mesh, Material, Object3D, Group, Vector3 } from 'three';
+import { useGLTF } from '@react-three/drei';
+import { HiExclamation } from 'react-icons/hi';
+import type { Mesh, Material, Object3D, Group } from 'three';
 import { useInViewport } from '../../hooks/useInViewport';
 
 interface VirtualCoachProps {
@@ -14,27 +14,75 @@ interface VirtualCoachProps {
 
 interface ModelProps {
   url: string;
-  mousePosition: { x: number; y: number };
+  /** Read every frame. A ref, so moving the mouse never re-renders React. */
+  mouseRef: RefObject<{ x: number; y: number }>;
+  onLoaded: () => void;
 }
 
-// Preload the model to avoid loading delays
-function Model({ url, mousePosition }: ModelProps) {
+/** The scene moves gently, so 60 renders a second is enough on any display. */
+const RENDER_INTERVAL_MS = 1000 / 60;
+
+/** Asks for a render at most 60 times a second. Mounted only while in view. */
+function RenderCap() {
+  const invalidate = useThree((state) => state.invalidate);
+
+  useEffect(() => {
+    let raf = 0;
+    let nextRenderAt = 0;
+    const tick = (t: number) => {
+      raf = requestAnimationFrame(tick);
+      if (t < nextRenderAt - 1) return;
+      nextRenderAt = Math.max(nextRenderAt + RENDER_INTERVAL_MS, t);
+      invalidate();
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [invalidate]);
+
+  return null;
+}
+
+/** Shows the error message if the model fails to load, instead of crashing the page. */
+class ModelErrorBoundary extends Component<{ onError: (message: string) => void; children: ReactNode }> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch(error: unknown) {
+    console.error('Error loading virtual coach:', error);
+    this.props.onError('Failed to load virtual coach model');
+  }
+
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
+}
+
+function Model({ url, mouseRef, onLoaded }: ModelProps) {
   const { scene } = useGLTF(url, true); // true enables preloading
   const modelRef = useRef<Group>(null);
-  const { viewport } = useThree();
-  
-  // Performance optimization: use a lower frequency for animation updates
-  const frameSkip = useRef(0);
+  const isDesktopRef = useRef(true);
+
   const lastRotationY = useRef(0);
   const lastRotationX = useRef(0);
-  
-  // Respond to mouse movements and add breathing animation with reduced frequency
+
+  useEffect(() => {
+    onLoaded();
+    const updateIsDesktop = () => {
+      isDesktopRef.current = window.innerWidth > 768;
+    };
+    updateIsDesktop();
+    window.addEventListener('resize', updateIsDesktop);
+    return () => window.removeEventListener('resize', updateIsDesktop);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Respond to mouse movements and add breathing animation
   useFrame(({ clock }) => {
-    // Skip frames for better performance (especially on mobile)
-    frameSkip.current = (frameSkip.current + 1) % 2;
-    if (frameSkip.current !== 0) return;
-    
     if (modelRef.current) {
+      const mousePosition = mouseRef.current;
       // Breathing animation - lower frequency
       const t = clock.getElapsedTime();
       const breathingIntensity = 0.03; // Reduced intensity
@@ -53,7 +101,7 @@ function Model({ url, mousePosition }: ModelProps) {
       // Add breathing animation with reduced calculations
       modelRef.current.position.y = Math.sin(t * 0.3) * breathingIntensity;
       // Skip scale changes on mobile for better performance
-      if (window.innerWidth > 768) {
+      if (isDesktopRef.current) {
         const breathScale = 1 + Math.sin(t * 0.3) * 0.01;
         modelRef.current.scale.set(breathScale, breathScale, breathScale);
       }
@@ -122,7 +170,7 @@ function SafeEnvironment() {
 export default function VirtualCoach({ modelUrl, className = '', sessionResults }: VirtualCoachProps) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 });
+  const mouseRef = useRef({ x: 0.5, y: 0.5 });
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
   // The scene only renders while someone can see it.
@@ -139,27 +187,13 @@ export default function VirtualCoach({ modelUrl, className = '', sessionResults 
       const rect = containerRef.current.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width;
       const y = (e.clientY - rect.top) / rect.height;
-      setMousePosition({ x, y });
+      mouseRef.current = { x, y };
     }
   };
 
   useEffect(() => {
     if (!isMounted) return;
-    
-    // Check if model file exists
-    fetch(modelUrl)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to load virtual coach model');
-        }
-        setIsLoading(false);
-      })
-      .catch(err => {
-        console.error('Error loading virtual coach:', err);
-        setError('Failed to load virtual coach model');
-        setIsLoading(false);
-      });
-      
+
     // Add mouse move event listener
     const currentRef = containerRef.current;
     if (currentRef) {
@@ -232,25 +266,21 @@ export default function VirtualCoach({ modelUrl, className = '', sessionResults 
         </div>
       )}
       
-      <Canvas
-        className="rounded-xl overflow-hidden bg-transparent"
-        camera={{ position: [0, 0, 2.5], fov: 50 }}
-        frameloop={inView ? 'always' : 'never'}
-        shadows
-        gl={{ antialias: true, alpha: true }}
-      >
-        <Suspense fallback={null}>
-          <Model url={modelUrl} mousePosition={mousePosition} />
-          <SafeEnvironment />
-          <OrbitControls 
-            enablePan={false} 
-            enableZoom={false} 
-            enableRotate={false}
-            minPolarAngle={Math.PI / 2 - 0.5}
-            maxPolarAngle={Math.PI / 2 + 0.5}
-          />
-        </Suspense>
-      </Canvas>
+      <ModelErrorBoundary onError={setError}>
+        <Canvas
+          className="rounded-xl overflow-hidden bg-transparent"
+          camera={{ position: [0, 0, 2.5], fov: 50 }}
+          frameloop={inView ? 'demand' : 'never'}
+          resize={{ scroll: false }}
+          gl={{ antialias: true, alpha: true }}
+        >
+          {inView && <RenderCap />}
+          <Suspense fallback={null}>
+            <Model url={modelUrl} mouseRef={mouseRef} onLoaded={() => setIsLoading(false)} />
+            <SafeEnvironment />
+          </Suspense>
+        </Canvas>
+      </ModelErrorBoundary>
     </div>
   );
 }

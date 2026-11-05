@@ -68,6 +68,8 @@ export function getPerformanceTier(): PerformanceTier {
           score -= 3;
         }
       }
+      // This context was only for the query. Browsers cap how many can be open.
+      (gl as WebGLRenderingContext).getExtension('WEBGL_lose_context')?.loseContext();
     }
   } catch {}
 

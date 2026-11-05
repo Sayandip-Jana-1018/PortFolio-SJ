@@ -14,6 +14,11 @@ interface CanvasRevealEffectProps {
 
 type Shape = 'star' | 'circle' | 'square';
 
+/** Sprites are drawn at this radius, then scaled to each particle's size. */
+const SPRITE_RADIUS = 8;
+const SPRITE_PADDING = 2;
+const SPRITE_SIZE = (SPRITE_RADIUS + SPRITE_PADDING) * 2;
+
 interface Particle {
   x: number
   y: number
@@ -170,6 +175,50 @@ export const CanvasRevealEffect = ({
     ctx.fill();
   };
 
+  // Each colour and shape is drawn once, then stamped. Stamping is far cheaper
+  // than building and filling a path for every particle on every frame.
+  const spritesRef = useRef(new Map<string, HTMLCanvasElement>());
+  const getSprite = (shape: Particle['shape'], color: string) => {
+    const key = `${shape}${color}`;
+    let sprite = spritesRef.current.get(key);
+    if (!sprite) {
+      sprite = document.createElement('canvas');
+      sprite.width = SPRITE_SIZE;
+      sprite.height = SPRITE_SIZE;
+      const spriteCtx = sprite.getContext('2d');
+      if (spriteCtx) drawShape(spriteCtx, SPRITE_SIZE / 2, SPRITE_SIZE / 2, SPRITE_RADIUS, shape, color);
+      spritesRef.current.set(key, sprite);
+    }
+    return sprite;
+  };
+
+  const stamp = (ctx: CanvasRenderingContext2D, particle: Particle) => {
+    if (particle.alpha <= 0) return;
+    const size = (SPRITE_SIZE / SPRITE_RADIUS) * particle.radius;
+    ctx.globalAlpha = particle.alpha;
+    ctx.drawImage(getSprite(particle.shape, particle.color), particle.x - size / 2, particle.y - size / 2, size, size);
+  };
+
+  /** Advances every particle and stamps the survivors, reusing the same array. */
+  const stepParticles = (
+    ctx: CanvasRenderingContext2D,
+    particles: Particle[],
+    timeStep: number,
+    update: (particle: Particle) => boolean
+  ) => {
+    let kept = 0;
+    for (let i = 0; i < particles.length; i++) {
+      const particle = particles[i];
+      particle.x += particle.speedX * timeStep;
+      particle.y += particle.speedY * timeStep;
+      particle.alpha -= 0.01 * animationSpeed * timeStep;
+      if (!update(particle)) continue;
+      stamp(ctx, particle);
+      particles[kept++] = particle;
+    }
+    particles.length = kept;
+  };
+
   // Animation function with fixed time step - throttled to 30fps for performance
   const lastRenderTimeRef = useRef(0);
   const targetFrameTime = 1000 / 30; // 30fps
@@ -217,67 +266,27 @@ export const CanvasRevealEffect = ({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Update and draw regular particles
-    particlesRef.current = particlesRef.current.filter(particle => {
-      particle.x += particle.speedX * timeStep;
-      particle.y += particle.speedY * timeStep;
-      particle.alpha -= 0.01 * animationSpeed * timeStep;
-
-      const alphaHex = Math.floor(particle.alpha * 255).toString(16).padStart(2, '0');
-      const color = `${particle.color}${alphaHex}`;
-
-      drawShape(ctx, particle.x, particle.y, particle.radius, particle.shape, color);
-
-      return particle.alpha > 0;
-    });
+    stepParticles(ctx, particlesRef.current, timeStep, (particle) => particle.alpha > 0);
 
     // Only process corner particles if explicitly enabled
     if (cornerParticlesRef.current) {
-      // Left corner particles
-      cornerParticlesLeftRef.current = cornerParticlesLeftRef.current.filter(particle => {
-        particle.x += particle.speedX * timeStep;
-        particle.y += particle.speedY * timeStep;
-
+      const updateCornerParticle = (particle: Particle) => {
         // Accelerate particles for dynamic effect
         particle.speedX *= 1.01;
         particle.speedY *= 1.01;
-
-        particle.alpha -= 0.01 * animationSpeed * timeStep;
-
-        const alphaHex = Math.floor(particle.alpha * 255).toString(16).padStart(2, '0');
-        const color = `${particle.color}${alphaHex}`;
-
-        drawShape(ctx, particle.x, particle.y, particle.radius, particle.shape, color);
 
         return particle.alpha > 0 &&
           particle.x > -50 &&
           particle.x < canvas.width + 50 &&
           particle.y > -50 &&
           particle.y < canvas.height + 50;
-      });
+      };
 
-      // Right corner particles
-      cornerParticlesRightRef.current = cornerParticlesRightRef.current.filter(particle => {
-        particle.x += particle.speedX * timeStep;
-        particle.y += particle.speedY * timeStep;
-
-        // Accelerate particles for dynamic effect
-        particle.speedX *= 1.01;
-        particle.speedY *= 1.01;
-
-        particle.alpha -= 0.01 * animationSpeed * timeStep;
-
-        const alphaHex = Math.floor(particle.alpha * 255).toString(16).padStart(2, '0');
-        const color = `${particle.color}${alphaHex}`;
-
-        drawShape(ctx, particle.x, particle.y, particle.radius, particle.shape, color);
-
-        return particle.alpha > 0 &&
-          particle.x > -50 &&
-          particle.x < canvas.width + 50 &&
-          particle.y > -50 &&
-          particle.y < canvas.height + 50;
-      });
+      stepParticles(ctx, cornerParticlesLeftRef.current, timeStep, updateCornerParticle);
+      stepParticles(ctx, cornerParticlesRightRef.current, timeStep, updateCornerParticle);
     }
+
+    ctx.globalAlpha = 1;
 
     // Continue animation if there are particles to animate
     if (cornerParticlesRef.current ||
@@ -375,6 +384,10 @@ export const CanvasRevealEffect = ({
         }
         return;
       }
+
+      // Timers keep running in a hidden tab while animation frames stop, so
+      // particles would pile up and all burst out on return.
+      if (document.hidden) return;
 
       const count = Math.floor(Math.random() * 4) + 3; // 3-6 particles per interval (increased density)
 

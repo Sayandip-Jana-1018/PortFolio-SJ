@@ -1,5 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { Renderer, Program, Mesh, Triangle } from 'ogl';
+import { getPerformanceTier, tierConfig } from '../../utils/performanceTier';
+import { createResolutionGovernor } from '../../utils/resolutionGovernor';
+
+/**
+ * The backdrop drifts slowly, so 60 draws a second look the same as 120 or 144
+ * on a high refresh display, at half the GPU work or less.
+ */
+const DRAW_INTERVAL_MS = 1000 / 60;
+/** Share of full resolution at each governor step. Never below 60%. */
+const RESOLUTION_STEPS = [1, 0.85, 0.72, 0.6];
 
 export type MoltenMetalColorMode = 'molten' | 'ember' | 'frost';
 
@@ -157,12 +167,19 @@ const MoltenMetal: React.FC<MoltenMetalProps> = ({
         const container = containerRef.current;
         if (!container) return;
 
+        // Full quality, unless this device's tier suggests starting lower. The
+        // governor below moves back up on its own if there is headroom.
+        const fullDpr = Math.min(window.devicePixelRatio || 1, 2);
+        const tierDpr = tierConfig[getPerformanceTier()].dpr;
+        const fitsTier = RESOLUTION_STEPS.findIndex((scale) => fullDpr * scale <= tierDpr);
+        const initialStep = fitsTier === -1 ? RESOLUTION_STEPS.length - 1 : fitsTier;
+
         const renderer = new Renderer({
             webgl: 2,
             alpha: true,
             premultipliedAlpha: true,
             antialias: false,
-            dpr: Math.min(window.devicePixelRatio || 1, 2)
+            dpr: fullDpr * RESOLUTION_STEPS[initialStep]
         });
 
         const gl = renderer.gl;
@@ -240,7 +257,29 @@ const MoltenMetal: React.FC<MoltenMetalProps> = ({
         let isPageVisible = !document.hidden;
         const t0 = performance.now();
 
+        const governor = createResolutionGovernor({
+            lastStep: RESOLUTION_STEPS.length - 1,
+            initialStep,
+            onStepChange: (step) => {
+                renderer.dpr = fullDpr * RESOLUTION_STEPS[step];
+                // setSize draws straight away, so the canvas never shows blank.
+                setSize();
+            }
+        });
+
+        let nextDrawAt = 0;
+        let lastFrameAt = 0;
+
         const loop = (t: number) => {
+            raf = requestAnimationFrame(loop);
+            if (lastFrameAt) governor.sample(t - lastFrameAt, t);
+            lastFrameAt = t;
+
+            // Small tolerance so a 60Hz display, whose frames land just under the
+            // interval, is not pushed down to every other frame.
+            if (t < nextDrawAt - 1) return;
+            nextDrawAt = Math.max(nextDrawAt + DRAW_INTERVAL_MS, t);
+
             program.uniforms.iTime.value = (t - t0) * 0.001;
             currentMouse[0] += 0.05 * (targetMouse[0] - currentMouse[0]);
             currentMouse[1] += 0.05 * (targetMouse[1] - currentMouse[1]);
@@ -248,11 +287,13 @@ const MoltenMetal: React.FC<MoltenMetalProps> = ({
             m[0] = currentMouse[0];
             m[1] = currentMouse[1];
             renderer.render({ scene: mesh });
-            raf = requestAnimationFrame(loop);
         };
 
         const tryStart = () => {
-            if (isVisible && isPageVisible && raf === 0) raf = requestAnimationFrame(loop);
+            if (isVisible && isPageVisible && raf === 0) {
+                lastFrameAt = 0;
+                raf = requestAnimationFrame(loop);
+            }
         };
         const tryStop = () => {
             if (raf !== 0) {
