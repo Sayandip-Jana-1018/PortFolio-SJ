@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import React, { createContext, startTransition, useCallback, useMemo, useRef, useState, useContext, useEffect, ReactNode } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -208,9 +208,14 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   // Defaults to the shader: it is free to start, so a first-time visitor never
   // pays for a frame set they did not ask for.
   const [backgroundMode, setBackgroundModeState] = useState<BackgroundMode>('metal');
-  const [colors, setColors] = useState<ColorPalette>(
-    generatePalette(theme === 'dark' ? darkPalette : lightPalette, accentColor)
+  // Derived, not stored. Keeping this in state rendered every consumer twice.
+  const colors = useMemo(
+    () => generatePalette(theme === 'dark' ? darkPalette : lightPalette, accentColor),
+    [theme, accentColor]
   );
+  const pendingAccentRef = useRef(defaultAccentColor);
+  const accentFrameRef = useRef(0);
+  const accentSaveTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     // Check if theme preference is stored in localStorage
@@ -233,9 +238,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   // Update colors when theme or accent color changes
   useEffect(() => {
-    const basePalette = theme === 'dark' ? darkPalette : lightPalette;
-    const newColors = generatePalette(basePalette, accentColor);
-    setColors(newColors);
+    const newColors = colors;
 
     // Apply theme to document body
     document.body.classList.toggle('dark-theme', theme === 'dark');
@@ -271,9 +274,14 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         element.style.background = `linear-gradient(135deg, ${accentColor}22 0%, ${theme === 'dark' ? '#000000' : '#ffffff'} 100%)`;
       }
     });
-  }, [theme, accentColor]);
+  }, [theme, accentColor, colors]);
 
-  const toggleTheme = () => {
+  useEffect(() => () => {
+    cancelAnimationFrame(accentFrameRef.current);
+    clearTimeout(accentSaveTimerRef.current);
+  }, []);
+
+  const toggleTheme = useCallback(() => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
@@ -281,39 +289,56 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     // Force immediate update of all theme-dependent elements
     const event = new CustomEvent('themechange', { detail: { theme: newTheme } });
     document.dispatchEvent(event);
-  };
+  }, [theme]);
 
-  const handleSetAccentColor = (color: string) => {
-    setAccentColor(color);
-    localStorage.setItem('accentColor', color);
+  // The colour picker fires on every pointer move, faster than the screen draws.
+  // The CSS variable updates right away, the rest of the page at most once a frame
+  // and at low priority, and the saved value once the drag settles.
+  const handleSetAccentColor = useCallback((color: string) => {
+    document.documentElement.style.setProperty('--color-accent', color);
+    pendingAccentRef.current = color;
 
-    // Force immediate update of all accent-color-dependent elements
-    const event = new CustomEvent('accentcolorchange', { detail: { color } });
-    document.dispatchEvent(event);
-  };
+    if (!accentFrameRef.current) {
+      accentFrameRef.current = requestAnimationFrame(() => {
+        accentFrameRef.current = 0;
+        const next = pendingAccentRef.current;
+        startTransition(() => setAccentColor(next));
 
-  const handleSetBackgroundMode = (mode: BackgroundMode) => {
+        // Force immediate update of all accent-color-dependent elements
+        const event = new CustomEvent('accentcolorchange', { detail: { color: next } });
+        document.dispatchEvent(event);
+      });
+    }
+
+    clearTimeout(accentSaveTimerRef.current);
+    accentSaveTimerRef.current = setTimeout(() => localStorage.setItem('accentColor', color), 200);
+  }, []);
+
+  const handleSetBackgroundMode = useCallback((mode: BackgroundMode) => {
     setBackgroundModeState(mode);
     localStorage.setItem('backgroundMode', mode);
-  };
+  }, []);
 
-  const getThemeColor = (colorName: keyof ColorPalette): string => {
+  const getThemeColor = useCallback((colorName: keyof ColorPalette): string => {
     return colors[colorName];
-  };
+  }, [colors]);
+
+  const value = useMemo(
+    () => ({
+      theme,
+      colors,
+      accentColor,
+      backgroundMode,
+      toggleTheme,
+      setAccentColor: handleSetAccentColor,
+      setBackgroundMode: handleSetBackgroundMode,
+      getThemeColor,
+    }),
+    [theme, colors, accentColor, backgroundMode, toggleTheme, handleSetAccentColor, handleSetBackgroundMode, getThemeColor]
+  );
 
   return (
-    <ThemeContext.Provider
-      value={{
-        theme,
-        colors,
-        accentColor,
-        backgroundMode,
-        toggleTheme,
-        setAccentColor: handleSetAccentColor,
-        setBackgroundMode: handleSetBackgroundMode,
-        getThemeColor,
-      }}
-    >
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );

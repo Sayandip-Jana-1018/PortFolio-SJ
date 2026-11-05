@@ -45,18 +45,6 @@ const EducationPage = memo(EducationPageBase);
 
 
 
-// Throttle utility for scroll performance
-const throttle = <T extends (...args: any[]) => void>(fn: T, wait: number): T => {
-  let lastTime = 0;
-  return ((...args: Parameters<T>) => {
-    const now = Date.now();
-    if (now - lastTime >= wait) {
-      lastTime = now;
-      fn(...args);
-    }
-  }) as T;
-};
-
 // Theme-aware MoltenMetal colors
 const getMoltenColors = (accentColor: string, theme: string) => {
   if (theme === 'dark') {
@@ -97,8 +85,6 @@ export default function Home() {
   const cardGridRef = useRef<HTMLDivElement>(null);
   const additionalCardsRef = useRef<HTMLDivElement>(null);
 
-  const welcomeTitleInView = useInView(welcomeTitleRef, { once: false, amount: 0.5 });
-  const welcomeTextInView = useInView(welcomeTextRef, { once: false, amount: 0.4 });
   const cardGridInView = useInView(cardGridRef, { once: false, amount: 0.3 });
   const additionalCardsInView = useInView(additionalCardsRef, { once: false, amount: 0.2 });
 
@@ -195,29 +181,6 @@ export default function Home() {
 
   // Get theme-aware molten metal colors
   const moltenColors = getMoltenColors(accentColor, theme);
-
-  // Beautiful smooth 3D text shadow for depth and pop effect on Welcome heading
-  const welcomeTextShadow3D = `
-    1px 1px 1px rgba(0,0,0,0.9),
-    2px 2px 2px rgba(0,0,0,0.8),
-    3px 3px 2px rgba(0,0,0,0.7),
-    4px 4px 3px rgba(0,0,0,0.6),
-    5px 5px 3px rgba(0,0,0,0.5),
-    6px 6px 4px rgba(0,0,0,0.4),
-    8px 8px 15px rgba(0,0,0,0.9),
-    12px 12px 35px rgba(0,0,0,0.7),
-    0 0 40px ${accentColor}a0,
-    0 0 80px ${accentColor}60
-  `;
-
-  // Fade-in animation variant
-  const fadeInUpVariant = {
-    hidden: { opacity: 0, y: 80, scale: 0.95 },
-    visible: {
-      opacity: 1, y: 0, scale: 1,
-      transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1.0] }
-    }
-  };
 
   return (
     <div className="font-sans antialiased">

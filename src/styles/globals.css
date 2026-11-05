@@ -464,6 +464,19 @@ body {
   50% { opacity: 0.8; transform: scale(1.3); }
 }
 
+/* Scroll progress dots. Passing a section toggles one attribute, not a re-render. */
+.scroll-progress-dot {
+  background-color: var(--progress-dot);
+  border: 2px solid var(--progress-dot-border);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-progress-dot[data-passed] {
+  background-color: var(--progress-accent);
+  border-color: var(--progress-accent);
+  box-shadow: 0 0 8px var(--progress-accent), 0 0 16px var(--progress-glow);
+}
+
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   *,

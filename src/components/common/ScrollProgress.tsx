@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef } from "react";
 import { useTheme } from "@/context/ThemeContext";
 import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 import Link from "next/link";
@@ -22,25 +22,34 @@ export function ScrollProgress() {
     const { accentColor, theme } = useTheme();
     const { scrollYProgress } = useScroll();
 
-    // Transform scroll progress to percentage for line height  
-    const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+    // The line slides into its clipped track, so scrolling never causes layout.
+    const lineY = useTransform(scrollYProgress, [0, 1], ["-100%", "0%"]);
 
-    // Track current scroll percentage for display
-    const [scrollPercent, setScrollPercent] = useState(0);
+    const percentRef = useRef<HTMLDivElement>(null);
+    const dotRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const lastPercent = useRef(0);
 
+    // Written straight to the DOM: scrolling must not re-render this component.
     useMotionValueEvent(scrollYProgress, "change", (latest) => {
-        setScrollPercent(Math.round(latest * 100));
+        const percent = Math.round(latest * 100);
+        if (percent === lastPercent.current) return;
+        lastPercent.current = percent;
+        if (percentRef.current) percentRef.current.textContent = `${percent}%`;
+        SECTIONS.forEach((section, i) => {
+            dotRefs.current[i]?.toggleAttribute("data-passed", percent >= section.position);
+        });
     });
-
-    // High contrast colors for both themes
-    const trackBg = theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)';
-    const dotInactive = theme === 'dark' ? 'rgba(60,60,60,1)' : 'rgba(100,100,100,1)';
-    const dotBorder = theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)';
 
     return (
         <div
             className="fixed right-6 top-1/2 -translate-y-1/2 z-[10000] flex flex-col items-center pointer-events-none"
-            style={{ height: '60vh' }}
+            style={{
+                height: '60vh',
+                '--progress-accent': accentColor,
+                '--progress-glow': `${accentColor}50`,
+                '--progress-dot': theme === 'dark' ? 'rgba(60,60,60,1)' : 'rgba(100,100,100,1)',
+                '--progress-dot-border': theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)',
+            } as React.CSSProperties}
         >
             {/* Track Background - High Visibility */}
             <div
@@ -59,17 +68,19 @@ export function ScrollProgress() {
             </div>
 
             {/* Progress Line - Fills from top as you scroll down */}
-            <motion.div
-                className="absolute top-0 w-[4px] rounded-full"
-                style={{
-                    height: lineHeight,
-                    backgroundColor: accentColor,
-                    boxShadow: `0 0 15px ${accentColor}, 0 0 5px ${accentColor}`
-                }}
-            />
+            <div className="absolute top-0 w-[4px] h-full" style={{ clipPath: 'inset(0 -30px -30px -30px)' }}>
+                <motion.div
+                    className="w-full h-full rounded-full"
+                    style={{
+                        y: lineY,
+                        backgroundColor: accentColor,
+                        boxShadow: `0 0 15px ${accentColor}, 0 0 5px ${accentColor}`
+                    }}
+                />
+            </div>
 
             {/* Section Dots */}
-            {SECTIONS.map((section) => (
+            {SECTIONS.map((section, i) => (
                 <Link
                     key={section.name}
                     href={section.link}
@@ -82,14 +93,8 @@ export function ScrollProgress() {
                 >
                     {/* Dot - Larger and more visible */}
                     <div
-                        className="w-3 h-3 rounded-full transition-all duration-200 hover:scale-150"
-                        style={{
-                            backgroundColor: scrollPercent >= section.position ? accentColor : dotInactive,
-                            border: `2px solid ${scrollPercent >= section.position ? accentColor : dotBorder}`,
-                            boxShadow: scrollPercent >= section.position
-                                ? `0 0 8px ${accentColor}, 0 0 16px ${accentColor}50`
-                                : `0 0 4px rgba(0,0,0,0.3)`
-                        }}
+                        ref={(el) => { dotRefs.current[i] = el; }}
+                        className="scroll-progress-dot w-3 h-3 rounded-full transition-all duration-200 hover:scale-150"
                     />
 
                     {/* Label on hover */}
@@ -112,10 +117,11 @@ export function ScrollProgress() {
 
             {/* Percentage indicator at bottom */}
             <div
+                ref={percentRef}
                 className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold"
                 style={{ color: accentColor }}
             >
-                {scrollPercent}%
+                0%
             </div>
         </div>
     );

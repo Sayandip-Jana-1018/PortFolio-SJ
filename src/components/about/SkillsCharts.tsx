@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { FiPieChart, FiBarChart2 } from 'react-icons/fi';
 import LazyChart from './LazyChart';
@@ -9,128 +9,133 @@ interface SkillsChartsProps {
 }
 
 const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
-  // Function to adjust color opacity
-  const adjustColorOpacity = (color: string, opacity: number) => {
-    if (color.startsWith('#')) {
-      // Convert hex to rgba
-      const r = parseInt(color.slice(1, 3), 16);
-      const g = parseInt(color.slice(3, 5), 16);
-      const b = parseInt(color.slice(5, 7), 16);
-      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-    }
-    return color;
-  };
+  // Stable between renders, so chart.js only updates when the colours really change.
+  const { skillCategories, skillProficiency, pieOptions, barOptions } = useMemo(() => {
+    // Function to adjust color opacity
+    const adjustColorOpacity = (color: string, opacity: number) => {
+      if (color.startsWith('#')) {
+        // Convert hex to rgba
+        const r = parseInt(color.slice(1, 3), 16);
+        const g = parseInt(color.slice(3, 5), 16);
+        const b = parseInt(color.slice(5, 7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      }
+      return color;
+    };
 
-  // Generate a gradient of colors based on accent color
-  const generateColorGradient = (baseColor: string, count: number) => {
-    const colors = [];
-    for (let i = 0; i < count; i++) {
-      const opacity = 0.3 + (i / count) * 0.7; // Vary opacity from 0.3 to 1.0
-      colors.push(adjustColorOpacity(baseColor, opacity));
-    }
-    return colors;
-  };
+    // Generate a gradient of colors based on accent color
+    const generateColorGradient = (baseColor: string, count: number) => {
+      const colors = [];
+      for (let i = 0; i < count; i++) {
+        const opacity = 0.3 + (i / count) * 0.7; // Vary opacity from 0.3 to 1.0
+        colors.push(adjustColorOpacity(baseColor, opacity));
+      }
+      return colors;
+    };
 
-  // Skill categories data for pie chart
-  const skillCategories = {
-    labels: ['Java', 'Data Science', 'Gen AI', 'Machine Learning', 'Full Stack'],
-    datasets: [
-      {
-        data: [35, 25, 15, 15, 10],
-        backgroundColor: generateColorGradient(accentColor, 5),
-        borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-        borderWidth: 1,
-      },
-    ],
-  };
+    // Skill categories data for pie chart
+    const skillCategories = {
+      labels: ['Java', 'Data Science', 'Gen AI', 'Machine Learning', 'Full Stack'],
+      datasets: [
+        {
+          data: [35, 25, 15, 15, 10],
+          backgroundColor: generateColorGradient(accentColor, 5),
+          borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+          borderWidth: 1,
+        },
+      ],
+    };
 
-  // Skill proficiency data for horizontal bar chart (Experience in Months)
-  const skillProficiency = {
-    labels: ['Java', 'Data Science', 'Gen AI', 'Machine Learning', 'Full Stack'],
-    datasets: [
-      {
-        label: 'Months Experience',
-        data: [36, 30, 24, 20, 12],
-        backgroundColor: adjustColorOpacity(accentColor, 0.7),
-        borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-        borderWidth: 1,
-        borderRadius: 4,
-      },
-    ],
-  };
+    // Skill proficiency data for horizontal bar chart (Experience in Months)
+    const skillProficiency = {
+      labels: ['Java', 'Data Science', 'Gen AI', 'Machine Learning', 'Full Stack'],
+      datasets: [
+        {
+          label: 'Months Experience',
+          data: [36, 30, 24, 20, 12],
+          backgroundColor: adjustColorOpacity(accentColor, 0.7),
+          borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+          borderWidth: 1,
+          borderRadius: 4,
+        },
+      ],
+    };
 
-  // Chart options
-  const pieOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'right' as const,
-        labels: {
-          color: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)',
-          font: {
-            size: 12,
+    // Chart options
+    const pieOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'right' as const,
+          labels: {
+            color: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)',
+            font: {
+              size: 12,
+            },
+            padding: 20,
           },
-          padding: 20,
+        },
+        tooltip: {
+          backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+          titleColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)',
+          bodyColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)',
+          borderColor: adjustColorOpacity(accentColor, 0.5),
+          borderWidth: 1,
         },
       },
-      tooltip: {
-        backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-        titleColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)',
-        bodyColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)',
-        borderColor: adjustColorOpacity(accentColor, 0.5),
-        borderWidth: 1,
-      },
-    },
-  };
+    };
 
-  const barOptions = {
-    indexAxis: 'y' as const,
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        beginAtZero: true,
-        grid: {
-          color: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+    const barOptions = {
+      indexAxis: 'y' as const,
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          beginAtZero: true,
+          grid: {
+            color: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+          },
+          ticks: {
+            color: theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+            callback: function(value: any) {
+              return value + ' Mos';
+            }
+          },
         },
-        ticks: {
-          color: theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
-          callback: function(value: any) {
-            return value + ' Mos';
-          }
+        y: {
+          grid: {
+            display: false,
+          },
+          ticks: {
+            color: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)',
+            font: {
+              size: 12,
+            }
+          },
         },
       },
-      y: {
-        grid: {
+      plugins: {
+        legend: {
           display: false,
         },
-        ticks: {
-          color: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)',
-          font: {
-            size: 12,
+        tooltip: {
+          backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+          titleColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)',
+          bodyColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)',
+          borderColor: adjustColorOpacity(accentColor, 0.5),
+          borderWidth: 1,
+          callbacks: {
+            label: function(context: any) {
+              return `${context.parsed.x} Months Experience`;
+            }
           }
         },
       },
-    },
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-        titleColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)',
-        bodyColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)',
-        borderColor: adjustColorOpacity(accentColor, 0.5),
-        borderWidth: 1,
-        callbacks: {
-          label: function(context: any) {
-            return `${context.parsed.x} Months Experience`;
-          }
-        }
-      },
-    },
-  };
+    };
+
+    return { skillCategories, skillProficiency, pieOptions, barOptions };
+  }, [accentColor, theme]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">

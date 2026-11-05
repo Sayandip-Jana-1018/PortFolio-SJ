@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useTheme } from '../../context/ThemeContext';
@@ -19,7 +19,7 @@ const StatItem: React.FC<StatItemProps> = ({
   suffix = '',
   delay = 0
 }) => {
-  const [count, setCount] = useState(0);
+  const countRef = useRef<HTMLSpanElement>(null);
   const { accentColor } = useTheme();
   const controls = useAnimation();
   const [ref, inView] = useInView({
@@ -38,29 +38,25 @@ const StatItem: React.FC<StatItemProps> = ({
         }
       });
 
-      // Animate counter
-      let start = 0;
-      const end = value;
+      // Animate counter, writing straight to the DOM so each tick skips React
       const duration = 2000; // 2 seconds
-      const startTime = Date.now();
+      const startTime = performance.now();
+      let raf = 0;
 
-      const timer = setInterval(() => {
-        const now = Date.now();
-        const elapsed = now - startTime;
-        const progress = Math.min(elapsed / duration, 1);
+      const tick = (now: number) => {
+        const progress = Math.min(Math.max(now - startTime, 0) / duration, 1);
 
         // Easing function for smoother animation
         const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-        const current = Math.floor(easeOutQuart * end);
-
-        setCount(current);
-
-        if (progress === 1) {
-          clearInterval(timer);
+        if (countRef.current) {
+          countRef.current.textContent = String(Math.floor(easeOutQuart * value));
         }
-      }, 16);
 
-      return () => clearInterval(timer);
+        if (progress < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+
+      return () => cancelAnimationFrame(raf);
     }
   }, [inView, value, controls, delay]);
 
@@ -81,7 +77,7 @@ const StatItem: React.FC<StatItemProps> = ({
         {icon}
       </div>
       <div className="text-3xl font-bold mb-1">
-        {count}{suffix}
+        <span ref={countRef}>0</span>{suffix}
       </div>
       <div className="text-sm opacity-70">{label}</div>
     </motion.div>

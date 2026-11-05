@@ -24,101 +24,106 @@ interface SkillCategory {
   technologies: Technology[];
 }
 
+// Custom image component with a smart drop-shadow that works on any background.
+// Defined out here so its identity is stable. Inside the component, every re-render
+// made it a new component type and React remounted every icon image.
+const TechImg = ({ src, alt }: { src: string, alt: string }) => {
+  const { theme } = useTheme();
+  return (
+  <img 
+    src={src} 
+    alt={alt} 
+    width={44}
+    height={44}
+    loading="lazy"
+    decoding="async"
+    className="w-11 h-11 object-contain"
+    style={{ filter: theme === 'dark' ? 'drop-shadow(0 2px 4px rgba(255,255,255,0.15)) drop-shadow(0 4px 8px rgba(0,0,0,0.5))' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+  />
+  );
+};
+
+// Define all the technology categories and their respective icons with colors
+const skillCategories: SkillCategory[] = [
+  {
+    title: "Languages",
+    technologies: [
+      { name: "Java", icon: <TechImg src="/skills/java.png" alt="Java" />, color: "#E34F26" },
+      { name: "Python", icon: <TechImg src="/skills/python.webp" alt="Python" />, color: "#3776AB" },
+      { name: "TypeScript", icon: <TechImg src="/skills/typescript.webp" alt="TypeScript" />, color: "#3178C6" },
+      { name: "JavaScript", icon: <SiJavascript />, color: "#F7DF1E" },
+      { name: "SQL", icon: <TechImg src="/skills/sql.png" alt="SQL" />, color: "#4479A1" },
+    ],
+  },
+  {
+    title: "Data Science & ML",
+    technologies: [
+      { name: "Pandas", icon: <SiPandas />, color: "#150458" },
+      { name: "NumPy", icon: <SiNumpy />, color: "#013243" },
+      { name: "Regression", icon: <FaChartLine />, color: "#4CAF50" },
+      { name: "Classification", icon: <FaSitemap />, color: "#2196F3" },
+      { name: "Clustering", icon: <FaProjectDiagram />, color: "#9C27B0" },
+      { name: "Decision Trees", icon: <FaTree />, color: "#009688" },
+      { name: "Random Forest", icon: <FaTree />, color: "#388E3C" },
+      { name: "PowerBI", icon: <FaChartBar />, color: "#F2C811" },
+      { name: "MS Excel", icon: <FaTable />, color: "#217346" },
+    ],
+  },
+  {
+    title: "Generative AI",
+    technologies: [
+      { name: "LangChain", icon: <TechImg src="/skills/langchain.webp" alt="LangChain" />, color: "#1C3C3C" },
+      { name: "LangGraph", icon: <TechImg src="/skills/langgraph.png" alt="LangGraph" />, color: "#1C3C3C" },
+      { name: "CrewAI", icon: <TechImg src="/skills/creq.png" alt="CrewAI" />, color: "#FF4B4B" },
+      { name: "RAG", icon: <FaBrain />, color: "#E91E63" },
+      { name: "Vector DBs", icon: <TechImg src="/skills/chroma.png" alt="Chroma" />, color: "#F97316" },
+      { name: "OpenAI", icon: <SiOpenai />, color: "#412991" },
+      { name: "Gemini", icon: <TechImg src="/skills/gemini.webp" alt="Gemini" />, color: "#1A73E8" },
+      { name: "Claude", icon: <TechImg src="/skills/claude.webp" alt="Claude" />, color: "#D97757" },
+    ],
+  },
+  {
+    title: "Frameworks",
+    technologies: [
+      { name: "Next.js", icon: <TechImg src="/skills/nextjs.png" alt="Next.js" />, color: "#000000" },
+      { name: "React.js", icon: <TechImg src="/skills/reactjs.webp" alt="React" />, color: "#61DAFB" },
+      { name: "Node.js", icon: <TechImg src="/skills/nodejs.webp" alt="Node.js" />, color: "#339933" },
+      { name: "FastAPI", icon: <SiFastapi />, color: "#009688" },
+      { name: "Prisma", icon: <SiPrisma />, color: "#2D3748" },
+      { name: "Tailwind CSS", icon: <TechImg src="/skills/tailwind.webp" alt="Tailwind" />, color: "#06B6D4" },
+    ],
+  },
+  {
+    title: "Databases",
+    technologies: [
+      { name: "PostgreSQL", icon: <TechImg src="/skills/postgre.png" alt="PostgreSQL" />, color: "#336791" },
+      { name: "MongoDB", icon: <TechImg src="/skills/mongodb.webp" alt="MongoDB" />, color: "#47A248" },
+      { name: "Firebase", icon: <TechImg src="/skills/firebase.png" alt="Firebase" />, color: "#FFCA28" },
+      { name: "Supabase", icon: <SiSupabase />, color: "#3ECF8E" },
+      { name: "Apache Hadoop", icon: <SiApachehadoop />, color: "#FF6600" },
+      { name: "Apache Spark", icon: <SiApachespark />, color: "#E25A1C" },
+      { name: "MySQL", icon: <SiMysql />, color: "#4479A1" },
+    ],
+  },
+  {
+    title: "DevOps & Cloud",
+    technologies: [
+      { name: "Git", icon: <TechImg src="/skills/git.webp" alt="Git" />, color: "#F05032" },
+      { name: "Docker", icon: <TechImg src="/skills/docker.webp" alt="Docker" />, color: "#2496ED" },
+      { name: "Kubernetes", icon: <SiKubernetes />, color: "#326CE5" },
+      { name: "Jenkins", icon: <SiJenkins />, color: "#D24939" },
+      { name: "GitHub Actions", icon: <SiGithubactions />, color: "#2088FF" },
+      { name: "AWS", icon: <TechImg src="/skills/aws.webp" alt="AWS" />, color: "#FF9900" },
+      { name: "Prometheus", icon: <SiPrometheus />, color: "#E6522C" },
+      { name: "Grafana", icon: <SiGrafana />, color: "#F46800" },
+      { name: "Husky", icon: <TechImg src="/skills/husky.png" alt="Husky" />, color: "#000000" },
+    ],
+  }
+];
+
 const SkillBalls = () => {
   const { theme, accentColor } = useTheme();
   
-  // Custom image component with a smart drop-shadow that works on any background
-  const TechImg = ({ src, alt }: { src: string, alt: string }) => (
-    <img 
-      src={src} 
-      alt={alt} 
-      width={44}
-      height={44}
-      loading="lazy"
-      decoding="async"
-      className="w-11 h-11 object-contain"
-      style={{ filter: theme === 'dark' ? 'drop-shadow(0 2px 4px rgba(255,255,255,0.15)) drop-shadow(0 4px 8px rgba(0,0,0,0.5))' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
-    />
-  );
-  
-  // Define all the technology categories and their respective icons with colors
-  const skillCategories: SkillCategory[] = [
-    {
-      title: "Languages",
-      technologies: [
-        { name: "Java", icon: <TechImg src="/skills/java.png" alt="Java" />, color: "#E34F26" },
-        { name: "Python", icon: <TechImg src="/skills/python.webp" alt="Python" />, color: "#3776AB" },
-        { name: "TypeScript", icon: <TechImg src="/skills/typescript.webp" alt="TypeScript" />, color: "#3178C6" },
-        { name: "JavaScript", icon: <SiJavascript />, color: "#F7DF1E" },
-        { name: "SQL", icon: <TechImg src="/skills/sql.png" alt="SQL" />, color: "#4479A1" },
-      ],
-    },
-    {
-      title: "Data Science & ML",
-      technologies: [
-        { name: "Pandas", icon: <SiPandas />, color: "#150458" },
-        { name: "NumPy", icon: <SiNumpy />, color: "#013243" },
-        { name: "Regression", icon: <FaChartLine />, color: "#4CAF50" },
-        { name: "Classification", icon: <FaSitemap />, color: "#2196F3" },
-        { name: "Clustering", icon: <FaProjectDiagram />, color: "#9C27B0" },
-        { name: "Decision Trees", icon: <FaTree />, color: "#009688" },
-        { name: "Random Forest", icon: <FaTree />, color: "#388E3C" },
-        { name: "PowerBI", icon: <FaChartBar />, color: "#F2C811" },
-        { name: "MS Excel", icon: <FaTable />, color: "#217346" },
-      ],
-    },
-    {
-      title: "Generative AI",
-      technologies: [
-        { name: "LangChain", icon: <TechImg src="/skills/langchain.webp" alt="LangChain" />, color: "#1C3C3C" },
-        { name: "LangGraph", icon: <TechImg src="/skills/langgraph.png" alt="LangGraph" />, color: "#1C3C3C" },
-        { name: "CrewAI", icon: <TechImg src="/skills/creq.png" alt="CrewAI" />, color: "#FF4B4B" },
-        { name: "RAG", icon: <FaBrain />, color: "#E91E63" },
-        { name: "Vector DBs", icon: <TechImg src="/skills/chroma.png" alt="Chroma" />, color: "#F97316" },
-        { name: "OpenAI", icon: <SiOpenai />, color: "#412991" },
-        { name: "Gemini", icon: <TechImg src="/skills/gemini.webp" alt="Gemini" />, color: "#1A73E8" },
-        { name: "Claude", icon: <TechImg src="/skills/claude.webp" alt="Claude" />, color: "#D97757" },
-      ],
-    },
-    {
-      title: "Frameworks",
-      technologies: [
-        { name: "Next.js", icon: <TechImg src="/skills/nextjs.png" alt="Next.js" />, color: "#000000" },
-        { name: "React.js", icon: <TechImg src="/skills/reactjs.webp" alt="React" />, color: "#61DAFB" },
-        { name: "Node.js", icon: <TechImg src="/skills/nodejs.webp" alt="Node.js" />, color: "#339933" },
-        { name: "FastAPI", icon: <SiFastapi />, color: "#009688" },
-        { name: "Prisma", icon: <SiPrisma />, color: "#2D3748" },
-        { name: "Tailwind CSS", icon: <TechImg src="/skills/tailwind.webp" alt="Tailwind" />, color: "#06B6D4" },
-      ],
-    },
-    {
-      title: "Databases",
-      technologies: [
-        { name: "PostgreSQL", icon: <TechImg src="/skills/postgre.png" alt="PostgreSQL" />, color: "#336791" },
-        { name: "MongoDB", icon: <TechImg src="/skills/mongodb.webp" alt="MongoDB" />, color: "#47A248" },
-        { name: "Firebase", icon: <TechImg src="/skills/firebase.png" alt="Firebase" />, color: "#FFCA28" },
-        { name: "Supabase", icon: <SiSupabase />, color: "#3ECF8E" },
-        { name: "Apache Hadoop", icon: <SiApachehadoop />, color: "#FF6600" },
-        { name: "Apache Spark", icon: <SiApachespark />, color: "#E25A1C" },
-        { name: "MySQL", icon: <SiMysql />, color: "#4479A1" },
-      ],
-    },
-    {
-      title: "DevOps & Cloud",
-      technologies: [
-        { name: "Git", icon: <TechImg src="/skills/git.webp" alt="Git" />, color: "#F05032" },
-        { name: "Docker", icon: <TechImg src="/skills/docker.webp" alt="Docker" />, color: "#2496ED" },
-        { name: "Kubernetes", icon: <SiKubernetes />, color: "#326CE5" },
-        { name: "Jenkins", icon: <SiJenkins />, color: "#D24939" },
-        { name: "GitHub Actions", icon: <SiGithubactions />, color: "#2088FF" },
-        { name: "AWS", icon: <TechImg src="/skills/aws.webp" alt="AWS" />, color: "#FF9900" },
-        { name: "Prometheus", icon: <SiPrometheus />, color: "#E6522C" },
-        { name: "Grafana", icon: <SiGrafana />, color: "#F46800" },
-        { name: "Husky", icon: <TechImg src="/skills/husky.png" alt="Husky" />, color: "#000000" },
-      ],
-    }
-  ];
-
   return (
     <div className="w-full max-w-6xl mx-auto">
       {skillCategories.map((category, categoryIndex) => (

@@ -221,8 +221,8 @@ export const useParallax = (speed: number = 0.1) => {
       ref.current.style.transform = `translate3d(0, ${yPos}px, 0)`;
     };
     
-    window.addEventListener('scroll', handleScroll);
-    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };

@@ -17,6 +17,32 @@ const HexColorPicker = dynamic(() => import('react-colorful').then((mod) => mod.
   loading: () => <div className="w-full h-[160px] md:h-[180px]" />,
 });
 
+/**
+ * Keeps its own copy of the colour so the picker always gets back exactly what it
+ * just sent. The page's accent colour updates at most once a frame, and handing the
+ * picker that slightly older value mid-drag would make its handle jump backwards.
+ */
+const AccentPicker: React.FC<{ color: string; onChange: (color: string) => void }> = ({ color, onChange }) => {
+  const [localColor, setLocalColor] = useState(color);
+  const lastSentAt = useRef(0);
+
+  // Follow changes from elsewhere, like the preset swatches, but not echoes of a drag.
+  useEffect(() => {
+    if (performance.now() - lastSentAt.current > 200) setLocalColor(color);
+  }, [color]);
+
+  return (
+    <HexColorPicker
+      color={localColor}
+      onChange={(next) => {
+        lastSentAt.current = performance.now();
+        setLocalColor(next);
+        onChange(next);
+      }}
+    />
+  );
+};
+
 const navItems = [
   { name: 'Home', href: '/#', icon: <FiHome /> },
   { name: 'About', href: '/#about', icon: <FiUser /> },
@@ -621,7 +647,7 @@ const Navbar: React.FC = () => {
                         border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)'}`
                       }}
                     >
-                      <HexColorPicker color={accentColor} onChange={setAccentColor} />
+                      <AccentPicker color={accentColor} onChange={setAccentColor} />
                     </div>
                   </div>
 
