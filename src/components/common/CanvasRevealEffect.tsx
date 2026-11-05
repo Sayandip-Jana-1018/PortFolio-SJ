@@ -491,7 +491,6 @@ export const CanvasRevealEffect = ({
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full pointer-events-none"
-          style={{ mixBlendMode: 'screen' }}
           onClick={startEffect}
         />
       </div>

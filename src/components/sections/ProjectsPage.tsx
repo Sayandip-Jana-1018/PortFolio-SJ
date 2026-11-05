@@ -74,7 +74,7 @@ const ProjectsPage: React.FC<ProjectsPageProps> = ({ sectionRef }) => {
     <section
       id="projects"
       ref={sectionRef}
-      className="relative min-h-screen w-full overflow-hidden py-20 px-4 md:px-8"
+      className="cv-auto relative min-h-screen w-full overflow-hidden py-20 px-4 md:px-8"
       style={{
         background: theme === 'dark' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',
         backdropFilter: 'blur(5px) saturate(150%)',

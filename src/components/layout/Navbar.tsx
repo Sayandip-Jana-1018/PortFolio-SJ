@@ -523,6 +523,8 @@ const Navbar: React.FC = () => {
                 style={{
                   top: '64px',
                   right: '16px', // Standardized spacing
+                  // Keeps this panel's own backdrop root, so its glass looks as designed
+                  willChange: 'opacity',
                 }}
               >
                 <div

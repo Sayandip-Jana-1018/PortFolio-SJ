@@ -544,8 +544,10 @@ export default function Home() {
 
               {/* CTA Button */}
               <div className="mt-16 relative">
-                <div className="ambient-cta-glow absolute -inset-2 rounded-full opacity-60"
-                  style={{ background: `radial-gradient(circle, ${accentColor}80 0%, transparent 70%)`, filter: 'blur(10px)' }} />
+                <div className="ambient-cta-glow absolute -inset-2 opacity-60">
+                  <div className="absolute inset-0 rounded-full"
+                    style={{ background: `radial-gradient(circle, ${accentColor}80 0%, transparent 70%)`, filter: 'blur(10px)' }} />
+                </div>
                 <div className="ambient-cta-ring absolute -inset-4 rounded-full opacity-30"
                   style={{ border: `1px solid ${accentColor}70` }} />
                 <motion.a

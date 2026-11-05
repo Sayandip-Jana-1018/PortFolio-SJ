@@ -37,12 +37,12 @@ const ContactInfo: React.FC<ContactInfoProps> = ({ accentColor, theme }) => {
         {infoItems.map((item, index) => (
           <motion.div 
             key={item.title}
-            className="relative flex items-center gap-5 bg-gradient-to-br from-white/[0.03] to-white/[0.01] backdrop-blur-xl p-5 rounded-2xl border border-white/10 overflow-hidden group"
+            className="relative flex items-center gap-5 bg-gradient-to-br from-white/[0.03] to-white/[0.01] p-5 rounded-2xl border border-white/10 overflow-hidden group"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: item.delay, duration: 0.5, type: 'spring', damping: 20 }}
             whileHover={{ y: -3, borderColor: `${accentColor}50` }}
-            style={{ boxShadow: `0 10px 30px -15px rgba(0,0,0,0.5)` }}
+            style={{ boxShadow: `0 10px 30px -15px rgba(0,0,0,0.5)`, backgroundColor: 'rgba(255,255,255,0.1)' }}
           >
             {/* Hover ambient glow */}
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style={{ background: `radial-gradient(circle at 0% 50%, ${accentColor}20, transparent 70%)` }} />

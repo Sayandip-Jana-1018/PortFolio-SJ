@@ -149,7 +149,9 @@ const ContactForm: React.FC<ContactFormProps> = ({ accentColor, theme }) => {
   
   // Input field styles
   const getInputStyle = (field: FormField, fieldName: string) => ({
-    backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+    // Field colour over the card's fill, which a nested backdrop filter used to repeat
+    backgroundImage: `linear-gradient(${theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'} 0 0)`,
+    backgroundColor: 'rgba(255,255,255,0.1)',
     border: `1px solid ${field.touched && field.error ? 'rgba(239, 68, 68, 0.5)' : 
       focusedField === fieldName ? accentColor : `${accentColor}30`}`,
     boxShadow: field.touched && field.error ? '0 0 0 2px rgba(239, 68, 68, 0.2)' : 
@@ -232,7 +234,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ accentColor, theme }) => {
                   onFocus={handleFocus}
                   onBlur={handleBlur}
                   required
-                  className="w-full px-10 py-3 rounded-lg focus:outline-none transition-all duration-300 bg-white/10 backdrop-blur-sm text-center"
+                  className="w-full px-10 py-3 rounded-lg focus:outline-none transition-all duration-300 text-center"
                   style={{
                     ...getInputStyle(formState.name, 'name'),
                     borderRadius: '8px',
@@ -270,7 +272,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ accentColor, theme }) => {
                   onFocus={handleFocus}
                   onBlur={handleBlur}
                   required
-                  className="w-full px-10 py-3 rounded-lg focus:outline-none transition-all duration-300 bg-white/10 backdrop-blur-sm text-center"
+                  className="w-full px-10 py-3 rounded-lg focus:outline-none transition-all duration-300 text-center"
                   style={{
                     ...getInputStyle(formState.email, 'email'),
                     borderRadius: '8px',
@@ -308,7 +310,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ accentColor, theme }) => {
                   onBlur={handleBlur}
                   required
                   rows={5}
-                  className="w-full px-10 py-3 rounded-lg focus:outline-none transition-all duration-300 resize-none bg-white/10 backdrop-blur-sm text-center"
+                  className="w-full px-10 py-3 rounded-lg focus:outline-none transition-all duration-300 resize-none text-center"
                   style={{
                     ...getInputStyle(formState.message, 'message'),
                     borderRadius: '8px',

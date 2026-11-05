@@ -90,7 +90,7 @@ const SkillProgressBar: React.FC<SkillProgressBarProps> = ({
       <div 
         className={`h-2 rounded-full w-full ${
           theme === 'dark' ? 'bg-gray-800/50' : 'bg-gray-200/70'
-        } overflow-hidden backdrop-blur-sm`}
+        } overflow-hidden`}
         style={{ boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.1)' }}
       >
         <motion.div

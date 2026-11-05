@@ -79,10 +79,11 @@ const SpotlightCard: React.FC<SpotlightCardProps> = ({ children, className = "",
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5 }}
       style={{
-        background: theme === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.2)', // Very translucent
+        // Translucent fill over the section tint. Same look as a nested backdrop
+        // filter, which only repainted that tint. See .nested-glass-fill.
+        backgroundImage: `linear-gradient(${theme === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.2)'} 0 0)`,
+        backgroundColor: 'var(--section-tint)',
         borderColor: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.4)',
-        backdropFilter: 'blur(20px) saturate(180%)', // Strong blur + saturation for premium glass
-        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
         boxShadow: `0 8px 32px 0 rgba(0, 0, 0, 0.2)`, // Enhanced depth
         transformStyle: 'preserve-3d',
       }}
@@ -163,7 +164,7 @@ const EducationPage: React.FC<{ sectionRef: React.RefObject<HTMLDivElement> }> =
   return (
     <section
       ref={sectionRef}
-      className="min-h-screen relative overflow-hidden py-20"
+      className="cv-auto min-h-screen relative overflow-hidden py-20"
       id="education"
       style={{
         background: theme === 'dark' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',

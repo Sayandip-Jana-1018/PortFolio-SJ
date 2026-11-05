@@ -1,10 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 
 interface BackgroundElementsProps {
   accentColor: string;
   theme: string;
 }
+
+/**
+ * The soft glows here used to be radial gradients under filter: blur(), which is
+ * slow to draw every time a tile of the page is rasterized. These gradients have
+ * the falloff that blur produces, computed numerically for each shape, so they
+ * look the same with no filter at all. Each array is evenly spaced stops from the
+ * centre out to the edge of the glow, as a fraction of its peak brightness.
+ */
+const AMBIENT_LARGE_FALLOFF = [1, 0.9507, 0.8162, 0.6313, 0.4381, 0.2714, 0.1493, 0.0724, 0.0308, 0.0114, 0.0037, 0.001, 0];
+const AMBIENT_SMALL_FALLOFF = [1, 0.95, 0.8141, 0.6283, 0.4356, 0.2703, 0.1496, 0.0736, 0.032, 0.0123, 0.0041, 0.0012, 0];
+const CORNER_FALLOFF = [1, 0.958, 0.8412, 0.6742, 0.4884, 0.315, 0.1774, 0.0854, 0.0345, 0.0115, 0.0031, 0.0007, 0];
+
+/** Peak opacity of each glow: its original element opacity × its peak after blur. */
+const AMBIENT_LARGE_OPACITY = 0.3 * 0.0993;
+const AMBIENT_SMALL_OPACITY = 0.3 * 0.08419;
+const CORNER_OPACITY = 0.2 * 0.30249;
+
+const glow = (accentColor: string, falloff: number[]) => {
+  const stops = falloff.map((fraction, i) => {
+    const alpha = Math.round(fraction * 255).toString(16).padStart(2, '0');
+    return `${accentColor}${alpha} ${((i / (falloff.length - 1)) * 100).toFixed(2)}%`;
+  });
+  return `radial-gradient(circle closest-side, ${stops.join(', ')})`;
+};
 
 const BackgroundElements: React.FC<BackgroundElementsProps> = ({ accentColor, theme }) => {
   // State to track if we're on mobile
@@ -48,47 +71,53 @@ const BackgroundElements: React.FC<BackgroundElementsProps> = ({ accentColor, th
         }}
       />
 
-      {/* Static Glassy corner elements - no animation */}
+      {/* Static glassy corner glows */}
       <div
-        className="absolute top-0 left-0 w-64 h-64 opacity-20"
+        className="absolute"
         style={{
-          background: `radial-gradient(circle, ${accentColor}80 0%, transparent 70%)`,
-          filter: 'blur(40px)',
-          borderRadius: '0 0 100% 0',
+          width: 496,
+          height: 496,
+          top: -120,
+          left: -120,
+          opacity: CORNER_OPACITY,
+          background: glow(accentColor, CORNER_FALLOFF),
         }}
       />
 
       <div
-        className="absolute bottom-0 right-0 w-64 h-64 opacity-20"
+        className="absolute"
         style={{
-          background: `radial-gradient(circle, ${accentColor}80 0%, transparent 70%)`,
-          filter: 'blur(40px)',
-          borderRadius: '100% 0 0 0',
+          width: 496,
+          height: 496,
+          bottom: -120,
+          right: -120,
+          opacity: CORNER_OPACITY,
+          background: glow(accentColor, CORNER_FALLOFF),
         }}
       />
 
-      {/* Static blurred ambient circles - no animation */}
+      {/* Static ambient glows */}
       <div
-        className="absolute rounded-full opacity-30"
+        className="absolute"
         style={{
-          width: 400,
-          height: 400,
-          background: `radial-gradient(circle, ${accentColor}40 0%, transparent 70%)`,
-          filter: 'blur(100px)',
-          top: '20%',
-          left: '10%',
+          width: 1000,
+          height: 1000,
+          top: 'calc(20% - 300px)',
+          left: 'calc(10% - 300px)',
+          opacity: AMBIENT_LARGE_OPACITY,
+          background: glow(accentColor, AMBIENT_LARGE_FALLOFF),
         }}
       />
 
       <div
-        className="absolute rounded-full opacity-30"
+        className="absolute"
         style={{
-          width: 350,
-          height: 350,
-          background: `radial-gradient(circle, ${accentColor}40 0%, transparent 70%)`,
-          filter: 'blur(100px)',
-          bottom: '20%',
-          right: '10%',
+          width: 950,
+          height: 950,
+          bottom: 'calc(20% - 300px)',
+          right: 'calc(10% - 300px)',
+          opacity: AMBIENT_SMALL_OPACITY,
+          background: glow(accentColor, AMBIENT_SMALL_FALLOFF),
         }}
       />
     </div>

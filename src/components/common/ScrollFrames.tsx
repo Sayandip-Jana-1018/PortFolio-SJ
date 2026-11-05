@@ -358,6 +358,14 @@ const ScrollFrames: React.FC<ScrollFramesProps> = ({
 
   return (
     <div ref={hostRef} className={`absolute inset-0 overflow-hidden ${className}`.trim()}>
+      {/* The saturation boost is a filter on this wrapper rather than a full
+          screen backdrop filter. It produces the same pixels without reading the
+          page back, and 1.18 fades toward 1 by the same amount as the old layer's
+          opacity did over the tail plate. */}
+      <div
+        className="absolute inset-0"
+        style={{ filter: 'saturate(calc(1 + 0.18 * (1 - var(--tail, 0) * 0.6)))' }}
+      >
       <canvas
         ref={canvasRef}
         className="h-full w-full block"
@@ -416,11 +424,10 @@ const ScrollFrames: React.FC<ScrollFramesProps> = ({
           }}
         />
       )}
+      </div>
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          backdropFilter: 'saturate(118%)',
-          WebkitBackdropFilter: 'saturate(118%)',
           opacity: 'calc(1 - var(--tail, 0) * 0.6)',
           boxShadow: isDark
             ? 'inset 0 0 220px 60px rgba(0,0,0,.55)'

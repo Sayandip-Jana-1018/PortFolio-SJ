@@ -133,11 +133,14 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({ scrollProgress, variant = '
           // radial and blurred — against MoltenMetal's own noise it reads as
           // atmosphere, but over a photographic plate its box edges show as a
           // panel behind the name. Dropped on the film backdrop.
-          className={`ambient-orb absolute inset-0 -z-10 blur-[80px] ${isFilm ? 'hidden' : 'opacity-80'}`}
-          style={{
-            background: `radial-gradient(ellipse at center, ${accentColor}50 0%, transparent 70%)`,
-          }}
-        />
+          className={`ambient-orb absolute inset-0 -z-10 ${isFilm ? 'hidden' : 'opacity-80'}`}
+        >
+          {/* Blurred inside the animated layer, so the blur is only drawn once */}
+          <div
+            className="absolute inset-0 blur-[80px]"
+            style={{ background: `radial-gradient(ellipse at center, ${accentColor}50 0%, transparent 70%)` }}
+          />
+        </div>
 
         <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-wide relative text-center">
           {/* Decorative elements — dropped on the film backdrop, where anything

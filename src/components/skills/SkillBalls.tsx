@@ -151,12 +151,13 @@ const SkillBalls = () => {
                 }}
               >
                 <div 
-                  className="h-20 w-20 rounded-full flex items-center justify-center overflow-hidden relative backdrop-blur-md transition-all duration-300"
+                  className="h-20 w-20 rounded-full flex items-center justify-center overflow-hidden relative transition-all duration-300"
                   style={{ 
                     // Beautiful tinted glass orb effect
-                    background: theme === 'dark' 
+                    backgroundImage: theme === 'dark'
                       ? `radial-gradient(circle at 30% 30%, ${technology.color}30, rgba(20,20,30,0.7) 70%)`
                       : `radial-gradient(circle at 30% 30%, ${technology.color}20, rgba(255,255,255,0.8) 70%)`,
+                    backgroundColor: 'var(--section-tint)',
                     boxShadow: theme === 'dark'
                       ? `0 8px 20px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.1), 0 0 12px ${technology.color}30`
                       : `0 8px 20px rgba(0,0,0,0.1), inset 0 2px 4px rgba(255,255,255,0.6), 0 0 12px ${technology.color}30`,

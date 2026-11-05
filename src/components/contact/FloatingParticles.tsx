@@ -64,20 +64,22 @@ const FloatingParticles: React.FC<FloatingParticlesProps> = ({
       {particles.map((particle) => (
         <div
           key={particle.id}
-          className="ambient-float absolute rounded-full blur-xl"
+          className="ambient-float absolute"
           style={{
             width: particle.size,
             height: particle.size,
             left: `${particle.left}%`,
             top: `${particle.top}%`,
-            backgroundColor: accentColor,
             opacity: particle.opacity,
             animationDuration: `${particle.duration}s`,
             animationDelay: `${particle.delay}s`,
             '--float-x': `${particle.driftX}px`,
             '--float-y': `${particle.driftY}px`,
           } as React.CSSProperties}
-        />
+        >
+          {/* Blurred inside the moving layer, so the blur is only drawn once */}
+          <div className="absolute inset-0 rounded-full blur-xl" style={{ backgroundColor: accentColor }} />
+        </div>
       ))}
     </motion.div>
   );

@@ -160,7 +160,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
               initial="hidden"
               variants={fadeInLeftVariant}
             >
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-xl">
+              <div className="nested-glass-fill rounded-2xl p-6 border border-white/10 shadow-xl">
                 <ContactForm accentColor={accentColor} theme={theme} />
               </div>
             </motion.div>
@@ -173,21 +173,24 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
               initial="hidden"
               variants={fadeInRightVariant}
             >
-              <div className="relative w-full aspect-square max-w-md bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 shadow-xl mx-auto">
+              <div
+                className="relative w-full aspect-square max-w-md bg-gradient-to-br from-white/5 to-white/10 rounded-2xl p-4 border border-white/10 shadow-xl mx-auto"
+                style={{ backgroundColor: 'var(--section-tint)' }}
+              >
                 <VirtualCoach
                   modelUrl={modelUrl}
                   className="w-full h-full rounded-2xl overflow-hidden"
                 />
 
                 {/* Decorative elements around the 3D model */}
-                <div
-                  className="contact-blob-a absolute -top-5 -left-5 w-12 h-12 rounded-full"
-                  style={{ backgroundColor: accentColor, filter: 'blur(25px)', opacity: 0.6 }}
-                />
-                <div
-                  className="contact-blob-b absolute -bottom-5 -right-5 w-16 h-16 rounded-full"
-                  style={{ backgroundColor: accentColor, filter: 'blur(25px)', opacity: 0.6 }}
-                />
+                {/* The blur is on the inner element, so it is drawn once and the
+                    animation only moves the finished layer. */}
+                <div className="contact-blob-a absolute -top-5 -left-5 w-12 h-12" style={{ opacity: 0.6 }}>
+                  <div className="absolute inset-0 rounded-full" style={{ backgroundColor: accentColor, filter: 'blur(25px)' }} />
+                </div>
+                <div className="contact-blob-b absolute -bottom-5 -right-5 w-16 h-16" style={{ opacity: 0.6 }}>
+                  <div className="absolute inset-0 rounded-full" style={{ backgroundColor: accentColor, filter: 'blur(25px)' }} />
+                </div>
 
                 {/* Caption for the 3D model */}
                 <motion.div
@@ -227,7 +230,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
               variants={fadeInUpVariant}
               className="h-full"
             >
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-xl h-full">
+              <div className="nested-glass-fill rounded-2xl p-6 border border-white/10 shadow-xl h-full">
                 <ContactInfo accentColor={accentColor} theme={theme} />
               </div>
             </motion.div>
@@ -239,7 +242,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
               transition={{ delay: 0.2 }}
               className="h-full"
             >
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 shadow-xl h-full">
+              <div className="nested-glass-fill rounded-2xl p-6 border border-white/10 shadow-xl h-full">
                 <SocialLinks accentColor={accentColor} theme={theme} />
               </div>
             </motion.div>

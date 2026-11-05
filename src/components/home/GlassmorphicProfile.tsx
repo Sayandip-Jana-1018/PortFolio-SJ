@@ -42,16 +42,20 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
     <div className="relative flex items-center justify-center">
       {/* Enhanced 3D Breathing Wave Animations */}
       {/* First Wave - Outermost with 3D effect */}
-      <div
-        className="profile-wave-1 absolute w-[220px] h-[220px] sm:w-[380px] sm:h-[380px]"
-        style={{
-          borderRadius: '50%',
-          border: `2px solid ${accentColor}40`,
-          background: `radial-gradient(circle, transparent 60%, ${accentColor}15 100%)`,
-          boxShadow: `0 0 25px ${accentColor}30`,
-          filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.2))',
-        }}
-      />
+      <div className="profile-wave-1 absolute w-[220px] h-[220px] sm:w-[380px] sm:h-[380px]">
+        {/* The filter is on the inner element, so it is drawn once and the
+            animation only moves the finished layer. */}
+        <div
+          className="absolute inset-0"
+          style={{
+            borderRadius: '50%',
+            border: `2px solid ${accentColor}40`,
+            background: `radial-gradient(circle, transparent 60%, ${accentColor}15 100%)`,
+            boxShadow: `0 0 25px ${accentColor}30`,
+            filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.2))',
+          }}
+        />
+      </div>
 
       {/* Second Wave - Middle with 3D effect */}
       <div
@@ -99,15 +103,19 @@ const GlassmorphicProfile: React.FC<GlassmorphicProfileProps> = ({ scrollProgres
       {/* Fourth Wave - Outermost with enhanced 3D effect */}
       <div
         className="profile-wave-4 absolute w-[250px] h-[250px] sm:w-[420px] sm:h-[420px]"
-        style={{
-          borderRadius: '50%',
-          border: `1px solid ${accentColor}20`,
-          background: `radial-gradient(circle, transparent 55%, ${accentColor}10 100%)`,
-          boxShadow: `0 0 20px ${accentColor}20`,
-          filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.15))',
-          backdropFilter: 'blur(1.5px)',
-        }}
-      />
+        style={{ borderRadius: '50%', backdropFilter: 'blur(1.5px)' }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            borderRadius: '50%',
+            border: `1px solid ${accentColor}20`,
+            background: `radial-gradient(circle, transparent 55%, ${accentColor}10 100%)`,
+            boxShadow: `0 0 20px ${accentColor}20`,
+            filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.15))',
+          }}
+        />
+      </div>
 
 
       {/* Circular photo frame with glassmorphic effect */}

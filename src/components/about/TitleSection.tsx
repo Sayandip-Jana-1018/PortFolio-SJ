@@ -66,10 +66,7 @@ const TitleSection: React.FC<TitleSectionProps> = ({
       whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
       viewport={{ once: false, margin: "-50px" }}
       transition={{ duration: 0.8, type: "spring", stiffness: 120, damping: 15 }}
-      style={{ 
-        perspective: 1200,
-        filter: `drop-shadow(0 20px 30px ${accentColor}30)`
-      }}
+      style={{ perspective: 1200 }}
     >
       {/* MaskedHeading — video-filled text with reveal animation */}
       <div className="mb-4">
@@ -89,6 +86,9 @@ const TitleSection: React.FC<TitleSectionProps> = ({
           lineHeight={1.1}
           fontSize="clamp(3.2rem, 8vw, 5.5rem)"
           className="mx-auto pb-2"
+          // Text shadows are drawn once. A drop-shadow filter around the video
+          // fill had to be recalculated on every video frame.
+          style={{ textShadow: `0 20px 60px ${accentColor}30` }}
         />
       </div>
       
@@ -96,7 +96,7 @@ const TitleSection: React.FC<TitleSectionProps> = ({
       <motion.div className="flex justify-center items-center text-xl md:text-2xl mt-6 h-10">
         <span 
           className="mr-2 opacity-70 font-light"
-          style={{ fontFamily: 'var(--font-body)' }}
+          style={{ fontFamily: 'var(--font-body)', textShadow: `0 20px 60px ${accentColor}30` }}
         >
           {subtitlePrefix}
         </span>
@@ -106,7 +106,7 @@ const TitleSection: React.FC<TitleSectionProps> = ({
           style={{ 
             color: accentColor,
             fontFamily: 'var(--font-body)',
-            textShadow: `0 0 10px ${accentColor}50`
+            textShadow: `0 0 10px ${accentColor}50, 0 20px 60px ${accentColor}30`
           }}
         >
           {subtitles[0]}

@@ -9,16 +9,20 @@
   --foreground: #171717;
   --font-title: 'Outfit', sans-serif;
   --font-body: 'Outfit', sans-serif;
+  /* The fill every glass section paints. See .nested-glass-fill. */
+  --section-tint: rgba(0, 0, 0, 0.15);
 }
 
 .dark-theme {
   --background: #0a0a0a;
   --foreground: #ededed;
+  --section-tint: rgba(0, 0, 0, 0.15);
 }
 
 .light-theme {
   --background: #ffffff;
   --foreground: #171717;
+  --section-tint: rgba(255, 255, 255, 0.15);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -31,10 +35,23 @@
 /* ========================================
    PREMIUM GLASSMORPHISM
    ======================================== */
-.glass-card, .glassmorphic-card {
-  background: rgba(255, 255, 255, 0.03);
+/* Only .glass-card blurs. It sits over the Explore video, so the blur is real.
+   .glassmorphic-card always sits inside a section that is already glass, and
+   testing showed a backdrop filter there changes nothing on screen. */
+.glass-card {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+}
+
+/* A backdrop filter nested in a glass section cannot see the page behind it. It
+   only redraws the section's own fill on top of itself, which tints the card.
+   This paints that same tint directly, without the extra GPU pass. */
+.nested-glass-fill {
+  background: linear-gradient(rgba(255, 255, 255, 0.1) 0 0), var(--section-tint);
+}
+
+.glass-card, .glassmorphic-card {
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 24px !important;
   /* Deep layered 3D block shadow */
@@ -43,7 +60,11 @@
     0 5px 15px rgba(0, 0, 0, 0.3),
     inset 0 3px 3px rgba(255, 255, 255, 0.2), 
     inset 0 -3px 5px rgba(0, 0, 0, 0.3);
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition:
+    transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    border-color 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    background-color 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   transform: translateZ(0);
 }
 
@@ -240,37 +261,42 @@ body {
    SCROLL PERFORMANCE OPTIMIZATIONS
    ======================================== */
 
-/* Force GPU layer for heavy canvas/WebGL containers */
-canvas,
-.canvas-container,
-[class*="plasma"],
-[class*="color-bends"] {
-  transform: translateZ(0);
-  will-change: transform;
-  backface-visibility: hidden;
-}
-
 /* Optimize fixed background elements */
 .fixed {
-  will-change: opacity;
   contain: layout style paint;
 }
 
 /* Off-screen sections don't need full rendering */
-.section-container {
+.section-container,
+.cv-auto {
   content-visibility: auto;
   contain-intrinsic-size: auto 100vh;
+}
+
+/* Measured section heights. The browser uses these until a section first renders,
+   so the page height, nav links and scroll positions are right from the start. */
+#about { contain-intrinsic-size: auto 2437px; }
+#projects { contain-intrinsic-size: auto 2821px; }
+#skills { contain-intrinsic-size: auto 3621px; }
+#education { contain-intrinsic-size: auto 1575px; }
+#hackathons { contain-intrinsic-size: auto 5325px; }
+#certificates { contain-intrinsic-size: auto 1836px; }
+#contact { contain-intrinsic-size: auto 1628px; }
+
+@media (max-width: 767px) {
+  #about { contain-intrinsic-size: auto 3988px; }
+  #projects { contain-intrinsic-size: auto 5498px; }
+  #skills { contain-intrinsic-size: auto 6143px; }
+  #education { contain-intrinsic-size: auto 2471px; }
+  #hackathons { contain-intrinsic-size: auto 5737px; }
+  #certificates { contain-intrinsic-size: auto 4330px; }
+  #contact { contain-intrinsic-size: auto 2324px; }
 }
 
 /* Smoother scroll for main container */
 .main-content {
   scroll-behavior: smooth;
   overflow-anchor: none;
-}
-
-/* Optimize Framer Motion elements during scroll */
-[data-framer-component-type] {
-  will-change: transform, opacity;
 }
 
 /* ========================================

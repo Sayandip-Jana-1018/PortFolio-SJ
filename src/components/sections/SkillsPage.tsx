@@ -115,7 +115,7 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
     <section
       id="skills"
       ref={sectionRef}
-      className="min-h-screen py-20 relative overflow-hidden"
+      className="cv-auto min-h-screen py-20 relative overflow-hidden"
       style={{
         background: theme === 'dark' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',
         backdropFilter: 'blur(5px) saturate(150%)',

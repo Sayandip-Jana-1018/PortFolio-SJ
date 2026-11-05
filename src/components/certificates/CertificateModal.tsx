@@ -179,6 +179,9 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
             className="relative w-[95vw] max-w-5xl h-[85vh] md:h-[90vh] rounded-2xl overflow-hidden glassmorphic-card shadow-2xl"
             style={{
               background: 'rgba(20, 20, 30, 0.6)',
+              // Over the dark overlay, unlike .glassmorphic-card inside a section
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
               border: `1px solid ${accentColor}40`,
               margin: 'auto'
             }}
