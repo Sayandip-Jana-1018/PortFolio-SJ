@@ -1,28 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title
-} from 'chart.js';
-import { Pie, Bar } from 'react-chartjs-2';
 import { FiPieChart, FiBarChart2 } from 'react-icons/fi';
-
-// Register ChartJS components
-ChartJS.register(
-  ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title
-);
+import LazyChart from './LazyChart';
 
 interface SkillsChartsProps {
   accentColor: string;
@@ -171,7 +150,7 @@ const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
           Skill Categories
         </h4>
         <div className="h-[250px] w-full">
-          <Pie data={skillCategories} options={pieOptions} />
+          <LazyChart type="pie" data={skillCategories} options={pieOptions as any} />
         </div>
       </motion.div>
 
@@ -191,7 +170,7 @@ const SkillsCharts: React.FC<SkillsChartsProps> = ({ accentColor, theme }) => {
           Skill Growth & Experience
         </h4>
         <div className="h-[250px] w-full">
-          <Bar data={skillProficiency} options={barOptions} />
+          <LazyChart type="bar" data={skillProficiency} options={barOptions as any} />
         </div>
       </motion.div>
     </div>

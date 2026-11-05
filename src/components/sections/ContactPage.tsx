@@ -1,13 +1,25 @@
 import React, { useRef, useEffect } from 'react';
 import { motion, useAnimation, useInView } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { useTheme } from '../../context/ThemeContext';
+import { NEAR_MARGIN, useInViewport } from '../../hooks/useInViewport';
 import BackgroundElements from '../about/BackgroundElements';
-import VirtualCoach from '../contact/VirtualCoach';
 import ContactForm from '../contact/ContactForm';
 import SocialLinks from '../contact/SocialLinks';
 import ContactInfo from '../contact/ContactInfo';
 import FloatingParticles from '../contact/FloatingParticles';
 import MaskedHeading from '../common/MaskedHeading';
+
+// three.js and the model are the heaviest things on the page, and this is the
+// very last section, so they load only as the reader gets close to it.
+const VirtualCoach = dynamic(() => import('../contact/VirtualCoach'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center" role="status" aria-live="polite">
+      <div className="w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+    </div>
+  ),
+});
 
 interface ContactPageProps {
   sectionRef: React.RefObject<HTMLDivElement>;
@@ -35,6 +47,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
 
   // 3D model URL
   const modelUrl = '/models/virtual_coach.glb';
+  const isSectionNear = useInViewport(sectionRef, { rootMargin: NEAR_MARGIN, once: true });
 
   // Update animations when elements come into view
   useEffect(() => {
@@ -177,10 +190,12 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
                 className="relative w-full aspect-square max-w-md bg-gradient-to-br from-white/5 to-white/10 rounded-2xl p-4 border border-white/10 shadow-xl mx-auto"
                 style={{ backgroundColor: 'var(--section-tint)' }}
               >
-                <VirtualCoach
-                  modelUrl={modelUrl}
-                  className="w-full h-full rounded-2xl overflow-hidden"
-                />
+                {isSectionNear && (
+                  <VirtualCoach
+                    modelUrl={modelUrl}
+                    className="w-full h-full rounded-2xl overflow-hidden"
+                  />
+                )}
 
                 {/* Decorative elements around the 3D model */}
                 {/* The blur is on the inner element, so it is drawn once and the

@@ -13,10 +13,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ small = false }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Create audio element
-    audioRef.current = new Audio('/media/water.mp3');
-    audioRef.current.loop = true;
-    
     // Clean up on component unmount
     return () => {
       if (audioRef.current) {
@@ -27,8 +23,13 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ small = false }) => {
   }, []);
 
   const togglePlay = () => {
-    if (!audioRef.current) return;
-    
+    // Created on first use, so the track is not downloaded for everyone who never
+    // presses play. There are several of these buttons on the page.
+    if (!audioRef.current) {
+      audioRef.current = new Audio('/media/water.mp3');
+      audioRef.current.loop = true;
+    }
+
     if (isPlaying) {
       audioRef.current.pause();
     } else {

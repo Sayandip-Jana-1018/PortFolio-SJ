@@ -1,7 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import Highlight from 'react-highlight';
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+import python from 'highlight.js/lib/languages/python';
+import typescript from 'highlight.js/lib/languages/typescript';
 import 'highlight.js/styles/atom-one-dark.css';
+
+// Only the languages the projects actually use. The full set is about 1MB.
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('python', python);
+hljs.registerLanguage('typescript', typescript);
+
+const highlight = (text: string, language: string) =>
+  hljs.highlight(text, { language, ignoreIllegals: true }).value;
 
 interface TerminalCodePreviewProps {
   code: string[];
@@ -65,7 +76,17 @@ const TerminalCodePreview: React.FC<TerminalCodePreviewProps> = ({
       return () => clearTimeout(timer);
     }
   }, [isVisible, code, currentLineIndex, currentCharIndex]);
-  
+
+  // Finished lines are highlighted together, once per line, so tokens spanning
+  // several lines stay correct. Each typed character only re-highlights its own line.
+  const finishedHtml = useMemo(
+    () => (currentLineIndex > 0 ? highlight(code.slice(0, currentLineIndex).join('\n'), language) : ''),
+    [code, currentLineIndex, language]
+  );
+  const typingLine = typedLines[currentLineIndex] ?? '';
+  const typingHtml = useMemo(() => highlight(typingLine, language), [typingLine, language]);
+  const highlightedHtml = currentLineIndex > 0 ? `${finishedHtml}\n${typingHtml}` : typingHtml;
+
   return (
     <motion.div 
       className="w-full h-full rounded-xl overflow-hidden backdrop-blur-xl terminal-wrapper flex flex-col"
@@ -122,9 +143,9 @@ const TerminalCodePreview: React.FC<TerminalCodePreviewProps> = ({
             }  
             ::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
           `}</style>
-          <Highlight className={language}>
-            {typedLines.join('\n')}
-          </Highlight>
+          <pre>
+            <code className={`${language} hljs`} dangerouslySetInnerHTML={{ __html: highlightedHtml }} />
+          </pre>
         </div>
         
         {/* Blinking cursor */}

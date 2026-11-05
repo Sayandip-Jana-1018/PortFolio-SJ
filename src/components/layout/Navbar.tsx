@@ -4,12 +4,18 @@ import { useTheme, PREMIUM_ACCENTS } from '../../context/ThemeContext';
 import { useParticles } from '../../context/ParticlesContext';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import Link from 'next/link';
-import { HexColorPicker } from 'react-colorful';
 import { FiHome, FiUser, FiCode, FiAward, FiFileText, FiMail, FiMenu, FiX, FiSun, FiMoon, FiSettings, FiBookOpen } from 'react-icons/fi';
 import MusicPlayer from '../common/MusicPlayer';
 import dynamic from 'next/dynamic';
 import { FaMedal } from 'react-icons/fa';
 import { FaRocket } from 'react-icons/fa';
+
+// Only loads when the settings panel first opens. Same height as the picker, so
+// the panel does not jump when it arrives.
+const HexColorPicker = dynamic(() => import('react-colorful').then((mod) => mod.HexColorPicker), {
+  ssr: false,
+  loading: () => <div className="w-full h-[160px] md:h-[180px]" />,
+});
 
 const navItems = [
   { name: 'Home', href: '/#', icon: <FiHome /> },

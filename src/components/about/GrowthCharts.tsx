@@ -1,30 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Chart as ChartJS, 
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Filler,
-  Legend
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
 import { FiTrendingUp, FiActivity } from 'react-icons/fi';
-
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Filler,
-  Legend
-);
+import LazyChart from './LazyChart';
 
 interface GrowthChartsProps {
   accentColor: string;
@@ -218,7 +195,7 @@ const GrowthCharts: React.FC<GrowthChartsProps> = ({ accentColor, theme }) => {
           Projects Growth
         </h4>
         <div className="h-[250px] w-full">
-          <Line data={projectsData} options={areaChartOptions} />
+          <LazyChart type="line" data={projectsData} options={areaChartOptions as any} />
         </div>
       </motion.div>
 
@@ -238,7 +215,7 @@ const GrowthCharts: React.FC<GrowthChartsProps> = ({ accentColor, theme }) => {
           Skills Growth
         </h4>
         <div className="h-[250px] w-full">
-          <Line data={skillGrowthData} options={lineChartOptions} />
+          <LazyChart type="line" data={skillGrowthData} options={lineChartOptions as any} />
         </div>
       </motion.div>
     </div>

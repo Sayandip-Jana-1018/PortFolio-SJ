@@ -1,14 +1,10 @@
-/* Import Premium Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
-
 @import "tailwindcss";
 
 /* Theme support based on classes */
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --font-title: 'Outfit', sans-serif;
-  --font-body: 'Outfit', sans-serif;
+  /* --font-title and --font-body are set in _app.tsx, from next/font */
   /* The fill every glass section paints. See .nested-glass-fill. */
   --section-tint: rgba(0, 0, 0, 0.15);
 }

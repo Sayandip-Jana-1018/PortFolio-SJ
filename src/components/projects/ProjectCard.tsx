@@ -2,7 +2,10 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { FiGithub, FiExternalLink, FiCode } from 'react-icons/fi';
-import TerminalCodePreview from './TerminalCodePreview';
+import dynamic from 'next/dynamic';
+
+// Only loads, along with highlight.js, when someone opens the code view.
+const TerminalCodePreview = dynamic(() => import('./TerminalCodePreview'), { ssr: false });
 
 interface ProjectCardProps {
   project: {

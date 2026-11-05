@@ -1,14 +1,6 @@
 import React, { Suspense, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
-import {
-  SiPython, SiTensorflow, SiScikitlearn, SiPandas, SiNumpy, SiOpencv,
-  SiJavascript, SiTypescript, SiReact, SiNextdotjs, SiTailwindcss,
-  SiNodedotjs, SiExpress, SiMongodb, SiFlask, SiSupabase,
-  SiGit, SiDocker, SiVercel, SiPostgresql,
-  SiThreedotjs, SiOpenai, SiStreamlit
-} from "react-icons/si";
-import { FiCpu, FiLayout, FiServer, FiTool, FiDatabase } from "react-icons/fi";
 import SkillBalls from '../skills/SkillBalls';
 import SkillStats from '../skills/SkillStats';
 import SkillProficiency from '../skills/SkillProficiency';
@@ -52,64 +44,6 @@ const SkillsPage: React.FC<SkillsPageProps> = ({ sectionRef }) => {
       }
     }
   };
-
-  // Define skill categories with icons - Updated for Data Science & ML focus
-  const skillCategories = [
-    {
-      title: "Generative AI",
-      icon: <FiCpu size={24} />,
-      skills: [
-        { name: "LangChain", icon: <FiTool size={40} />, color: "#3776AB" },
-        { name: "LangGraph", icon: <FiServer size={40} />, color: "#F7931E" },
-        { name: "CrewAI", icon: <FiCpu size={40} />, color: "#FF6F00" },
-        { name: "OpenAI", icon: <SiOpenai size={40} />, color: "#412991" },
-        { name: "Gemini", icon: <FiLayout size={40} />, color: "#4169E1" },
-        { name: "Claude", icon: <FiTool size={40} />, color: "#D97757" },
-        { name: "Vector DBs", icon: <FiDatabase size={40} />, color: "#000000" }
-      ]
-    },
-    {
-      title: "Data Science & ML",
-      icon: <FiDatabase size={24} />,
-      skills: [
-        { name: "Python", icon: <SiPython size={40} />, color: "#3776AB" },
-        { name: "TensorFlow", icon: <SiTensorflow size={40} />, color: "#FF6F00" },
-        { name: "Scikit-Learn", icon: <SiScikitlearn size={40} />, color: "#F7931E" },
-        { name: "Pandas", icon: <SiPandas size={40} />, color: "#150458" },
-        { name: "NumPy", icon: <SiNumpy size={40} />, color: "#013243" },
-        { name: "PowerBI", icon: <FiLayout size={40} />, color: "#F2C811" },
-        { name: "Streamlit", icon: <SiStreamlit size={40} />, color: "#FF4B4B" }
-      ]
-    },
-    {
-      title: "Full Stack & Databases",
-      icon: <FiLayout size={24} />,
-      skills: [
-        { name: "Next.js", icon: <SiNextdotjs size={40} />, color: "#000000" },
-        { name: "React", icon: <SiReact size={40} />, color: "#61DAFB" },
-        { name: "TypeScript", icon: <SiTypescript size={40} />, color: "#3178C6" },
-        { name: "Node.js", icon: <SiNodedotjs size={40} />, color: "#339933" },
-        { name: "FastAPI", icon: <FiServer size={40} />, color: "#009688" },
-        { name: "PostgreSQL", icon: <SiPostgresql size={40} />, color: "#4169E1" },
-        { name: "MongoDB", icon: <SiMongodb size={40} />, color: "#47A248" },
-        { name: "Supabase", icon: <SiSupabase size={40} />, color: "#3ECF8E" }
-      ]
-    },
-    {
-      title: "DevOps & Cloud",
-      icon: <FiServer size={24} />,
-      skills: [
-        { name: "Docker", icon: <SiDocker size={40} />, color: "#2496ED" },
-        { name: "Kubernetes", icon: <FiTool size={40} />, color: "#326CE5" },
-        { name: "Jenkins", icon: <FiTool size={40} />, color: "#D33833" },
-        { name: "AWS", icon: <FiServer size={40} />, color: "#FF9900" },
-        { name: "GitHub Actions", icon: <SiGit size={40} />, color: "#2088FF" },
-        { name: "Prometheus", icon: <FiDatabase size={40} />, color: "#E6522C" },
-        { name: "Grafana", icon: <FiLayout size={40} />, color: "#F46800" },
-        { name: "Vercel", icon: <SiVercel size={40} />, color: "#000000" }
-      ]
-    }
-  ];
 
   return (
     <section

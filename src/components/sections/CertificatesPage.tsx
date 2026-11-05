@@ -6,9 +6,12 @@ import BackgroundElements from '../about/BackgroundElements';
 import TitleSection from '../about/TitleSection';
 import CertificateFilter from '../certificates/CertificateFilter';
 import CertificateCard from '../certificates/CertificateCard';
-import CertificateModal from '../certificates/CertificateModal';
 import CertificatePagination from '../certificates/CertificatePagination';
 import { Certificate } from '../../data/certificatesData';
+import dynamic from 'next/dynamic';
+
+const loadCertificateModal = () => import('../certificates/CertificateModal');
+const CertificateModal = dynamic(loadCertificateModal, { ssr: false });
 
 interface CertificatesPageProps {
   sectionRef: React.RefObject<HTMLDivElement>;
@@ -22,6 +25,8 @@ const CertificatesPage: React.FC<CertificatesPageProps> = ({ sectionRef }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  // Stays true after the first open, so the modal can play its exit animation.
+  const [hasOpenedModal, setHasOpenedModal] = useState(false);
   const certificatesPerPage = 9; // 3x3 grid
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -66,6 +71,7 @@ const CertificatesPage: React.FC<CertificatesPageProps> = ({ sectionRef }) => {
 
   // Handle certificate selection
   const handleCertificateSelect = (certificate: Certificate) => {
+    setHasOpenedModal(true);
     setSelectedCertificate(certificate);
     setIsModalOpen(true);
   };
@@ -134,6 +140,8 @@ const CertificatesPage: React.FC<CertificatesPageProps> = ({ sectionRef }) => {
           ref={containerRef}
           className="relative w-full"
           onMouseMove={handleMouseMove}
+          // Fetch the modal on first hover, so it is ready by the time of the click.
+          onPointerEnter={loadCertificateModal}
         >
           {isLoading ? (
             <motion.div
@@ -180,13 +188,15 @@ const CertificatesPage: React.FC<CertificatesPageProps> = ({ sectionRef }) => {
       </div>
 
       {/* Certificate Modal with working download button */}
-      <CertificateModal
-        certificate={selectedCertificate}
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        accentColor={accentColor}
-        onDownload={handleDownloadCertificate}
-      />
+      {hasOpenedModal && (
+        <CertificateModal
+          certificate={selectedCertificate}
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          accentColor={accentColor}
+          onDownload={handleDownloadCertificate}
+        />
+      )}
     </section >
   );
 };
