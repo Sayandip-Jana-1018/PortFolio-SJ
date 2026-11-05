@@ -5,6 +5,7 @@ import Head from "next/head";
 import { useEffect, useRef, useState, memo, useCallback } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import dynamic from "next/dynamic";
+import { observeViewport } from "../hooks/useInViewport";
 
 // Performance: Dynamic imports for heavy components
 const MoltenMetal = dynamic(() => import("../components/common/MoltenMetal"), { ssr: false });
@@ -116,6 +117,24 @@ export default function Home() {
   // Client-side initialization
   useEffect(() => {
     setIsClient(true);
+  }, []);
+
+  // The Explore background video only decodes while it can be seen.
+  const exploreVideoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const video = exploreVideoRef.current;
+    if (!video) return;
+    return observeViewport(video, (inView) => {
+      if (inView) {
+        if (!video.getAttribute('src')) {
+          video.preload = 'auto';
+          video.src = '/media/LiveWallpaper.webm';
+        }
+        video.play().catch(() => { });
+      } else {
+        video.pause();
+      }
+    });
   }, []);
 
   // Section refs
@@ -372,15 +391,15 @@ export default function Home() {
             {/* Video background with WebM */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }}
               className="absolute inset-0 z-0">
+              {/* WebM only. The 8.4MB MP4 fallback existed for browsers that
+                  have supported WebM for a decade; it now lives in assets/
+                  and no longer ships. Loaded and played only near the viewport. */}
               <video
+                ref={exploreVideoRef}
                 className="absolute inset-0 w-full h-full object-cover"
-                muted loop playsInline autoPlay
-              >
-                {/* WebM only. The 8.4MB MP4 fallback existed for browsers that
-                    have supported WebM for a decade; it now lives in assets/
-                    and no longer ships. */}
-                <source src="/media/LiveWallpaper.webm" type="video/webm" />
-              </video>
+                preload="none"
+                muted loop playsInline
+              />
               <div className="absolute inset-0 z-10" style={{
                 background: `linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 40%, ${accentColor}10 60%, rgba(0,0,0,0.7) 100%)`
               }} />

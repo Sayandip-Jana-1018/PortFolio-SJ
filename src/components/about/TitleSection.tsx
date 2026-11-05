@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { TextPlugin } from 'gsap/dist/TextPlugin';
 import MaskedHeading from '../common/MaskedHeading';
+import { observeViewport } from '../../hooks/useInViewport';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -30,45 +31,33 @@ const TitleSection: React.FC<TitleSectionProps> = ({
   ]
 }) => {
   const textRef = useRef<HTMLDivElement>(null);
+  // Parents pass a new array on every render, so the effect keys on the content.
+  const subtitlesKey = subtitles.join('|');
 
-  // Text typing animation with GSAP
+  // Typing loop: one killable timeline that only runs near the viewport.
+  // The first subtitle is already in the DOM, so it holds for 3.5s, then each
+  // cycle erases, types the next one, and holds for 2s.
   useEffect(() => {
-    if (typeof window === 'undefined' || !textRef.current) return;
-    
-    let currentIndex = 0;
-    
-    const animateText = () => {
-      gsap.to(textRef.current, {
-        duration: 0.5,
-        text: { value: '', padSpace: true },
-        ease: 'none',
-        onComplete: () => {
-          currentIndex = (currentIndex + 1) % subtitles.length;
-          gsap.to(textRef.current, {
-            duration: 1.5,
-            text: { value: subtitles[currentIndex], padSpace: true },
-            ease: 'none',
-            onComplete: () => {
-              gsap.delayedCall(2, animateText);
-            }
-          });
-        }
-      });
-    };
-    
-    gsap.to(textRef.current, {
-      duration: 1.5,
-      text: { value: subtitles[0], padSpace: true },
-      ease: 'none',
-      onComplete: () => {
-        gsap.delayedCall(2, animateText);
-      }
+    const el = textRef.current;
+    if (!el || subtitles.length === 0) return;
+
+    const timeline = gsap.timeline({ repeat: -1, delay: 3.5, paused: true });
+    [...subtitles.slice(1), subtitles[0]].forEach((value) => {
+      timeline.to(el, { duration: 0.5, text: { value: '', padSpace: true }, ease: 'none' });
+      timeline.to(el, { duration: 1.5, text: { value, padSpace: true }, ease: 'none' });
+      timeline.to({}, { duration: 2 });
     });
-    
+
+    const stopObserving = observeViewport(el, (inView) => {
+      timeline.paused(!inView);
+    });
+
     return () => {
-      gsap.killTweensOf(textRef.current);
+      stopObserving();
+      timeline.kill();
     };
-  }, [subtitles]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subtitlesKey]);
 
   return (
     <motion.div 

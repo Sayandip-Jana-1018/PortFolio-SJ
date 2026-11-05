@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef } from 'react';
 import type { CSSProperties, ElementType } from 'react';
 import { gsap } from 'gsap';
+import { observeViewport, NEAR_MARGIN } from '../../hooks/useInViewport';
 
 const clamp = (v: number, a: number, b: number): number => (v < a ? a : v > b ? b : v);
 
@@ -69,6 +70,12 @@ const MaskedHeading: React.FC<MaskedHeadingProps> = ({
     const glyphRefs = useRef<(SVGTextElement | null)[]>([]);
     const tweenRef = useRef<gsap.core.Tween | null>(null);
     const offsetRef = useRef<{ x: number; y: number; tx: number; ty: number }>({ x: 0, y: 0, tx: 0, ty: 0 });
+    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const srcRef = useRef(src);
+    srcRef.current = src;
+    // Measured by sync() on resize, so the per-frame loop never forces layout.
+    const sizeRef = useRef({ w: 0, h: 0 });
+    const placedRef = useRef({ x: NaN, y: NaN, scale: NaN, filter: '' });
 
     const clipId = `mh-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
     const words = useMemo(() => String(text).split(/\s+/).filter(Boolean), [text]);
@@ -86,19 +93,32 @@ const MaskedHeading: React.FC<MaskedHeadingProps> = ({
     settingsRef.current = { fillScale, parallax, drift, brightness, saturation, grayscale, textScale, fontSize };
 
     const place = useCallback(() => {
-        const root = rootRef.current;
         const media = mediaRef.current;
-        if (!root || !media) return;
+        if (!media) return;
         const s = settingsRef.current;
-        const W = root.clientWidth;
-        const H = root.clientHeight;
+        const { w: W, h: H } = sizeRef.current;
         const off = offsetRef.current;
+        const placed = placedRef.current;
 
         const maxX = Math.max(0, ((s.fillScale - 1) / 2) * W);
         const maxY = Math.max(0, ((s.fillScale - 1) / 2) * H);
+        const x = clamp(off.x, -maxX, maxX);
+        const y = clamp(off.y, -maxY, maxY);
 
-        media.style.transform = `translate3d(${clamp(off.x, -maxX, maxX).toFixed(2)}px, ${clamp(off.y, -maxY, maxY).toFixed(2)}px, 0) scale(${s.fillScale})`;
-        media.style.filter = `brightness(${s.brightness}) saturate(${s.saturation})${s.grayscale ? ' grayscale(1)' : ''}`;
+        // Style writes only happen when the result would actually differ.
+        if (!(Math.abs(x - placed.x) < 0.05) || !(Math.abs(y - placed.y) < 0.05) || s.fillScale !== placed.scale) {
+            media.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) scale(${s.fillScale})`;
+            placed.x = x;
+            placed.y = y;
+            placed.scale = s.fillScale;
+        }
+
+        const isIdentity = s.brightness === 1 && s.saturation === 1 && !s.grayscale;
+        const filter = isIdentity ? '' : `brightness(${s.brightness}) saturate(${s.saturation})${s.grayscale ? ' grayscale(1)' : ''}`;
+        if (filter !== placed.filter) {
+            media.style.filter = filter;
+            placed.filter = filter;
+        }
     }, []);
 
     const sync = useCallback(() => {
@@ -126,6 +146,7 @@ const MaskedHeading: React.FC<MaskedHeadingProps> = ({
             glyph.style.fontStyle = cs.fontStyle;
             glyph.style.letterSpacing = cs.letterSpacing;
         }
+        sizeRef.current = { w: root.clientWidth, h: root.clientHeight };
         place();
     }, [place]);
 
@@ -177,10 +198,51 @@ const MaskedHeading: React.FC<MaskedHeadingProps> = ({
 
         root.addEventListener('pointermove', onMove);
         root.addEventListener('pointerleave', onLeave);
-        raf = requestAnimationFrame(frame);
+
+        // The video and the drift loop only run while this heading can be seen.
+        // A paused video keeps showing its current frame, so nothing goes blank.
+        let inView = false;
+        const loadVideo = () => {
+            const video = videoRef.current;
+            if (video && !video.getAttribute('src') && srcRef.current) {
+                video.preload = 'auto';
+                video.src = srcRef.current;
+            }
+        };
+        const applyActivity = () => {
+            const active = inView && !document.hidden;
+            if (active && !raf) {
+                last = performance.now();
+                raf = requestAnimationFrame(frame);
+            } else if (!active && raf) {
+                cancelAnimationFrame(raf);
+                raf = 0;
+            }
+            const video = videoRef.current;
+            if (!video) return;
+            if (active) {
+                loadVideo();
+                video.play().catch(() => { });
+            } else {
+                video.pause();
+            }
+        };
+        const stopView = observeViewport(root, (visible) => {
+            inView = visible;
+            applyActivity();
+        });
+        const stopNear = observeViewport(root, (near) => {
+            if (near) loadVideo();
+        }, NEAR_MARGIN);
+        document.addEventListener('visibilitychange', applyActivity);
 
         return () => {
             cancelAnimationFrame(raf);
+            raf = 0;
+            stopView();
+            stopNear();
+            document.removeEventListener('visibilitychange', applyActivity);
+            videoRef.current?.pause();
             ro.disconnect();
             root.removeEventListener('pointermove', onMove);
             root.removeEventListener('pointerleave', onLeave);
@@ -339,13 +401,13 @@ const MaskedHeading: React.FC<MaskedHeadingProps> = ({
 
             <span ref={revealRef} className="absolute inset-0 block pointer-events-none">
                 <span className="absolute inset-0 block" style={{ clipPath: `url(#${clipId})` }}>
-                    <span ref={mediaRef} className="absolute inset-0 block [will-change:transform,filter]">
+                    <span ref={mediaRef} className="absolute inset-0 block [will-change:transform]">
                         {mediaType === 'video' ? (
                             <video
+                                ref={videoRef}
                                 className="block w-full h-full object-cover select-none"
-                                src={src}
-                                poster={poster}
-                                autoPlay
+                                poster={poster || undefined}
+                                preload="none"
                                 muted
                                 loop
                                 playsInline
