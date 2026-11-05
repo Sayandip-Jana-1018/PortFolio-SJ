@@ -4,6 +4,7 @@ import { useGLTF, OrbitControls, Environment, PerspectiveCamera, useEnvironment 
 import { HiExclamation, HiOutlineRefresh, HiCheck, HiX } from 'react-icons/hi';
 import { motion } from 'framer-motion';
 import type { Mesh, Material, Object3D, Group, Vector3 } from 'three';
+import { useInViewport } from '../../hooks/useInViewport';
 
 interface VirtualCoachProps {
   modelUrl: string;
@@ -124,6 +125,8 @@ export default function VirtualCoach({ modelUrl, className = '', sessionResults 
   const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 });
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
+  // The scene only renders while someone can see it.
+  const inView = useInViewport(containerRef, { enabled: isMounted && !error });
 
   // Only render on client-side
   useEffect(() => {
@@ -232,6 +235,7 @@ export default function VirtualCoach({ modelUrl, className = '', sessionResults 
       <Canvas
         className="rounded-xl overflow-hidden bg-transparent"
         camera={{ position: [0, 0, 2.5], fov: 50 }}
+        frameloop={inView ? 'always' : 'never'}
         shadows
         gl={{ antialias: true, alpha: true }}
       >

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight, FiPlay, FiPause } from 'react-icons/fi';
 import HackathonCard, { HackathonProject } from './HackathonCard';
+import { useInViewport } from '../../hooks/useInViewport';
 
 interface HackathonCarouselProps {
   hackathons: HackathonProject[];
@@ -19,6 +20,8 @@ const HackathonCarousel: React.FC<HackathonCarouselProps> = ({
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+  // Slides only auto-advance while someone can see them.
+  const inView = useInViewport(carouselRef);
 
   // Handle next and previous actions
   const handleNext = () => {
@@ -53,7 +56,7 @@ const HackathonCarousel: React.FC<HackathonCarouselProps> = ({
 
   // Set up auto play
   useEffect(() => {
-    if (isAutoPlaying) {
+    if (isAutoPlaying && inView) {
       autoPlayRef.current = setTimeout(() => {
         handleNext();
       }, 5000);
@@ -64,7 +67,7 @@ const HackathonCarousel: React.FC<HackathonCarouselProps> = ({
         clearTimeout(autoPlayRef.current);
       }
     };
-  }, [isAutoPlaying, activeIndex]);
+  }, [isAutoPlaying, activeIndex, inView]);
 
   // Handle keyboard navigation
   useEffect(() => {

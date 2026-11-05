@@ -1,3 +1,5 @@
+import { useEffect, useState, type RefObject } from 'react';
+
 /**
  * One IntersectionObserver per margin, shared by every effect on the page, so
  * offscreen work can stop without each component running its own observer.
@@ -47,4 +49,33 @@ export function observeViewport(el: Element, listener: Listener, rootMargin: str
       io.unobserve(el);
     }
   };
+}
+
+interface UseInViewportOptions {
+  rootMargin?: string;
+  /** Set false until the ref is attached, for components that render it late. */
+  enabled?: boolean;
+  /** Stay true after the first time the element comes near. */
+  once?: boolean;
+}
+
+/** React state version of observeViewport. False on the server and first render. */
+export function useInViewport(
+  ref: RefObject<Element | null>,
+  { rootMargin = VIEW_MARGIN, enabled = true, once = false }: UseInViewportOptions = {}
+): boolean {
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !enabled) return;
+    const stop = observeViewport(el, (visible) => {
+      if (once && !visible) return;
+      setInView(visible);
+      if (once && visible) stop();
+    }, rootMargin);
+    return stop;
+  }, [ref, rootMargin, enabled, once]);
+
+  return inView;
 }

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { FiGithub, FiExternalLink, FiCode, FiAward } from 'react-icons/fi';
 import TerminalCodePreview from './TerminalCodePreview';
+import { useInViewport } from '../../hooks/useInViewport';
 
 interface FeaturedProjectProps {
   project: {
@@ -27,19 +28,20 @@ const FeaturedProject: React.FC<FeaturedProjectProps> = ({ project, accentColor,
   const [showTerminal, setShowTerminal] = useState(false);
   const [currentScreenshot, setCurrentScreenshot] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
-  
+  const inView = useInViewport(cardRef);
+
   // Carousel effect for screenshots
   useEffect(() => {
-    if (!project.screenshots || project.screenshots.length <= 1 || showTerminal) return;
-    
+    if (!project.screenshots || project.screenshots.length <= 1 || showTerminal || !inView) return;
+
     const interval = setInterval(() => {
-      setCurrentScreenshot(prev => 
+      setCurrentScreenshot(prev =>
         prev === project.screenshots!.length - 1 ? 0 : prev + 1
       );
     }, 5000);
-    
+
     return () => clearInterval(interval);
-  }, [project.screenshots, showTerminal]);
+  }, [project.screenshots, showTerminal, inView]);
   
   return (
     <div className="relative col-span-1 md:col-span-2 lg:col-span-2 h-full max-w-5xl mx-auto w-full min-h-[480px]" onClick={() => showTerminal && setShowTerminal(false)}>
