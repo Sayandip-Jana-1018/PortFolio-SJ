@@ -116,32 +116,21 @@ const Education3DCircle: React.FC<{ imageSrc: string; accentColor: string }> = (
   return (
     <div className="relative w-[220px] h-[220px] sm:w-[260px] sm:h-[260px] flex items-center justify-center mx-auto">
       {/* 3D Glassmorphic Layers */}
-      <motion.div
-        className="absolute inset-0 rounded-full"
+      <div
+        className="edu-ring-outer absolute inset-0 rounded-full"
         style={{
           border: `2px solid ${accentColor}40`,
           background: `radial-gradient(circle, transparent 60%, ${accentColor}15 100%)`,
           boxShadow: `0 0 25px ${accentColor}30`,
-          transform: 'perspective(800px) rotateX(10deg) scale(0.9)',
         }}
-        animate={{
-          rotateX: [10, 15, 10],
-          scale: [0.9, 0.95, 0.9],
-        }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      <motion.div
-        className="absolute inset-4 rounded-full"
+      <div
+        className="edu-ring-inner absolute inset-4 rounded-full"
         style={{
           border: `1px solid ${accentColor}30`,
           background: `radial-gradient(circle, transparent 70%, ${accentColor}20 100%)`,
-          transform: 'perspective(800px) rotateX(-5deg)',
         }}
-        animate={{
-          rotateX: [-5, 5, -5],
-        }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
       />
 
       {/* Image Container with Glass Effect */}

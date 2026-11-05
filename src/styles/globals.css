@@ -273,6 +273,175 @@ canvas,
   will-change: transform, opacity;
 }
 
+/* ========================================
+   AMBIENT LOOPS
+   Endless decorative motion. These run in CSS so the compositor can drive them
+   without main-thread work. Easing and timing match the framer-motion loops they
+   replaced. Durations and delays that vary per element are set inline.
+   ======================================== */
+
+/* Nothing loops in a section nobody can see. index.tsx sets this attribute. */
+[data-offscreen] *,
+[data-offscreen] *::before,
+[data-offscreen] *::after {
+  animation-play-state: paused !important;
+}
+
+.ambient-spin { animation: ambient-spin 20s linear infinite; }
+@keyframes ambient-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.ambient-flip { animation: ambient-flip 3s ease-in-out infinite backwards; }
+@keyframes ambient-flip {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
+.ambient-sway { animation: ambient-sway 5s ease-in-out infinite; }
+@keyframes ambient-sway {
+  0%, 100% { transform: rotate(0deg); }
+  33.333% { transform: rotate(5deg); }
+  66.667% { transform: rotate(-5deg); }
+}
+
+.ambient-bob-down-10 { animation: ambient-bob-down-10 2s ease-in-out infinite; }
+@keyframes ambient-bob-down-10 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
+}
+
+.ambient-bob-down-5 { animation: ambient-bob-down-5 1.5s ease-in-out infinite; }
+@keyframes ambient-bob-down-5 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+
+.ambient-bob-up-10 { animation: ambient-bob-up-10 1.5s ease-in-out infinite; }
+@keyframes ambient-bob-up-10 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.ambient-breathe-110 { animation: ambient-breathe-110 3s ease-in-out infinite; }
+@keyframes ambient-breathe-110 {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.ambient-cta-glow { animation: ambient-cta-glow 3s ease-in-out infinite; }
+@keyframes ambient-cta-glow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+.ambient-cta-ring { animation: ambient-cta-ring 4s ease-in-out infinite; }
+@keyframes ambient-cta-ring {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.1); }
+}
+
+/* Sweeps across in 1.5s, then holds offscreen for 3s */
+.ambient-shine { animation: ambient-shine 4.5s ease-in-out infinite; }
+@keyframes ambient-shine {
+  0% { transform: translateX(0%); }
+  33.333%, 100% { transform: translateX(200%); }
+}
+
+.ambient-orb { animation: ambient-orb 6s ease-in-out infinite; }
+@keyframes ambient-orb {
+  0%, 100% { opacity: 0.5; transform: scale(1.4); }
+  50% { opacity: 0.8; transform: scale(1.6); }
+}
+
+/* Decorative hairlines that grow from 8px to 16px, as a transform on a 16px box */
+.ambient-line-grow { height: 16px; animation: ambient-line-grow 2s ease-in-out infinite backwards; }
+@keyframes ambient-line-grow {
+  0%, 100% { transform: translateX(-50%) scaleY(0.5); }
+  50% { transform: translateX(-50%) scaleY(1); }
+}
+
+.ambient-edge-fade { animation: ambient-edge-fade 15s linear infinite; }
+@keyframes ambient-edge-fade {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.3; }
+}
+
+.ambient-glow { animation: ambient-glow 2s ease-in-out infinite; }
+@keyframes ambient-glow {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* Each particle sets its own --float-x and --float-y */
+.ambient-float { animation: ambient-float 20s ease-in-out infinite backwards; }
+@keyframes ambient-float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(var(--float-x, 0), var(--float-y, 0)); }
+}
+
+.profile-wave-1 { animation: profile-wave-1 8s ease-in-out infinite; }
+@keyframes profile-wave-1 {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.05); }
+}
+
+.profile-wave-2 { animation: profile-wave-2 7s ease-in-out 0.5s infinite backwards; }
+@keyframes profile-wave-2 {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(1.08); }
+}
+
+.profile-wave-3 { animation: profile-wave-3 6s ease-in-out 1s infinite backwards; }
+@keyframes profile-wave-3 {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(1.1); }
+}
+
+.profile-wave-4 { animation: profile-wave-4 9s ease-in-out 1.5s infinite backwards; }
+@keyframes profile-wave-4 {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.03); }
+}
+
+.profile-spark { animation: profile-spark 10s ease-in-out infinite backwards; }
+@keyframes profile-spark {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.3); }
+}
+
+/* Brief pop, then a long rest: 2s of motion in a 10s cycle */
+.stat-pop { animation: stat-pop 10s ease-in-out infinite backwards; }
+@keyframes stat-pop {
+  0%, 20%, 100% { transform: scale(1); }
+  10% { transform: scale(1.1); }
+}
+
+.edu-ring-outer { animation: edu-ring-outer 6s ease-in-out infinite; }
+@keyframes edu-ring-outer {
+  0%, 100% { transform: scale(0.9) rotateX(10deg); }
+  50% { transform: scale(0.95) rotateX(15deg); }
+}
+
+.edu-ring-inner { animation: edu-ring-inner 5s ease-in-out 0.5s infinite backwards; }
+@keyframes edu-ring-inner {
+  0%, 100% { transform: rotateX(-5deg); }
+  50% { transform: rotateX(5deg); }
+}
+
+.contact-blob-a { animation: contact-blob-a 4s ease-in-out infinite; }
+@keyframes contact-blob-a {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.2); }
+}
+
+.contact-blob-b { animation: contact-blob-b 5s ease-in-out 1s infinite backwards; }
+@keyframes contact-blob-b {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.3); }
+}
+
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   *,

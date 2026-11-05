@@ -49,14 +49,12 @@ const TechnicalSkills: React.FC<TechnicalSkillsProps> = ({ accentColor, theme })
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.1 + (index * 0.05) }}
             >
-              <motion.div
-                className="text-3xl mb-2"
-                style={{ color: accentColor }}
-                animate={{ rotateY: [0, 360] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: index * 0.2 }}
+              <div
+                className="ambient-flip text-3xl mb-2"
+                style={{ color: accentColor, animationDelay: `${index * 0.2}s` }}
               >
                 {skill.icon}
-              </motion.div>
+              </div>
               <div className="text-sm font-medium">{skill.name}</div>
               <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                 <div

@@ -36,19 +36,12 @@ const StatsSection: React.FC<StatsSectionProps> = ({ accentColor, theme }) => {
               delay: 0.1 + (index * 0.1)
             }}
           >
-            <motion.div
-              className="text-2xl mb-2"
-              style={{ color: accentColor }}
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{
-                duration: 2,
-                delay: index * 0.2,
-                repeat: Infinity,
-                repeatDelay: 8
-              }}
+            <div
+              className="stat-pop text-2xl mb-2"
+              style={{ color: accentColor, animationDelay: `${index * 0.2}s` }}
             >
               {stat.icon}
-            </motion.div>
+            </div>
             <div
               className="text-2xl font-bold mb-1"
               style={{ color: theme === 'dark' ? 'white' : 'black' }}

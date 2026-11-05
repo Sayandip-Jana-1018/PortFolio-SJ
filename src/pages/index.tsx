@@ -119,6 +119,32 @@ export default function Home() {
     setIsClient(true);
   }, []);
 
+  // CSS loops pause in any section that is offscreen. See globals.css.
+  useEffect(() => {
+    const root = mainRef.current;
+    if (!root) return;
+    const stops = Array.from(root.children).map((section) =>
+      observeViewport(section, (inView) => {
+        if (inView) section.removeAttribute('data-offscreen');
+        else section.setAttribute('data-offscreen', '');
+      })
+    );
+    return () => stops.forEach((stop) => stop());
+  }, []);
+
+  // CSS loops pause in any section that is offscreen. See globals.css.
+  useEffect(() => {
+    const root = mainRef.current;
+    if (!root) return;
+    const stops = Array.from(root.children).map((section) =>
+      observeViewport(section, (inView) => {
+        if (inView) section.removeAttribute('data-offscreen');
+        else section.setAttribute('data-offscreen', '');
+      })
+    );
+    return () => stops.forEach((stop) => stop());
+  }, []);
+
   // The Explore background video only decodes while it can be seen.
   const exploreVideoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
@@ -335,11 +361,9 @@ export default function Home() {
                 style={{ transform: 'perspective(1000px) rotateX(5deg)', transformStyle: 'preserve-3d' }}
                 whileHover={{ scale: 1.05, rotateX: 0, transition: { duration: 0.3 } }}
               >
-                <motion.div
-                  className="absolute -inset-3 rounded-full opacity-30"
-                  style={{ borderWidth: '1px', borderStyle: 'dashed', borderColor: `${accentColor}80` }}
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+                <div
+                  className="ambient-spin absolute -inset-3 rounded-full opacity-30"
+                  style={{ borderWidth: '1px', borderStyle: 'dashed', borderColor: `${accentColor}80`, animationDuration: '40s' }}
                 />
                 <div style={{ transform: 'scale(1.15)' }}>
                   <GlassmorphicProfile scrollProgress={scrollProgress} />
@@ -361,10 +385,8 @@ export default function Home() {
                 <span>Explore Portfolio</span>
               </motion.a>
               
-              <motion.div
-                className="flex flex-col items-center cursor-pointer"
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              <div
+                className="ambient-bob-down-10 flex flex-col items-center cursor-pointer"
                 onClick={() => document.getElementById('explore')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <p className="text-xs uppercase tracking-widest mb-1 opacity-70" style={{
@@ -377,7 +399,7 @@ export default function Home() {
                   <path d="M12 5L12 19M12 19L19 12M12 19L5 12" stroke={accentColor} strokeWidth="2"
                     strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-              </motion.div>
+              </div>
             </motion.div>
           </div>
 
@@ -469,15 +491,11 @@ export default function Home() {
                       whileHover={{ y: -10, boxShadow: `0 15px 40px rgba(0, 0, 0, 0.3), 0 0 20px ${accentColor}40` }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <motion.div className="text-4xl mb-4 p-4 rounded-full relative" style={{ color: theme === 'dark' ? '#ffffff' : '#000000', textShadow: `0 0 15px ${accentColor}80` }}
-                        animate={{ rotate: [0, 5, -5, 0] }}
-                        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
-                        <motion.div className="absolute inset-0 rounded-full -z-10"
-                          style={{ border: `1px solid ${accentColor}60`, boxShadow: `inset 0 0 15px ${accentColor}30, 0 0 15px ${accentColor}30` }}
-                          animate={{ scale: [1, 1.1, 1] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
+                      <div className="ambient-sway text-4xl mb-4 p-4 rounded-full relative" style={{ color: theme === 'dark' ? '#ffffff' : '#000000', textShadow: `0 0 15px ${accentColor}80` }}>
+                        <div className="ambient-breathe-110 absolute inset-0 rounded-full -z-10"
+                          style={{ border: `1px solid ${accentColor}60`, boxShadow: `inset 0 0 15px ${accentColor}30, 0 0 15px ${accentColor}30` }} />
                         {item.icon}
-                      </motion.div>
+                      </div>
                       <h3 className="text-2xl font-bold mb-2 z-10 relative" style={{ fontFamily: 'var(--font-title)' }}>{item.title}</h3>
                       <div className="w-12 h-1 rounded-full mb-4 z-10 relative" style={{ backgroundColor: accentColor, boxShadow: `0 0 10px ${accentColor}` }} />
                       <p className="text-sm opacity-80 z-10 relative">Explore my {item.title.toLowerCase()}</p>
@@ -526,14 +544,10 @@ export default function Home() {
 
               {/* CTA Button */}
               <div className="mt-16 relative">
-                <motion.div className="absolute -inset-2 rounded-full opacity-60"
-                  style={{ background: `radial-gradient(circle, ${accentColor}80 0%, transparent 70%)`, filter: 'blur(10px)' }}
-                  animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.05, 1] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
-                <motion.div className="absolute -inset-4 rounded-full opacity-30"
-                  style={{ border: `1px solid ${accentColor}70` }}
-                  animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
+                <div className="ambient-cta-glow absolute -inset-2 rounded-full opacity-60"
+                  style={{ background: `radial-gradient(circle, ${accentColor}80 0%, transparent 70%)`, filter: 'blur(10px)' }} />
+                <div className="ambient-cta-ring absolute -inset-4 rounded-full opacity-30"
+                  style={{ border: `1px solid ${accentColor}70` }} />
                 <motion.a
                   href="#contact"
                   className="inline-block px-10 py-4 rounded-full font-medium overflow-hidden glass-btn"
@@ -547,15 +561,13 @@ export default function Home() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
                 >
-                  <motion.div className="absolute inset-0 w-full h-full"
-                    style={{ background: `linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)`, transform: 'translateX(-100%)' }}
-                    animate={{ x: ['0%', '200%'] }}
-                    transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }} />
+                  <div className="ambient-shine absolute inset-0 w-full h-full"
+                    style={{ background: `linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)` }} />
                   <span className="text-white text-lg font-medium flex items-center gap-2 relative z-10">
                     Get in Touch
-                    <motion.span animate={{ y: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+                    <span className="ambient-bob-down-5">
                       <FiArrowDown />
-                    </motion.span>
+                    </span>
                   </span>
                 </motion.a>
               </div>

@@ -180,28 +180,21 @@ const HackathonTimeline: React.FC<HackathonTimelineProps> = ({
                 type: "spring"
               }}
             >
-              <motion.div
-                className="w-6 h-6 rounded-full flex items-center justify-center"
+              <div
+                className="relative w-6 h-6 rounded-full flex items-center justify-center"
                 style={{
                   backgroundColor: theme === 'dark' ? '#1a1a2e' : '#ffffff',
                   border: `2px solid ${accentColor}`,
-                  boxShadow: `0 0 10px ${accentColor}80`
-                }}
-                animate={{
-                  boxShadow: [
-                    `0 0 5px ${accentColor}40`,
-                    `0 0 15px ${accentColor}80`,
-                    `0 0 5px ${accentColor}40`
-                  ]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  repeatType: "reverse"
+                  boxShadow: `0 0 5px ${accentColor}40`
                 }}
               >
+                {/* The pulse fades a pre-drawn glow, so it never repaints */}
+                <span
+                  className="ambient-glow absolute -inset-[2px] rounded-full pointer-events-none"
+                  style={{ boxShadow: `0 0 15px ${accentColor}80` }}
+                />
                 {getTrophyIcon(hackathon.trophy, 14)}
-              </motion.div>
+              </div>
             </motion.div>
 
             {/* Hackathon Image - On opposite side of card */}
@@ -266,18 +259,10 @@ const HackathonTimeline: React.FC<HackathonTimelineProps> = ({
                     background: `linear-gradient(135deg, ${accentColor}40, ${accentColor}10)`
                   }}
                 >
-                  <motion.div
+                  <div
                     className="absolute inset-0 opacity-20"
                     style={{
                       backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='[http://www.w3.org/2000/svg'%3E%3Cg](http://www.w3.org/2000/svg'%3E%3Cg) fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${accentColor.slice(1)}' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-                    }}
-                    animate={{
-                      backgroundPosition: ['0px 0px', '60px 60px'],
-                    }}
-                    transition={{
-                      duration: 10,
-                      repeat: Infinity,
-                      ease: "linear"
                     }}
                   />
 
@@ -486,28 +471,20 @@ const HackathonTimeline: React.FC<HackathonTimelineProps> = ({
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.5 + (sortedHackathons.length * 0.2), duration: 0.5 }}
         >
-          <motion.div
-            className="w-10 h-10 rounded-full flex items-center justify-center"
+          <div
+            className="relative w-10 h-10 rounded-full flex items-center justify-center"
             style={{
               backgroundColor: theme === 'dark' ? '#1a1a2e' : '#ffffff',
               border: `2px solid ${accentColor}`,
-              boxShadow: `0 0 15px ${accentColor}60`
-            }}
-            animate={{
-              boxShadow: [
-                `0 0 5px ${accentColor}40`,
-                `0 0 20px ${accentColor}80`,
-                `0 0 5px ${accentColor}40`
-              ]
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              repeatType: "reverse"
+              boxShadow: `0 0 5px ${accentColor}40`
             }}
           >
+            <span
+              className="ambient-glow absolute -inset-[2px] rounded-full pointer-events-none"
+              style={{ boxShadow: `0 0 20px ${accentColor}80`, animationDuration: '3s' }}
+            />
             <FaRegLightbulb size={18} color={accentColor} />
-          </motion.div>
+          </div>
         </motion.div>
       </div>
 

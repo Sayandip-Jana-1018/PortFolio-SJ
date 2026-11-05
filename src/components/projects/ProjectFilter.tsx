@@ -42,20 +42,9 @@ const ProjectFilter: React.FC<ProjectFilterProps> = ({
         >
           {/* Animated glow effect on active category */}
           {activeCategory === category && (
-            <motion.div
-              className="absolute inset-0 rounded-full"
-              animate={{ 
-                boxShadow: [
-                  `0 0 5px ${accentColor}50`,
-                  `0 0 15px ${accentColor}70`,
-                  `0 0 5px ${accentColor}50`
-                ]
-              }}
-              transition={{ 
-                repeat: Infinity, 
-                duration: 2,
-                ease: "easeInOut"
-              }}
+            <span
+              className="ambient-glow absolute inset-0 rounded-full"
+              style={{ boxShadow: `0 0 15px ${accentColor}70` }}
             />
           )}
           {category}

@@ -98,23 +98,13 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
 
       {/* Decorative Lines */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute top-0 left-0 w-full h-1 opacity-20"
+        <div
+          className="ambient-edge-fade absolute top-0 left-0 w-full h-1"
           style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }}
-          animate={{
-            opacity: [0.1, 0.3, 0.1],
-            backgroundPosition: ['0% 0%', '100% 0%', '0% 0%']
-          }}
-          transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
         />
-        <motion.div
-          className="absolute bottom-0 left-0 w-full h-1 opacity-20"
+        <div
+          className="ambient-edge-fade absolute bottom-0 left-0 w-full h-1"
           style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }}
-          animate={{
-            opacity: [0.1, 0.3, 0.1],
-            backgroundPosition: ['100% 0%', '0% 0%', '100% 0%']
-          }}
-          transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
         />
       </div>
 
@@ -190,17 +180,13 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
                 />
 
                 {/* Decorative elements around the 3D model */}
-                <motion.div
-                  className="absolute -top-5 -left-5 w-12 h-12 rounded-full"
+                <div
+                  className="contact-blob-a absolute -top-5 -left-5 w-12 h-12 rounded-full"
                   style={{ backgroundColor: accentColor, filter: 'blur(25px)', opacity: 0.6 }}
-                  animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                 />
-                <motion.div
-                  className="absolute -bottom-5 -right-5 w-16 h-16 rounded-full"
+                <div
+                  className="contact-blob-b absolute -bottom-5 -right-5 w-16 h-16 rounded-full"
                   style={{ backgroundColor: accentColor, filter: 'blur(25px)', opacity: 0.6 }}
-                  animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0.8, 0.4] }}
-                  transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
                 />
 
                 {/* Caption for the 3D model */}
@@ -272,10 +258,8 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
             className="flex flex-col items-center justify-center p-3 transition-all duration-300 hover:opacity-80"
             aria-label="Scroll to top"
           >
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-              className="w-10 h-10 flex items-center justify-center rounded-full border-2"
+            <div
+              className="ambient-bob-up-10 w-10 h-10 flex items-center justify-center rounded-full border-2"
               style={{
                 borderColor: accentColor,
                 backgroundColor: `${accentColor}20`,
@@ -290,7 +274,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ sectionRef }) => {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
               </svg>
-            </motion.div>
+            </div>
             <span
               className="text-sm mt-2"
               style={{ color: accentColor }}

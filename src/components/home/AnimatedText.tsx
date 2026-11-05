@@ -128,21 +128,15 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({ scrollProgress, variant = '
         className="mb-6 relative"
       >
         {/* Glow orb behind name */}
-        <motion.div
+        <div
           // THIS is the box. It is an inset-0 rectangle filled with an accent
           // radial and blurred — against MoltenMetal's own noise it reads as
           // atmosphere, but over a photographic plate its box edges show as a
           // panel behind the name. Dropped on the film backdrop.
-          className={`absolute inset-0 -z-10 blur-[80px] ${isFilm ? 'hidden' : 'opacity-80'}`}
+          className={`ambient-orb absolute inset-0 -z-10 blur-[80px] ${isFilm ? 'hidden' : 'opacity-80'}`}
           style={{
             background: `radial-gradient(ellipse at center, ${accentColor}50 0%, transparent 70%)`,
-            transform: 'scale(1.5)'
           }}
-          animate={{ 
-            opacity: [0.5, 0.8, 0.5],
-            scale: [1.4, 1.6, 1.4] 
-          }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         />
 
         <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-wide relative text-center">
@@ -150,20 +144,19 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({ scrollProgress, variant = '
               outlined near the name reads as a stray frame around it. */}
           {!isFilm && (
             <>
-              <motion.div
-                className="absolute -top-8 -left-8 w-16 h-16 opacity-40"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              <div
+                className="ambient-spin absolute -top-8 -left-8 w-16 h-16 opacity-40"
                 style={{
+                  animationDuration: '20s',
                   border: `2px solid ${accentColor}40`,
                   borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%'
                 }}
               />
-              <motion.div
-                className="absolute -top-4 -right-4 w-12 h-12 opacity-40"
-                animate={{ rotate: -360 }}
-                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+              <div
+                className="ambient-spin absolute -top-4 -right-4 w-12 h-12 opacity-40"
                 style={{
+                  animationDuration: '15s',
+                  animationDirection: 'reverse',
                   border: `2px solid ${accentColor}50`,
                   borderRadius: '70% 30% 30% 70% / 70% 70% 30% 30%'
                 }}
@@ -246,17 +239,13 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({ scrollProgress, variant = '
         className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-5 text-base sm:text-lg md:text-xl relative mb-16 sm:mb-12 md:mb-16"
       >
         {/* Decorative lines */}
-        <motion.div
-          className="absolute left-1/2 -top-4 w-[1px] h-8 opacity-40"
-          style={{ backgroundColor: accentColor, transform: 'translateX(-50%)' }}
-          animate={{ height: [8, 16, 8] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        <div
+          className="ambient-line-grow absolute left-1/2 -top-4 w-[1px] opacity-40"
+          style={{ backgroundColor: accentColor, transformOrigin: 'top' }}
         />
-        <motion.div
-          className="absolute left-1/2 -bottom-4 w-[1px] h-8 opacity-40"
-          style={{ backgroundColor: accentColor, transform: 'translateX(-50%)' }}
-          animate={{ height: [8, 16, 8] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        <div
+          className="ambient-line-grow absolute left-1/2 -bottom-4 w-[1px] opacity-40"
+          style={{ backgroundColor: accentColor, transformOrigin: 'bottom', animationDelay: '1s' }}
         />
 
         {titles.map((title, index) => (
