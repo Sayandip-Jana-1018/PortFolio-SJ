@@ -199,6 +199,7 @@ const CertificateModal: React.FC<CertificateModalProps> = ({
                   src={certificate.image}
                   alt={certificate.title}
                   fill
+                  sizes="(max-width: 1078px) 95vw, 1024px"
                   className="object-contain drop-shadow-2xl"
                   priority
                 />

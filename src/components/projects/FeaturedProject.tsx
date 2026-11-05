@@ -93,6 +93,8 @@ const FeaturedProject: React.FC<FeaturedProjectProps> = ({ project, accentColor,
                           src={screenshot} 
                           alt={`${project.title} screenshot ${index + 1}`}
                           fill
+                          // Cropped to fill a tall box, so it renders much wider than the box itself
+                          sizes="(max-width: 767px) 600px, 1100px"
                           style={{ objectFit: 'cover' }}
                           quality={90}
                         />
@@ -120,6 +122,7 @@ const FeaturedProject: React.FC<FeaturedProjectProps> = ({ project, accentColor,
                       src={project.image} 
                       alt={project.title}
                       fill
+                      sizes="(max-width: 767px) 600px, 1100px"
                       style={{ objectFit: 'cover' }}
                       quality={90}
                     />

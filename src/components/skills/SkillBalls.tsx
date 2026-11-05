@@ -32,6 +32,10 @@ const SkillBalls = () => {
     <img 
       src={src} 
       alt={alt} 
+      width={44}
+      height={44}
+      loading="lazy"
+      decoding="async"
       className="w-11 h-11 object-contain"
       style={{ filter: theme === 'dark' ? 'drop-shadow(0 2px 4px rgba(255,255,255,0.15)) drop-shadow(0 4px 8px rgba(0,0,0,0.5))' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
     />

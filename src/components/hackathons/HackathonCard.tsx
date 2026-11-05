@@ -124,7 +124,6 @@ const HackathonCard: React.FC<HackathonCardProps> = ({
           fill
           className="object-cover transition-all duration-700 hover:scale-110 filter brightness-90"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          priority
         />
         <motion.div
           className="absolute inset-0"

@@ -9,6 +9,7 @@ import {
   FaCode, FaLaptopCode, FaRegLightbulb
 } from 'react-icons/fa';
 import { HackathonProject } from './HackathonCard';
+import Image from 'next/image';
 
 interface HackathonTimelineProps {
   hackathons: HackathonProject[];
@@ -206,15 +207,19 @@ const HackathonTimeline: React.FC<HackathonTimelineProps> = ({
               transition={{ delay: 0.2, duration: 0.5 }}
             >
               <div
-                className="rounded-xl overflow-hidden shadow-lg h-full"
+                className="relative rounded-xl overflow-hidden shadow-lg h-full"
                 style={{
                   boxShadow: `0 10px 30px rgba(0, 0, 0, 0.3), 0 0 20px ${accentColor}20`
                 }}
               >
-                <img
+                <Image
                   src={hackathon.image}
                   alt={hackathon.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  // Cropped to fill the full height of the timeline card
+                  sizes="1000px"
+                  quality={90}
+                  className="object-cover"
                   onError={(e) => {
                     (e.target as HTMLImageElement).style.display = 'none';
                   }}

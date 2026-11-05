@@ -30,7 +30,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ accentColor, theme }) => {
               sizes="(max-width: 768px) 100vw, 288px"
               className="object-cover"
               style={{ objectPosition: 'center 25%' }} // Moved down slightly to better frame the head
-              priority
             />
 
             {/* Glow effect */}

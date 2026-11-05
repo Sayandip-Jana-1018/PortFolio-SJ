@@ -117,6 +117,8 @@ const CertificateCard: React.FC<CertificateCardProps> = ({
               src={certificate.image}
               alt={certificate.title}
               fill
+              // 320px card, plus the crop and the slight zoom on hover
+              sizes="(max-width: 767px) 100vw, 360px"
               className="object-cover transition-transform duration-700"
               style={{
                 transform: isHovered ? "scale(1.05)" : "scale(1)",

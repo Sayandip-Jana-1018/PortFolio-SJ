@@ -64,6 +64,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, accentColor, theme, 
                 src={project.image}
                 alt={project.title}
                 fill
+                // Cropped to fill a 224px tall box, which needs about 480px for the widest screenshots
+                sizes="480px"
                 style={{ objectFit: 'cover' }}
                 quality={90}
               />
