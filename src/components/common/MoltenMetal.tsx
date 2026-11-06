@@ -8,6 +8,11 @@ import { createResolutionGovernor } from '../../utils/resolutionGovernor';
  * on a high refresh display, at half the GPU work or less.
  */
 const DRAW_INTERVAL_MS = 1000 / 60;
+/**
+ * Scrolling makes frames slow for reasons unrelated to this shader, and resizing
+ * the canvas is itself a hitch. So resolution is only judged once the page settles.
+ */
+const SCROLL_QUIET_MS = 1000;
 /** Share of full resolution at each governor step. Never below 60%. */
 const RESOLUTION_STEPS = [1, 0.85, 0.72, 0.6];
 
@@ -269,10 +274,16 @@ const MoltenMetal: React.FC<MoltenMetalProps> = ({
 
         let nextDrawAt = 0;
         let lastFrameAt = 0;
+        let lastScrollAt = -Infinity;
+        const onScroll = () => {
+            lastScrollAt = performance.now();
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
 
         const loop = (t: number) => {
             raf = requestAnimationFrame(loop);
-            if (lastFrameAt) governor.sample(t - lastFrameAt, t);
+            if (t - lastScrollAt < SCROLL_QUIET_MS) governor.discardWindow(t);
+            else if (lastFrameAt) governor.sample(t - lastFrameAt, t);
             lastFrameAt = t;
 
             // Small tolerance so a 60Hz display, whose frames land just under the
@@ -324,6 +335,7 @@ const MoltenMetal: React.FC<MoltenMetalProps> = ({
             ro.disconnect();
             io.disconnect();
             document.removeEventListener('visibilitychange', onVisibility);
+            window.removeEventListener('scroll', onScroll);
             canvas.removeEventListener('mousemove', handleMouseMove);
             canvas.removeEventListener('mouseleave', handleMouseLeave);
             ctxMap.delete(container);

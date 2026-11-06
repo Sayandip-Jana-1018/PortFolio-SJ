@@ -92,6 +92,12 @@ export function createResolutionGovernor({ lastStep, initialStep = 0, onStepChan
   };
 
   return {
+    /** Throw away the current window, for moments that say nothing about the GPU. */
+    discardWindow(now: number) {
+      sum = 0;
+      frames = 0;
+      windowStart = now;
+    },
     /** Feed the time between two animation frames. */
     sample(deltaMs: number, now: number) {
       if (startedAt < 0) {
